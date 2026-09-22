@@ -1,0 +1,1548 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Auto Banner Generator Pro — Enterprise Studio</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    .font-serif-brand {
+      font-family: 'Playfair Display', serif;
+    }
+
+    .font-sans-brand {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    .checker {
+      background-image:
+        linear-gradient(45deg, #111827 25%, transparent 25%),
+        linear-gradient(-45deg, #111827 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #111827 75%),
+        linear-gradient(-45deg, transparent 75%, #111827 75%);
+      background-size: 20px 20px;
+      background-position: 0 0, 0 10px, 10px -10px, -10px 0;
+    }
+
+    .draggable {
+      cursor: grab;
+      touch-action: none;
+    }
+
+    .draggable.dragging {
+      cursor: grabbing;
+      outline: 2px dashed #D4AF37;
+      outline-offset: 4px;
+      z-index: 30;
+    }
+
+    .draggable:hover {
+      outline: 1px dashed rgba(212, 175, 55, .4);
+      outline-offset: 4px;
+    }
+
+    .draggable.layer-hidden {
+      display: none !important;
+    }
+
+    .draggable.layer-locked {
+      cursor: not-allowed;
+    }
+
+    .editor-control {
+      background: rgba(255, 255, 255, .04);
+      border: 1px solid rgba(255, 255, 255, .08);
+      border-radius: 12px;
+      padding: 14px;
+    }
+
+    .icon-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, .08);
+      font-size: 13px;
+      transition: background .15s;
+    }
+
+    .icon-btn:hover {
+      background: rgba(255, 255, 255, .16);
+    }
+
+    .icon-btn.on {
+      background: rgba(212, 175, 55, .35);
+      color: #D4AF37;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .55);
+      backdrop-filter: blur(4px);
+      z-index: 60;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-content {
+      background: linear-gradient(180deg, #151b28, #0c111b);
+      border: 1px solid rgba(255, 255, 255, .08);
+      border-radius: 16px;
+      max-width: 480px;
+      width: 100%;
+      margin: 0 16px;
+    }
+
+    .range-slider {
+      width: 100%;
+      accent-color: #D4AF37;
+    }
+
+    .layer-row {
+      padding: 8px 10px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, .04);
+      border: 1px solid rgba(255, 255, 255, .08);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
+      font-size: 11px;
+    }
+
+    .tab-active {
+      border-color: #D4AF37;
+      color: #D4AF37;
+    }
+
+    .tab-inactive {
+      border-color: transparent;
+      color: #94a3b8;
+    }
+
+    .canvas-btn.active,
+    .style-swatch.active {
+      border-color: #D4AF37 !important;
+      color: #D4AF37 !important;
+      background: rgba(212, 175, 55, .12) !important;
+    }
+
+    .pos-btn.active,
+    .valign-btn.active {
+      border-color: #D4AF37 !important;
+      background: rgba(212, 175, 55, .15) !important;
+      color: #D4AF37 !important;
+    }
+
+    select,
+    input[type=text],
+    input[type=number] {
+      color-scheme: dark;
+    }
+  </style>
+</head>
+
+<body
+  class="bg-gradient-to-br from-[#0B0F17] to-[#0F1621] text-slate-100 font-sans-brand antialiased min-h-screen overflow-hidden">
+
+  <header class="border-b border-white/10 bg-[#0B0F17]/95 sticky top-0 z-40 backdrop-blur-xl">
+    <div class="px-6 py-3 flex items-center justify-between h-16">
+      <div class="flex items-center gap-3 flex-1">
+        <div
+          class="h-9 w-9 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-700 flex items-center justify-center font-bold text-white shadow-lg shadow-amber-500/20">
+          ⚡</div>
+        <div>
+          <h1 class="font-serif-brand text-base font-bold tracking-wide text-white">Auto Banner Pro</h1>
+          <p class="text-[10px] text-slate-400">Studio Banner Enterprise-Grade</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button id="modeToggle" class="icon-btn" title="Basic ↔ Advanced">⚙️</button>
+        <button id="saveTemplateBtn" class="icon-btn" title="Lưu template (JSON)">💾</button>
+        <button id="loadTemplateBtn" class="icon-btn" title="Tải template (JSON)">📂</button>
+        <input id="templateFileInput" type="file" accept="application/json" class="hidden">
+        <button id="undoBtn" class="icon-btn" title="Hoàn tác (Ctrl+Z)">↶</button>
+        <button id="redoBtn" class="icon-btn" title="Làm lại (Ctrl+Y)">↷</button>
+        <button id="exportBtn"
+          class="bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 font-semibold px-4 py-2 rounded-xl text-xs shadow-xl shadow-amber-900/30 transition-all">📥
+          Export</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="flex h-[calc(100vh-64px)] overflow-hidden">
+
+    <!-- SIDEBAR -->
+    <aside id="controlPanel" class="w-96 bg-[#0B0F17]/80 border-r border-white/10 overflow-y-auto shrink-0">
+
+      <div class="p-4 border-b border-white/10 flex items-center justify-between">
+        <span class="text-xs font-semibold uppercase tracking-wider text-amber-400">Chế độ</span>
+        <span id="modeLabel" class="text-xs text-slate-400">Cơ Bản</span>
+      </div>
+
+      <div class="px-4 py-3 border-b border-white/10 flex gap-4 overflow-x-auto">
+        <button class="tab-btn tab-active text-xs font-semibold pb-2 border-b-2 whitespace-nowrap" data-tab="layout">📐
+          Layout</button>
+        <button class="tab-btn tab-inactive text-xs font-semibold pb-2 border-b-2 whitespace-nowrap"
+          data-tab="content">📝 Nội Dung</button>
+        <button class="tab-btn tab-inactive text-xs font-semibold pb-2 border-b-2 whitespace-nowrap"
+          data-tab="design">🎨 Thiết Kế</button>
+        <button class="tab-btn tab-inactive text-xs font-semibold pb-2 border-b-2 whitespace-nowrap hidden"
+          data-tab="advanced" id="advancedTabBtn">⚙️ Nâng Cao</button>
+      </div>
+
+      <div class="p-4 space-y-4">
+
+        <!-- LAYOUT TAB -->
+        <div id="tab-layout" class="space-y-4">
+          <div class="editor-control">
+            <label class="text-xs font-semibold uppercase tracking-wider text-amber-400 block mb-2">Kích Thước
+              Canvas</label>
+            <div class="grid grid-cols-2 gap-2">
+              <button
+                class="canvas-btn active bg-slate-900 border-2 border-transparent text-slate-300 text-xs py-2 rounded-lg font-medium"
+                data-w="1200" data-h="628">1200×628<br><span class="text-[9px] text-slate-400">Landscape</span></button>
+              <button
+                class="canvas-btn bg-slate-900 border-2 border-transparent text-slate-300 text-xs py-2 rounded-lg font-medium"
+                data-w="1080" data-h="1080">1080×1080<br><span class="text-[9px] text-slate-400">Square</span></button>
+              <button
+                class="canvas-btn bg-slate-900 border-2 border-transparent text-slate-300 text-xs py-2 rounded-lg font-medium"
+                data-w="1080" data-h="1920">1080×1920<br><span class="text-[9px] text-slate-400">Story</span></button>
+              <button
+                class="canvas-btn bg-slate-900 border-2 border-transparent text-slate-300 text-xs py-2 rounded-lg font-medium"
+                data-w="1920" data-h="1080">1920×1080<br><span class="text-[9px] text-slate-400">4K Wide</span></button>
+            </div>
+            <div class="mt-3">
+              <label class="text-[11px] text-slate-300 block mb-1">Custom Size (áp dụng khi đổi giá trị)</label>
+              <div class="flex gap-2 items-center">
+                <input id="customWidth" type="number" value="1200" min="200" max="4000"
+                  class="w-full bg-slate-900 border border-white/10 rounded-lg px-2 py-1 text-xs focus:outline-none focus:border-amber-500">
+                <span class="text-slate-500 text-xs">×</span>
+                <input id="customHeight" type="number" value="628" min="200" max="4000"
+                  class="w-full bg-slate-900 border border-white/10 rounded-lg px-2 py-1 text-xs focus:outline-none focus:border-amber-500">
+              </div>
+            </div>
+          </div>
+
+          <div class="editor-control">
+            <label class="text-xs font-semibold uppercase tracking-wider text-amber-400 block mb-2">Layout
+              Preset</label>
+            <select id="layoutPreset"
+              class="w-full bg-slate-900 border border-white/10 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
+              <option value="classic">👔 Classic (Text 58% + Device 42%)</option>
+              <option value="split">↔️ Split (50/50)</option>
+              <option value="device-focus">📱 Device Focus (Text 30% + Device 70%)</option>
+              <option value="minimal">✨ Minimal (Ẩn Device, Text 100%)</option>
+              <option value="center">🎯 Center (Text giữa trên, Device dưới)</option>
+            </select>
+            <p class="text-[10px] text-slate-500 mt-2">Chọn preset sẽ tự đổi tỉ lệ cột, có thể chỉnh tay thêm bên dưới.
+            </p>
+          </div>
+
+          <div class="editor-control">
+            <label class="text-xs font-semibold uppercase tracking-wider text-amber-400 block mb-2">Vị Trí Nội Dung
+              (ngang)</label>
+            <div class="grid grid-cols-3 gap-2">
+              <button class="pos-btn text-xs py-1.5 rounded-lg border border-white/10" data-target="content"
+                data-pos="left">← Trái</button>
+              <button class="pos-btn active text-xs py-1.5 rounded-lg border border-white/10" data-target="content"
+                data-pos="center">Giữa</button>
+              <button class="pos-btn text-xs py-1.5 rounded-lg border border-white/10" data-target="content"
+                data-pos="right">Phải →</button>
+            </div>
+          </div>
+
+          <div class="editor-control">
+            <label class="text-xs font-semibold uppercase tracking-wider text-amber-400 block mb-2">Vị Trí Thiết Bị
+              (ngang)</label>
+            <div class="grid grid-cols-3 gap-2">
+              <button class="pos-btn text-xs py-1.5 rounded-lg border border-white/10" data-target="device"
+                data-pos="left">← Trái</button>
+              <button class="pos-btn text-xs py-1.5 rounded-lg border border-white/10" data-target="device"
+                data-pos="center">Giữa</button>
+              <button class="pos-btn active text-xs py-1.5 rounded-lg border border-white/10" data-target="device"
+                data-pos="right">Phải →</button>
+            </div>
+          </div>
+
+          <div class="editor-control">
+            <label class="text-xs font-semibold uppercase tracking-wider text-amber-400 block mb-2">Căn Dọc Nội
+              Dung</label>
+            <div class="grid grid-cols-3 gap-2">
+              <button class="valign-btn text-xs py-1.5 rounded-lg border border-white/10" data-align="top">⬆
+                Trên</button>
+              <button class="valign-btn active text-xs py-1.5 rounded-lg border border-white/10" data-align="center">⬍
+                Giữa</button>
+              <button class="valign-btn text-xs py-1.5 rounded-lg border border-white/10" data-align="bottom">⬇
+                Dưới</button>
+            </div>
+          </div>
+
+          <div class="editor-control">
+            <label class="text-xs font-semibold uppercase tracking-wider text-amber-400 block mb-2">Khoảng Cách Giữa Các
+              Khối</label>
+            <input id="spacingGap" type="range" min="0" max="48" value="12" class="range-slider">
+            <div class="flex justify-between text-[10px] text-slate-400 mt-1"><span>0px</span><span
+                id="gapValue">12px</span><span>48px</span></div>
+          </div>
+
+          <button id="autoLayoutBtn"
+            class="w-full bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-white font-semibold py-2 rounded-lg text-xs">✨
+            Auto Layout — Reset vị trí kéo-thả &amp; cân khoảng cách</button>
+        </div>
+
+        <!-- CONTENT TAB -->
+        <div id="tab-content" class="space-y-4 hidden">
+          <div class="editor-control">
+            <label class="text-xs font-semibold uppercase tracking-wider text-amber-400 block mb-2">Logo Thương
+              Hiệu</label>
+            <input id="logoInput" type="file" accept="image/*"
+              class="w-full text-xs text-slate-400 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:bg-slate-800 file:text-slate-200 cursor-pointer">
+            <div class="mt-2">
+              <label class="text-[11px] text-slate-300 block mb-1">Kích thước: <span
+                  id="logoSizeValue">50px</span></label>
+              <input id="logoSize" type="range" min="20" max="150" value="50" class="range-slider">
+            </div>
+            <div class="mt-2">
+              <label class="text-[11px] text-slate-300 block mb-1">Độ trong suốt: <span
+                  id="logoOpacityValue">100%</span></label>
+              <input id="logoOpacity" type="range" min="0" max="100" value="100" class="range-slider">
+            </div>
+          </div>
+
+          <div class="editor-control">
+            <label class="text-xs font-semibold uppercase tracking-wider text-amber-400 block mb-2">Badge</label>
+            <input id="badgeInput" value="✦ EST. 2026 — APEX ENTERPRISE"
+              class="w-full bg-slate-900 border border-white/10 rounded-lg px-3 py-2 text-xs text-amber-300 focus:outline-none focus:border-amber-500">
+          </div>
+
+          <div class="editor-control">
+            <label class="text-xs font-semibold uppercase tracking-wider text-amber-400 block mb-2">Tiêu Đề
+              Chính</label>
+            <textarea id="titleInput" rows="2"
+              class="w-full bg-slate-900 border border-white/10 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500 resize-none">Nền Tảng Quản Trị Số Thế Hệ Mới</textarea>
+            <div class="mt-2 flex items-center justify-between">
+              <label class="text-[11px] text-slate-300">Cỡ chữ</label>
+              <input id="titleSize" type="number" min="14" max="72" value="34"
+                class="w-16 bg-slate-900 border border-white/10 rounded px-2 py-1 text-xs focus:outline-none focus:border-amber-500">
+            </div>
+          </div>
+
+          <div class="editor-control">
+            <label class="text-xs font-semibold uppercase tracking-wider text-amber-400 block mb-2">Mô Tả</label>
+            <textarea id="descInput" rows="2"
+              class="w-full bg-slate-900 border border-white/10 rounded-lg px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-amber-500 resize-none">Giải pháp chuẩn hóa quy trình, bảo mật đa tầng và tối ưu hiệu suất cho doanh nghiệp.</textarea>
+            <div class="mt-2 flex items-center justify-between">
+              <label class="text-[11px] text-slate-300">Cỡ chữ</label>
+              <input id="descSize" type="number" min="10" max="24" value="13"
+                class="w-16 bg-slate-900 border border-white/10 rounded px-2 py-1 text-xs focus:outline-none focus:border-amber-500">
+            </div>
+          </div>
+
+          <div class="editor-control">
+            <label class="text-xs font-semibold uppercase tracking-wider text-amber-400 block mb-2">Nút CTA</label>
+            <input id="ctaInput" value="KHÁM PHÁ GIẢI PHÁP"
+              class="w-full bg-slate-900 border border-white/10 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
+          </div>
+
+          <div class="editor-control">
+            <label class="text-xs font-semibold uppercase tracking-wider text-amber-400 block mb-2">Màn Hình Device
+              UI</label>
+            <input id="uiInput" type="file" accept="image/*"
+              class="w-full text-xs text-slate-400 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:bg-slate-800 file:text-slate-200 cursor-pointer">
+          </div>
+
+          <div class="editor-control">
+            <label class="text-xs font-semibold uppercase tracking-wider text-amber-400 block mb-2">Loại Device</label>
+            <select id="deviceType"
+              class="w-full bg-slate-900 border border-white/10 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
+              <option value="phone">📱 Phone (9:16)</option>
+              <option value="tablet">⬜ Tablet (4:3)</option>
+              <option value="laptop">💻 Laptop (16:9)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- DESIGN TAB -->
+        <div id="tab-design" class="space-y-4 hidden">
+          <div class="editor-control">
+            <label class="text-xs font-semibold uppercase tracking-wider text-amber-400 block mb-2">Design Style
+              Preset</label>
+            <div class="grid grid-cols-2 gap-2" id="styleSwatchGrid"></div>
+          </div>
+
+          <div class="editor-control">
+            <label class="text-xs font-semibold uppercase tracking-wider text-amber-400 block mb-2">Màu Chính (Primary /
+              CTA)</label>
+            <div class="flex gap-2"><input id="primaryColor" type="color" value="#D4AF37"
+                class="w-12 h-10 rounded-lg border border-white/20 cursor-pointer bg-transparent"><input id="primaryHex"
+                type="text" value="#D4AF37"
+                class="flex-1 bg-slate-900 border border-white/10 rounded-lg px-2 py-2 text-xs focus:outline-none focus:border-amber-500">
+            </div>
+          </div>
+          <div class="editor-control">
+            <label class="text-xs font-semibold uppercase tracking-wider text-amber-400 block mb-2">Màu Nền</label>
+            <div class="flex gap-2"><input id="bgColor" type="color" value="#0A0E17"
+                class="w-12 h-10 rounded-lg border border-white/20 cursor-pointer bg-transparent"><input id="bgHex"
+                type="text" value="#0A0E17"
+                class="flex-1 bg-slate-900 border border-white/10 rounded-lg px-2 py-2 text-xs focus:outline-none focus:border-amber-500">
+            </div>
+          </div>
+          <div class="editor-control">
+            <label class="text-xs font-semibold uppercase tracking-wider text-amber-400 block mb-2">Màu Chữ</label>
+            <div class="flex gap-2"><input id="textColor" type="color" value="#FFFFFF"
+                class="w-12 h-10 rounded-lg border border-white/20 cursor-pointer bg-transparent"><input id="textHex"
+                type="text" value="#FFFFFF"
+                class="flex-1 bg-slate-900 border border-white/10 rounded-lg px-2 py-2 text-xs focus:outline-none focus:border-amber-500">
+            </div>
+          </div>
+
+          <div class="editor-control">
+            <label class="text-xs font-semibold uppercase tracking-wider text-amber-400 block mb-2">Nền Gradient</label>
+            <select id="gradientType"
+              class="w-full bg-slate-900 border border-white/10 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
+              <option value="none">— Không dùng (màu phẳng)</option>
+              <option value="linear">Linear (chéo góc)</option>
+              <option value="radial">Radial (toả tâm)</option>
+            </select>
+          </div>
+
+          <div class="editor-control">
+            <label class="text-xs font-semibold uppercase tracking-wider text-amber-400 block mb-2">Font Heading
+              (Serif)</label>
+            <select id="serifFont"
+              class="w-full bg-slate-900 border border-white/10 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
+              <option value="Playfair Display">Playfair Display</option>
+              <option value="Plus Jakarta Sans">Plus Jakarta Sans</option>
+              <option value="Inter">Inter</option>
+            </select>
+          </div>
+          <div class="editor-control">
+            <label class="text-xs font-semibold uppercase tracking-wider text-amber-400 block mb-2">Font Body
+              (Sans)</label>
+            <select id="sansFont"
+              class="w-full bg-slate-900 border border-white/10 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
+              <option value="Plus Jakarta Sans">Plus Jakarta Sans</option>
+              <option value="Inter">Inter</option>
+            </select>
+          </div>
+
+          <div class="editor-control">
+            <label class="text-xs font-semibold uppercase tracking-wider text-amber-400 block mb-2">Border Radius: <span
+                id="borderRadiusValue">16px</span></label>
+            <input id="borderRadius" type="range" min="0" max="40" value="16" class="range-slider">
+          </div>
+
+          <div class="editor-control">
+            <label class="text-xs font-semibold uppercase tracking-wider text-amber-400 block mb-2">Shadow</label>
+            <select id="shadowIntensity"
+              class="w-full bg-slate-900 border border-white/10 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
+              <option value="none">Không</option>
+              <option value="light">Nhẹ</option>
+              <option value="medium" selected>Trung bình</option>
+              <option value="heavy">Nặng</option>
+            </select>
+          </div>
+
+          <div class="editor-control">
+            <label class="text-xs font-semibold uppercase tracking-wider text-amber-400 block mb-2">Glow: <span
+                id="glowValue">30%</span></label>
+            <input id="glowIntensity" type="range" min="0" max="100" value="30" class="range-slider">
+          </div>
+        </div>
+
+        <!-- ADVANCED TAB -->
+        <div id="tab-advanced" class="space-y-4 hidden">
+          <div class="editor-control">
+            <label class="flex items-center gap-2 text-xs text-slate-300"><input id="enable3D" type="checkbox"
+                class="w-4 h-4 accent-amber-500"> Bật 3D Tilt cho khung Device</label>
+          </div>
+          <div class="editor-control space-y-3">
+            <label class="text-xs font-semibold uppercase tracking-wider text-amber-400 block">Xoay Device (3D)</label>
+            <div><label class="text-[11px] text-slate-300 block mb-1">Rotate X: <span
+                  id="rotateXValue">0</span>°</label><input id="rotateX" type="range" min="-45" max="45" value="0"
+                class="range-slider"></div>
+            <div><label class="text-[11px] text-slate-300 block mb-1">Rotate Y: <span
+                  id="rotateYValue">0</span>°</label><input id="rotateY" type="range" min="-45" max="45" value="0"
+                class="range-slider"></div>
+            <div><label class="text-[11px] text-slate-300 block mb-1">Rotate Z: <span
+                  id="rotateZValue">-6</span>°</label><input id="rotateZ" type="range" min="-45" max="45" value="-6"
+                class="range-slider"></div>
+          </div>
+          <div class="editor-control">
+            <label class="text-xs font-semibold uppercase tracking-wider text-amber-400 block mb-2">Perspective: <span
+                id="perspectiveValue">1000</span>px</label>
+            <input id="perspective" type="range" min="400" max="2000" value="1000" class="range-slider">
+          </div>
+          <div class="editor-control">
+            <label class="text-xs font-semibold uppercase tracking-wider text-amber-400 block mb-2">Device Scale: <span
+                id="deviceScaleValue">100</span>%</label>
+            <input id="deviceScale" type="range" min="50" max="150" value="100" class="range-slider">
+          </div>
+          <div class="editor-control">
+            <label class="text-xs font-semibold uppercase tracking-wider text-amber-400 block mb-2">Layers (khoá / ẩn /
+              vị trí)</label>
+            <div id="layersList"></div>
+            <p class="text-[10px] text-slate-500 mt-1">Kéo trực tiếp phần tử trên canvas để đổi vị trí (offset). Khoá để
+              tránh kéo nhầm.</p>
+          </div>
+          <div class="editor-control">
+            <label class="text-xs font-semibold uppercase tracking-wider text-amber-400 block mb-2">Generate
+              Variation</label>
+            <button id="generateVariationBtn"
+              class="w-full bg-slate-800 hover:bg-slate-700 text-white font-semibold py-2 rounded-lg text-xs">🎲 Random
+              layout + style (giữ nội dung)</button>
+          </div>
+          <button id="resetBtn"
+            class="w-full bg-red-900/40 hover:bg-red-900/60 text-red-200 font-semibold py-2 rounded-lg text-xs">🔄 Reset
+            Toàn Bộ</button>
+        </div>
+
+      </div>
+    </aside>
+
+    <!-- CANVAS -->
+    <main class="flex-1 overflow-hidden flex flex-col bg-gradient-to-br from-slate-900/20 to-transparent">
+      <div class="border-b border-white/10 bg-[#0B0F17]/50 backdrop-blur-sm px-4 py-3 flex items-center gap-3">
+        <button id="zoomOut" class="icon-btn" title="Thu nhỏ">−</button>
+        <select id="zoomLevel"
+          class="bg-slate-900 border border-white/10 rounded-lg px-2 py-1 text-xs text-white focus:outline-none focus:border-amber-500">
+          <option value="50">50%</option>
+          <option value="75">75%</option>
+          <option value="100" selected>100%</option>
+          <option value="150">150%</option>
+          <option value="200">200%</option>
+        </select>
+        <button id="zoomIn" class="icon-btn" title="Phóng to">+</button>
+        <div class="w-px h-6 bg-white/10"></div>
+        <button id="toggleGrid" class="icon-btn" title="Lưới">📐</button>
+        <button id="toggleSafeZone" class="icon-btn" title="Safe zone">⚠️</button>
+        <button id="previewDesktop" class="icon-btn on" title="Xem full">🖥️</button>
+        <button id="previewMobile" class="icon-btn" title="Xem thu nhỏ giả lập mobile">📱</button>
+        <div class="flex-1"></div>
+        <span id="canvasSizeLabel" class="text-[11px] text-slate-400 font-mono">1200 × 628</span>
+      </div>
+
+      <div id="canvasContainer" class="checker flex-1 flex items-center justify-center overflow-auto p-6">
+        <div id="bannerViewport" style="width:100%; max-width:900px; transition: max-width .2s;">
+          <div id="bannerDOM" class="relative bg-[#0A0E17] overflow-hidden shadow-2xl"
+            style="aspect-ratio: 1200/628; width:100%; border-radius:16px;">
+
+            <div id="bgGlow"
+              class="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-amber-500/10 blur-[100px] pointer-events-none">
+            </div>
+            <div id="gridOverlay" class="absolute inset-0 pointer-events-none z-40"
+              style="background-image: linear-gradient(rgba(255,255,255,.12) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.12) 1px, transparent 1px); background-size: 40px 40px; display:none;">
+            </div>
+            <div id="safeZoneOverlay"
+              class="absolute inset-[6%] pointer-events-none z-40 border-2 border-dashed border-red-400/50"
+              style="display:none;"></div>
+
+            <div id="contentWrap" class="absolute inset-0 flex" style="flex-direction: row;">
+              <div id="textCol" class="flex flex-col relative"
+                style="width:58%; padding: 0 6% 0 6%; justify-content:center;">
+                <div id="logoArea" class="draggable inline-block w-fit" style="margin-bottom:12px;">
+                  <img id="domLogoImg" class="h-12 object-contain hidden" alt="Brand Logo">
+                  <div id="domLogoPlaceholder"
+                    class="text-[10px] font-mono text-slate-500 italic border border-dashed border-white/10 px-2.5 py-1 rounded">
+                    [Logo]</div>
+                </div>
+                <div id="badgeArea" class="draggable inline-block w-fit" style="margin-bottom:12px;">
+                  <div id="domBadge"
+                    class="inline-flex items-center gap-2 border border-amber-500/30 bg-amber-500/10 px-3 py-1 rounded-full text-[10px] font-mono tracking-widest text-amber-300">
+                    ✦ EST. 2026 — APEX ENTERPRISE</div>
+                </div>
+                <div id="titleArea" class="draggable" style="margin-bottom:12px;">
+                  <h2 id="domTitle" class="font-serif-brand font-bold text-white leading-[1.15] tracking-tight"
+                    style="font-size:34px;">Nền Tảng Quản Trị Số Thế Hệ Mới</h2>
+                </div>
+                <div id="descArea" class="draggable" style="margin-bottom:16px;">
+                  <p id="domDesc" class="text-slate-300 leading-relaxed" style="font-size:13px; max-width:28rem;">Giải
+                    pháp chuẩn hóa quy trình, bảo mật đa tầng và tối ưu hiệu suất cho doanh nghiệp.</p>
+                </div>
+                <div id="ctaArea" class="draggable inline-block w-fit">
+                  <span id="domCta"
+                    class="inline-flex items-center gap-2 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-bold px-5 py-2.5 rounded-xl text-xs tracking-wider">KHÁM
+                    PHÁ GIẢI PHÁP <span>→</span></span>
+                </div>
+              </div>
+
+              <div id="mockupCol" class="flex items-center justify-center relative"
+                style="width:42%; perspective:1000px;">
+                <div id="deviceFrame"
+                  class="draggable relative rounded-[2rem] bg-slate-900 border-[6px] border-slate-700/60 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)] overflow-hidden"
+                  style="width:65%; aspect-ratio:9/16; transform: rotateZ(-6deg);">
+                  <div
+                    class="absolute inset-0 bg-gradient-to-tr from-white/10 via-transparent to-transparent z-20 pointer-events-none">
+                  </div>
+                  <img id="domUiImg" class="w-full h-full object-cover object-top"
+                    src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25' viewBox='0 0 300 600'><rect width='100%25' height='100%25' fill='%230F172A'/><rect x='30' y='60' width='240' height='120' rx='16' fill='%231E293B'/><rect x='30' y='200' width='240' height='40' rx='8' fill='%23334155'/><rect x='30' y='255' width='180' height='30' rx='8' fill='%23334155'/></svg>"
+                    alt="App UI">
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <canvas id="exportCanvas" class="hidden"></canvas>
+
+  <div id="exportModal" class="modal-overlay hidden">
+    <div class="modal-content">
+      <div class="border-b border-white/10 px-6 py-4 flex items-center justify-between">
+        <h2 class="font-serif-brand text-lg font-bold">Export Banner</h2>
+        <button id="closeExportModal" class="icon-btn">×</button>
+      </div>
+      <div class="p-6 space-y-4">
+        <div>
+          <label class="text-xs font-semibold uppercase tracking-wider text-amber-400 block mb-2">Format</label>
+          <select id="exportFormat"
+            class="w-full bg-slate-900 border border-white/10 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
+            <option value="png">PNG (có nền trong suốt nếu chọn)</option>
+            <option value="jpeg">JPG</option>
+            <option value="webp">WebP</option>
+          </select>
+        </div>
+        <div class="flex items-center gap-2">
+          <input id="exportTransparent" type="checkbox" class="w-4 h-4 accent-amber-500">
+          <label for="exportTransparent" class="text-xs text-slate-300">Nền trong suốt (chỉ PNG/WebP)</label>
+        </div>
+        <div>
+          <label class="text-xs font-semibold uppercase tracking-wider text-amber-400 block mb-2">Độ Phân Giải</label>
+          <select id="exportQuality"
+            class="w-full bg-slate-900 border border-white/10 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
+            <option value="1">1× (Chuẩn)</option>
+            <option value="2" selected>2× (High-Res)</option>
+            <option value="3">3× (Ultra-HD)</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-xs font-semibold uppercase tracking-wider text-amber-400 block mb-2">Tên File</label>
+          <input id="exportFilename" type="text" value="banner"
+            class="w-full bg-slate-900 border border-white/10 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
+        </div>
+        <div class="pt-2 flex gap-2">
+          <button id="doExportBtn"
+            class="flex-1 bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-white font-semibold py-2 rounded-lg text-xs">📥
+            Export</button>
+          <button id="cancelExportBtn"
+            class="flex-1 bg-slate-800 hover:bg-slate-700 text-white font-semibold py-2 rounded-lg text-xs">Hủy</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="notification"
+    class="fixed bottom-6 right-6 bg-gradient-to-r from-amber-600 to-amber-700 text-white px-4 py-3 rounded-lg shadow-lg hidden z-50 text-xs font-medium max-w-xs">
+  </div>
+
+  <script>
+    (function () {
+      "use strict";
+
+      // ============================================================
+      // STATE
+      // ============================================================
+      const defaultState = {
+        canvas: { width: 1200, height: 628 },
+        layout: 'classic',
+        contentPos: 'center',
+        devicePos: 'right',
+        verticalAlign: 'center',
+        spacingGap: 12,
+
+        badge: '✦ EST. 2026 — APEX ENTERPRISE',
+        title: 'Nền Tảng Quản Trị Số Thế Hệ Mới',
+        desc: 'Giải pháp chuẩn hóa quy trình, bảo mật đa tầng và tối ưu hiệu suất cho doanh nghiệp.',
+        cta: 'KHÁM PHÁ GIẢI PHÁP',
+        titleSize: 34,
+        descSize: 13,
+        logoSize: 50,
+        logoOpacity: 100,
+
+        style: 'luxury',
+        primaryColor: '#D4AF37',
+        bgColor: '#0A0E17',
+        textColor: '#FFFFFF',
+        borderRadius: 16,
+        shadowIntensity: 'medium',
+        glowIntensity: 30,
+        serifFont: 'Playfair Display',
+        sansFont: 'Plus Jakarta Sans',
+        gradientType: 'none',
+        deviceType: 'phone',
+
+        enable3D: false,
+        rotateX: 0, rotateY: 0, rotateZ: -6,
+        perspective: 1000,
+        deviceScale: 100,
+
+        // per-element drag offsets {x,y} in px (at 1x DOM scale, relative to natural flow position)
+        positions: { logo: { x: 0, y: 0 }, badge: { x: 0, y: 0 }, title: { x: 0, y: 0 }, desc: { x: 0, y: 0 }, cta: { x: 0, y: 0 }, device: { x: 0, y: 0 } },
+        layers: { logo: { hidden: false, locked: false }, badge: { hidden: false, locked: false }, title: { hidden: false, locked: false }, desc: { hidden: false, locked: false }, cta: { hidden: false, locked: false }, device: { hidden: false, locked: false } },
+
+        isAdvancedMode: false,
+      };
+
+      let state = JSON.parse(JSON.stringify(defaultState));
+      // images can't survive JSON so kept separate
+      let logoImgElement = null;
+      let uiImgElement = null;
+
+      // ============================================================
+      // HISTORY (undo/redo) — snapshot-based, debounced pushes
+      // ============================================================
+      const history = { stack: [snapshot()], index: 0 };
+      let historyDebounce = null;
+
+      function snapshot() { return JSON.stringify(state); }
+
+      function pushHistory() {
+        clearTimeout(historyDebounce);
+        historyDebounce = setTimeout(() => {
+          const snap = snapshot();
+          if (snap === history.stack[history.index]) return;
+          history.stack = history.stack.slice(0, history.index + 1);
+          history.stack.push(snap);
+          if (history.stack.length > 60) history.stack.shift(); else history.index++;
+        }, 300);
+      }
+
+      function undo() {
+        if (history.index > 0) {
+          history.index--;
+          state = JSON.parse(history.stack[history.index]);
+          syncAllControlsFromState();
+          render();
+          notify('↶ Hoàn tác');
+        } else {
+          notify('Không còn bước để hoàn tác');
+        }
+      }
+      function redo() {
+        if (history.index < history.stack.length - 1) {
+          history.index++;
+          state = JSON.parse(history.stack[history.index]);
+          syncAllControlsFromState();
+          render();
+          notify('↷ Làm lại');
+        } else {
+          notify('Không còn bước để làm lại');
+        }
+      }
+
+      // ============================================================
+      // PRESETS
+      // ============================================================
+      const stylePresets = {
+        luxury: { bg: '#0A0E17', primary: '#D4AF37', text: '#FFFFFF', serif: 'Playfair Display', sans: 'Plus Jakarta Sans', label: '👑 Luxury Gold' },
+        modern: { bg: '#080E1A', primary: '#38BDF8', text: '#FFFFFF', serif: 'Plus Jakarta Sans', sans: 'Inter', label: '🚀 Modern Cyan' },
+        minimal: { bg: '#18181B', primary: '#F4F4F5', text: '#F4F4F5', serif: 'Inter', sans: 'Inter', label: '✨ Minimalist' },
+        corporate: { bg: '#0F172A', primary: '#3B82F6', text: '#E2E8F0', serif: 'Inter', sans: 'Inter', label: '🏛️ Corporate' },
+        tech: { bg: '#0A0E1A', primary: '#00FF88', text: '#E0E6FF', serif: 'Plus Jakarta Sans', sans: 'Inter', label: '⚡ Cyber Tech' },
+        playful: { bg: '#1A1033', primary: '#EC4899', text: '#F5E6FF', serif: 'Plus Jakarta Sans', sans: 'Plus Jakarta Sans', label: '🎨 Playful' },
+        dark: { bg: '#000000', primary: '#F97316', text: '#E5E7EB', serif: 'Playfair Display', sans: 'Inter', label: '🌙 Dark Premium' },
+        light: { bg: '#FFFFFF', primary: '#2563EB', text: '#1F2937', serif: 'Playfair Display', sans: 'Inter', label: '☀️ Light Airy' },
+      };
+
+      const layoutPresets = {
+        classic: { textW: 58, deviceW: 42, showDevice: true, direction: 'row' },
+        split: { textW: 50, deviceW: 50, showDevice: true, direction: 'row' },
+        'device-focus': { textW: 30, deviceW: 70, showDevice: true, direction: 'row' },
+        minimal: { textW: 100, deviceW: 0, showDevice: false, direction: 'row' },
+        center: { textW: 100, deviceW: 100, showDevice: true, direction: 'column' },
+      };
+
+      const deviceRatios = { phone: '9/16', tablet: '4/3', laptop: '16/9' };
+
+      // ============================================================
+      // DOM refs
+      // ============================================================
+      const $ = id => document.getElementById(id);
+      const el = {
+        bannerDOM: $('bannerDOM'), bannerViewport: $('bannerViewport'), contentWrap: $('contentWrap'),
+        textCol: $('textCol'), mockupCol: $('mockupCol'), deviceFrame: $('deviceFrame'),
+        domTitle: $('domTitle'), domBadge: $('domBadge'), domDesc: $('domDesc'), domCta: $('domCta'),
+        domLogoImg: $('domLogoImg'), domLogoPlaceholder: $('domLogoPlaceholder'), domUiImg: $('domUiImg'),
+        bgGlow: $('bgGlow'), gridOverlay: $('gridOverlay'), safeZoneOverlay: $('safeZoneOverlay'),
+        canvasSizeLabel: $('canvasSizeLabel'), layersList: $('layersList'),
+        notification: $('notification'),
+      };
+
+      const areaEls = {
+        logo: $('logoArea'), badge: $('badgeArea'), title: $('titleArea'), desc: $('descArea'), cta: $('ctaArea'), device: $('deviceFrame')
+      };
+
+      // ============================================================
+      // RENDER — single source of truth applying state -> DOM
+      // ============================================================
+      function render() {
+        // text content
+        el.domTitle.textContent = state.title;
+        el.domBadge.textContent = state.badge;
+        el.domDesc.textContent = state.desc;
+        el.domCta.innerHTML = escapeHtml(state.cta) + ' <span>→</span>';
+
+        // sizes
+        el.domTitle.style.fontSize = state.titleSize + 'px';
+        el.domDesc.style.fontSize = state.descSize + 'px';
+        el.domLogoImg.style.height = state.logoSize + 'px';
+        el.domLogoImg.style.opacity = state.logoOpacity / 100;
+
+        // colors
+        el.bannerDOM.style.backgroundColor = state.bgColor;
+        if (state.gradientType === 'linear') {
+          el.bannerDOM.style.backgroundImage = `linear-gradient(135deg, ${state.bgColor}, ${shade(state.bgColor, -25)})`;
+        } else if (state.gradientType === 'radial') {
+          el.bannerDOM.style.backgroundImage = `radial-gradient(circle at 30% 30%, ${shade(state.bgColor, 15)}, ${state.bgColor})`;
+        } else {
+          el.bannerDOM.style.backgroundImage = 'none';
+        }
+        el.domTitle.style.color = state.textColor;
+        el.domDesc.style.color = state.textColor;
+        el.domCta.style.background = state.primaryColor;
+        el.domCta.style.color = isLight(state.bgColor) ? '#000000' : '#0B0F17';
+        el.domBadge.style.borderColor = state.primaryColor + '55';
+        el.domBadge.style.backgroundColor = state.primaryColor + '1A';
+        el.domBadge.style.color = state.primaryColor;
+
+        el.bgGlow.style.backgroundColor = state.primaryColor;
+        el.bgGlow.style.opacity = (state.glowIntensity / 100) * 0.6;
+
+        // canvas size / aspect ratio
+        el.bannerDOM.style.aspectRatio = state.canvas.width + '/' + state.canvas.height;
+        el.contentWrap.style.flexDirection = state.canvas.height > state.canvas.width ? 'column' : (layoutPresets[state.layout].direction === 'column' ? 'column' : 'row');
+        el.canvasSizeLabel.textContent = state.canvas.width + ' × ' + state.canvas.height;
+
+        // fonts
+        el.domTitle.style.fontFamily = `'${state.serifFont}', serif`;
+        el.domDesc.style.fontFamily = `'${state.sansFont}', sans-serif`;
+        el.domBadge.style.fontFamily = `'${state.sansFont}', monospace`;
+        el.domCta.style.fontFamily = `'${state.sansFont}', sans-serif`;
+
+        // radius / shadow
+        el.bannerDOM.style.borderRadius = state.borderRadius + 'px';
+        el.domCta.style.borderRadius = Math.max(4, state.borderRadius * 0.7) + 'px';
+        el.deviceFrame.style.borderRadius = (state.borderRadius + 16) + 'px';
+        const shadowMap = { none: 'none', light: '0 10px 25px -5px rgba(0,0,0,.15)', medium: '0 25px 50px -12px rgba(0,0,0,.35)', heavy: '0 50px 100px -20px rgba(0,0,0,.6)' };
+        el.bannerDOM.style.boxShadow = shadowMap[state.shadowIntensity];
+
+        // layout preset -> column widths
+        const preset = layoutPresets[state.layout];
+        const isVerticalCanvas = state.canvas.height > state.canvas.width;
+        if (preset.direction === 'column' || isVerticalCanvas) {
+          el.textCol.style.width = '100%';
+          el.mockupCol.style.width = '100%';
+          el.textCol.style.padding = '6%';
+          el.mockupCol.style.minHeight = '40%';
+        } else {
+          el.textCol.style.width = preset.textW + '%';
+          el.mockupCol.style.width = preset.deviceW + '%';
+          el.textCol.style.padding = `0 4% 0 6%`;
+        }
+        el.mockupCol.style.display = preset.showDevice ? 'flex' : 'none';
+
+        // horizontal align of columns within contentWrap (order)
+        const wrap = el.contentWrap;
+        if (preset.direction !== 'column' && !isVerticalCanvas) {
+          if (state.devicePos === 'left') { el.textCol.style.order = 2; el.mockupCol.style.order = 1; }
+          else { el.textCol.style.order = 1; el.mockupCol.style.order = 2; }
+        } else {
+          el.textCol.style.order = 1; el.mockupCol.style.order = 2;
+        }
+
+        // text alignment inside textCol
+        el.textCol.style.alignItems = state.contentPos === 'left' ? 'flex-start' : state.contentPos === 'right' ? 'flex-end' : 'center';
+        el.textCol.style.textAlign = state.contentPos;
+        el.textCol.style.justifyContent = state.verticalAlign === 'top' ? 'flex-start' : state.verticalAlign === 'bottom' ? 'flex-end' : 'center';
+
+        // spacing between blocks
+        [areaEls.logo, areaEls.badge, areaEls.title, areaEls.desc].forEach(a => { a.style.marginBottom = state.spacingGap + 'px'; });
+
+        // device type ratio
+        el.deviceFrame.style.aspectRatio = deviceRatios[state.deviceType];
+        if (state.deviceType === 'laptop') { el.deviceFrame.style.width = '92%'; el.deviceFrame.style.borderRadius = '14px'; }
+        else if (state.deviceType === 'tablet') { el.deviceFrame.style.width = '78%'; }
+        else { el.deviceFrame.style.width = '65%'; }
+
+        // 3D transform on device only
+        const baseRotate = state.enable3D ? `rotateX(${state.rotateX}deg) rotateY(${state.rotateY}deg) rotateZ(${state.rotateZ}deg)` : `rotateZ(${state.rotateZ}deg)`;
+        el.mockupCol.style.perspective = state.perspective + 'px';
+        el.deviceFrame.style.transform = `${baseRotate} scale(${state.deviceScale / 100}) translate(${state.positions.device.x}px, ${state.positions.device.y}px)`;
+
+        // drag offsets for text elements
+        applyOffset(areaEls.logo, state.positions.logo);
+        applyOffset(areaEls.badge, state.positions.badge);
+        applyOffset(areaEls.title, state.positions.title);
+        applyOffset(areaEls.desc, state.positions.desc);
+        applyOffset(areaEls.cta, state.positions.cta);
+
+        // layer visibility / lock
+        Object.keys(state.layers).forEach(key => {
+          const node = areaEls[key];
+          if (!node) return;
+          node.classList.toggle('layer-hidden', !!state.layers[key].hidden);
+          node.classList.toggle('layer-locked', !!state.layers[key].locked);
+        });
+
+        renderLayersPanel();
+
+        // sync sidebar value labels
+        setText('gapValue', state.spacingGap + 'px');
+        setText('logoSizeValue', state.logoSize + 'px');
+        setText('logoOpacityValue', state.logoOpacity + '%');
+        setText('borderRadiusValue', state.borderRadius + 'px');
+        setText('glowValue', state.glowIntensity + '%');
+        setText('rotateXValue', state.rotateX);
+        setText('rotateYValue', state.rotateY);
+        setText('rotateZValue', state.rotateZ);
+        setText('perspectiveValue', state.perspective);
+        setText('deviceScaleValue', state.deviceScale);
+      }
+
+      function applyOffset(node, pos) {
+        node.style.transform = `translate(${pos.x}px, ${pos.y}px)`;
+      }
+      function setText(id, val) { const n = $(id); if (n) n.textContent = val; }
+      function escapeHtml(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+      function isLight(hex) {
+        const c = hex.replace('#', '');
+        if (c.length < 6) return false;
+        const r = parseInt(c.substr(0, 2), 16), g = parseInt(c.substr(2, 2), 16), b = parseInt(c.substr(4, 2), 16);
+        return (0.299 * r + 0.587 * g + 0.114 * b) > 170;
+      }
+      function shade(hex, percent) {
+        let c = hex.replace('#', '');
+        if (c.length !== 6) return hex;
+        let num = parseInt(c, 16);
+        let r = Math.min(255, Math.max(0, ((num >> 16) & 0xff) + Math.round(255 * percent / 100)));
+        let g = Math.min(255, Math.max(0, ((num >> 8) & 0xff) + Math.round(255 * percent / 100)));
+        let b = Math.min(255, Math.max(0, (num & 0xff) + Math.round(255 * percent / 100)));
+        return '#' + [r, g, b].map(v => v.toString(16).padStart(2, '0')).join('');
+      }
+
+      function notify(msg) {
+        el.notification.textContent = msg;
+        el.notification.classList.remove('hidden');
+        clearTimeout(notify._t);
+        notify._t = setTimeout(() => el.notification.classList.add('hidden'), 2200);
+      }
+
+      // ============================================================
+      // LAYERS PANEL
+      // ============================================================
+      const layerLabels = { logo: 'Logo', badge: 'Badge', title: 'Tiêu đề', desc: 'Mô tả', cta: 'CTA', device: 'Device Mockup' };
+      function renderLayersPanel() {
+        el.layersList.innerHTML = '';
+        Object.keys(state.layers).forEach(key => {
+          const row = document.createElement('div');
+          row.className = 'layer-row';
+          const L = state.layers[key];
+          row.innerHTML = `
+        <span class="text-slate-200">${layerLabels[key]}</span>
+        <span class="flex items-center gap-1">
+          <button data-act="hide" data-key="${key}" class="icon-btn" style="width:24px;height:24px;font-size:11px;" title="Ẩn/hiện">${L.hidden ? '🚫' : '👁️'}</button>
+          <button data-act="lock" data-key="${key}" class="icon-btn" style="width:24px;height:24px;font-size:11px;" title="Khoá kéo-thả">${L.locked ? '🔒' : '🔓'}</button>
+          <button data-act="reset" data-key="${key}" class="icon-btn" style="width:24px;height:24px;font-size:11px;" title="Reset vị trí">↺</button>
+        </span>`;
+          el.layersList.appendChild(row);
+        });
+        el.layersList.querySelectorAll('button').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const key = btn.dataset.key, act = btn.dataset.act;
+            if (act === 'hide') state.layers[key].hidden = !state.layers[key].hidden;
+            if (act === 'lock') state.layers[key].locked = !state.layers[key].locked;
+            if (act === 'reset' && state.positions[key]) state.positions[key] = { x: 0, y: 0 };
+            pushHistory(); render();
+          });
+        });
+      }
+
+      // ============================================================
+      // DRAG (pointer events, transform-based offset)
+      // ============================================================
+      let dragCtx = null;
+      function posKeyFor(nodeId) {
+        return { logoArea: 'logo', badgeArea: 'badge', titleArea: 'title', descArea: 'desc', ctaArea: 'cta', deviceFrame: 'device' }[nodeId];
+      }
+      Object.values(areaEls).forEach(node => {
+        node.addEventListener('pointerdown', e => {
+          const key = posKeyFor(node.id);
+          if (!key || state.layers[key].locked) return;
+          e.preventDefault();
+          node.classList.add('dragging');
+          dragCtx = { key, startX: e.clientX, startY: e.clientY, origin: { ...state.positions[key] } };
+          node.setPointerCapture(e.pointerId);
+        });
+        node.addEventListener('pointermove', e => {
+          if (!dragCtx || posKeyFor(node.id) !== dragCtx.key) return;
+          const dx = e.clientX - dragCtx.startX;
+          const dy = e.clientY - dragCtx.startY;
+          state.positions[dragCtx.key] = { x: dragCtx.origin.x + dx, y: dragCtx.origin.y + dy };
+          applyOffset(node, state.positions[dragCtx.key]);
+        });
+        ['pointerup', 'pointercancel'].forEach(evt => node.addEventListener(evt, () => {
+          if (dragCtx) { node.classList.remove('dragging'); pushHistory(); dragCtx = null; }
+        }));
+      });
+
+      // ============================================================
+      // CONTROL WIRING
+      // ============================================================
+      function bindText(id, key) {
+        $(id).addEventListener('input', e => { state[key] = e.target.value; render(); pushHistory(); });
+      }
+      bindText('titleInput', 'title'); bindText('descInput', 'desc'); bindText('badgeInput', 'badge'); bindText('ctaInput', 'cta');
+
+      function bindRange(id, key, labelId, suffix) {
+        $(id).addEventListener('input', e => {
+          state[key] = parseInt(e.target.value, 10);
+          if (labelId) setText(labelId, state[key] + (suffix || ''));
+          render(); pushHistory();
+        });
+      }
+      bindRange('titleSize', 'titleSize'); bindRange('descSize', 'descSize');
+      bindRange('logoSize', 'logoSize', 'logoSizeValue', 'px');
+      bindRange('logoOpacity', 'logoOpacity', 'logoOpacityValue', '%');
+      bindRange('borderRadius', 'borderRadius', 'borderRadiusValue', 'px');
+      bindRange('glowIntensity', 'glowIntensity', 'glowValue', '%');
+      bindRange('spacingGap', 'spacingGap', 'gapValue', 'px');
+      bindRange('rotateX', 'rotateX', 'rotateXValue');
+      bindRange('rotateY', 'rotateY', 'rotateYValue');
+      bindRange('rotateZ', 'rotateZ', 'rotateZValue');
+      bindRange('perspective', 'perspective', 'perspectiveValue');
+      bindRange('deviceScale', 'deviceScale', 'deviceScaleValue');
+
+      function bindColor(colorId, hexId, key) {
+        $(colorId).addEventListener('input', e => { state[key] = e.target.value; $(hexId).value = e.target.value; render(); pushHistory(); });
+        $(hexId).addEventListener('change', e => {
+          let v = e.target.value.trim();
+          if (!/^#[0-9A-Fa-f]{6}$/.test(v)) { notify('Mã HEX không hợp lệ'); e.target.value = state[key]; return; }
+          state[key] = v; $(colorId).value = v; render(); pushHistory();
+        });
+      }
+      bindColor('primaryColor', 'primaryHex', 'primaryColor');
+      bindColor('bgColor', 'bgHex', 'bgColor');
+      bindColor('textColor', 'textHex', 'textColor');
+
+      $('gradientType').addEventListener('change', e => { state.gradientType = e.target.value; render(); pushHistory(); });
+      $('serifFont').addEventListener('change', e => { state.serifFont = e.target.value; render(); pushHistory(); });
+      $('sansFont').addEventListener('change', e => { state.sansFont = e.target.value; render(); pushHistory(); });
+      $('shadowIntensity').addEventListener('change', e => { state.shadowIntensity = e.target.value; render(); pushHistory(); });
+      $('deviceType').addEventListener('change', e => { state.deviceType = e.target.value; render(); pushHistory(); });
+      $('enable3D').addEventListener('change', e => { state.enable3D = e.target.checked; render(); pushHistory(); });
+
+      // Style swatches (built dynamically)
+      const swatchGrid = $('styleSwatchGrid');
+      Object.entries(stylePresets).forEach(([key, preset]) => {
+        const btn = document.createElement('button');
+        btn.className = 'style-swatch bg-slate-900 border-2 border-transparent text-xs py-2 px-3 rounded-lg text-left font-medium text-slate-300' + (key === state.style ? ' active' : '');
+        btn.dataset.style = key;
+        btn.textContent = preset.label;
+        btn.addEventListener('click', () => {
+          applyStylePreset(key);
+          pushHistory();
+        });
+        swatchGrid.appendChild(btn);
+      });
+      function applyStylePreset(key) {
+        const p = stylePresets[key];
+        state.style = key; state.primaryColor = p.primary; state.bgColor = p.bg; state.textColor = p.text;
+        state.serifFont = p.serif; state.sansFont = p.sans;
+        $('primaryColor').value = p.primary; $('primaryHex').value = p.primary;
+        $('bgColor').value = p.bg; $('bgHex').value = p.bg;
+        $('textColor').value = p.text; $('textHex').value = p.text;
+        $('serifFont').value = p.serif; $('sansFont').value = p.sans;
+        swatchGrid.querySelectorAll('.style-swatch').forEach(b => b.classList.toggle('active', b.dataset.style === key));
+        render();
+      }
+
+      // Layout preset
+      $('layoutPreset').addEventListener('change', e => { state.layout = e.target.value; render(); pushHistory(); });
+
+      // Canvas size buttons
+      document.querySelectorAll('.canvas-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.canvas-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          state.canvas.width = parseInt(btn.dataset.w, 10);
+          state.canvas.height = parseInt(btn.dataset.h, 10);
+          $('customWidth').value = state.canvas.width;
+          $('customHeight').value = state.canvas.height;
+          render(); pushHistory();
+        });
+      });
+      function applyCustomSize() {
+        const w = parseInt($('customWidth').value, 10), h = parseInt($('customHeight').value, 10);
+        if (!w || !h || w < 100 || h < 100) { notify('Kích thước không hợp lệ'); return; }
+        state.canvas.width = w; state.canvas.height = h;
+        document.querySelectorAll('.canvas-btn').forEach(b => b.classList.remove('active'));
+        render(); pushHistory();
+      }
+      $('customWidth').addEventListener('change', applyCustomSize);
+      $('customHeight').addEventListener('change', applyCustomSize);
+
+      // Position buttons
+      document.querySelectorAll('.pos-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const target = btn.dataset.target, pos = btn.dataset.pos;
+          document.querySelectorAll(`.pos-btn[data-target="${target}"]`).forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          if (target === 'content') state.contentPos = pos; else state.devicePos = pos;
+          render(); pushHistory();
+        });
+      });
+      document.querySelectorAll('.valign-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.valign-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          state.verticalAlign = btn.dataset.align;
+          render(); pushHistory();
+        });
+      });
+
+      // File uploads
+      $('logoInput').addEventListener('change', e => {
+        const file = e.target.files && e.target.files[0]; if (!file) return;
+        const reader = new FileReader();
+        reader.onload = ev => {
+          const img = new Image();
+          img.onload = () => {
+            logoImgElement = img;
+            el.domLogoImg.src = ev.target.result;
+            el.domLogoImg.classList.remove('hidden');
+            el.domLogoPlaceholder.classList.add('hidden');
+            pushHistory();
+          };
+          img.src = ev.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+      $('uiInput').addEventListener('change', e => {
+        const file = e.target.files && e.target.files[0]; if (!file) return;
+        const reader = new FileReader();
+        reader.onload = ev => {
+          const img = new Image();
+          img.onload = () => { uiImgElement = img; el.domUiImg.src = ev.target.result; pushHistory(); };
+          img.src = ev.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+
+      // Auto layout: reset drag offsets + normalize spacing
+      $('autoLayoutBtn').addEventListener('click', () => {
+        state.positions = JSON.parse(JSON.stringify(defaultState.positions));
+        state.spacingGap = 12;
+        $('spacingGap').value = 12;
+        render(); pushHistory();
+        notify('✓ Đã cân chỉnh lại layout');
+      });
+
+      // Generate variation
+      $('generateVariationBtn').addEventListener('click', () => {
+        const layoutKeys = Object.keys(layoutPresets);
+        const styleKeys = Object.keys(stylePresets);
+        state.layout = layoutKeys[Math.floor(Math.random() * layoutKeys.length)];
+        $('layoutPreset').value = state.layout;
+        applyStylePreset(styleKeys[Math.floor(Math.random() * styleKeys.length)]);
+        render(); pushHistory();
+        notify('✓ Đã tạo biến thể mới');
+      });
+
+      // Reset
+      $('resetBtn').addEventListener('click', () => {
+        if (!confirm('Reset toàn bộ về mặc định? (Ảnh đã tải lên sẽ mất)')) return;
+        state = JSON.parse(JSON.stringify(defaultState));
+        logoImgElement = null; uiImgElement = null;
+        el.domLogoImg.classList.add('hidden'); el.domLogoPlaceholder.classList.remove('hidden');
+        el.domUiImg.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25' viewBox='0 0 300 600'><rect width='100%25' height='100%25' fill='%230F172A'/></svg>";
+        syncAllControlsFromState();
+        history.stack = [snapshot()]; history.index = 0;
+        render();
+        notify('✓ Đã reset về mặc định');
+      });
+
+      // Undo/redo buttons + keyboard
+      $('undoBtn').addEventListener('click', undo);
+      $('redoBtn').addEventListener('click', redo);
+      document.addEventListener('keydown', e => {
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z' && !e.shiftKey) { e.preventDefault(); undo(); }
+        if ((e.ctrlKey || e.metaKey) && (e.key.toLowerCase() === 'y' || (e.key.toLowerCase() === 'z' && e.shiftKey))) { e.preventDefault(); redo(); }
+      });
+
+      // Mode toggle
+      $('modeToggle').addEventListener('click', () => {
+        state.isAdvancedMode = !state.isAdvancedMode;
+        $('modeLabel').textContent = state.isAdvancedMode ? 'Nâng Cao' : 'Cơ Bản';
+        $('modeToggle').classList.toggle('on', state.isAdvancedMode);
+        $('advancedTabBtn').classList.toggle('hidden', !state.isAdvancedMode);
+        if (!state.isAdvancedMode) {
+          // if currently on advanced tab, switch back to layout tab
+          const advTab = $('tab-advanced');
+          if (!advTab.classList.contains('hidden')) switchTab('layout');
+        }
+      });
+
+      // Tabs
+      function switchTab(name) {
+        document.querySelectorAll('.tab-btn').forEach(b => { b.classList.toggle('tab-active', b.dataset.tab === name); b.classList.toggle('tab-inactive', b.dataset.tab !== name); });
+        document.querySelectorAll('[id^="tab-"]').forEach(t => t.classList.toggle('hidden', t.id !== 'tab-' + name));
+      }
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.addEventListener('click', () => switchTab(btn.dataset.tab)));
+
+      // Zoom
+      let zoom = 100;
+      function applyZoom() { el.bannerViewport.style.maxWidth = (900 * zoom / 100) + 'px'; }
+      $('zoomIn').addEventListener('click', () => { zoom = Math.min(zoom + 10, 200); $('zoomLevel').value = zoom; applyZoom(); });
+      $('zoomOut').addEventListener('click', () => { zoom = Math.max(zoom - 10, 50); $('zoomLevel').value = zoom; applyZoom(); });
+      $('zoomLevel').addEventListener('change', e => { zoom = parseInt(e.target.value, 10); applyZoom(); });
+
+      // Grid / safe zone toggles
+      $('toggleGrid').addEventListener('click', () => {
+        const on = el.gridOverlay.style.display !== 'block';
+        el.gridOverlay.style.display = on ? 'block' : 'none';
+        $('toggleGrid').classList.toggle('on', on);
+      });
+      $('toggleSafeZone').addEventListener('click', () => {
+        const on = el.safeZoneOverlay.style.display !== 'block';
+        el.safeZoneOverlay.style.display = on ? 'block' : 'none';
+        $('toggleSafeZone').classList.toggle('on', on);
+      });
+
+      // Preview desktop/mobile (simulate viewport width)
+      $('previewDesktop').addEventListener('click', () => {
+        $('previewDesktop').classList.add('on'); $('previewMobile').classList.remove('on');
+        el.bannerViewport.style.maxWidth = (900 * zoom / 100) + 'px';
+      });
+      $('previewMobile').addEventListener('click', () => {
+        $('previewMobile').classList.add('on'); $('previewDesktop').classList.remove('on');
+        el.bannerViewport.style.maxWidth = '360px';
+      });
+
+      // Save / load template (JSON, includes images as data URLs)
+      $('saveTemplateBtn').addEventListener('click', () => {
+        const payload = {
+          state,
+          logo: logoImgElement ? el.domLogoImg.src : null,
+          ui: uiImgElement ? el.domUiImg.src : null,
+        };
+        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = `banner-template-${Date.now()}.json`; a.click();
+        URL.revokeObjectURL(url);
+        notify('✓ Đã lưu template');
+      });
+
+      $('loadTemplateBtn').addEventListener('click', () => $('templateFileInput').click());
+      $('templateFileInput').addEventListener('change', e => {
+        const file = e.target.files && e.target.files[0]; if (!file) return;
+        const reader = new FileReader();
+        reader.onload = ev => {
+          try {
+            const payload = JSON.parse(ev.target.result);
+            state = Object.assign(JSON.parse(JSON.stringify(defaultState)), payload.state);
+            if (payload.logo) {
+              const img = new Image();
+              img.onload = () => { logoImgElement = img; el.domLogoImg.src = payload.logo; el.domLogoImg.classList.remove('hidden'); el.domLogoPlaceholder.classList.add('hidden'); render(); };
+              img.src = payload.logo;
+            }
+            if (payload.ui) {
+              const img2 = new Image();
+              img2.onload = () => { uiImgElement = img2; el.domUiImg.src = payload.ui; render(); };
+              img2.src = payload.ui;
+            }
+            syncAllControlsFromState();
+            render();
+            pushHistory();
+            notify('✓ Đã tải template');
+          } catch (err) {
+            notify('✗ File template không hợp lệ');
+          }
+        };
+        reader.readAsText(file);
+        e.target.value = '';
+      });
+
+      // Export modal
+      $('exportBtn').addEventListener('click', () => el.exportModalShow());
+      el.exportModalShow = () => $('exportModal').classList.remove('hidden');
+      $('closeExportModal').addEventListener('click', () => $('exportModal').classList.add('hidden'));
+      $('cancelExportBtn').addEventListener('click', () => $('exportModal').classList.add('hidden'));
+      $('exportFormat').addEventListener('change', e => {
+        $('exportTransparent').disabled = e.target.value === 'jpeg';
+        if (e.target.value === 'jpeg') $('exportTransparent').checked = false;
+      });
+
+      $('doExportBtn').addEventListener('click', () => {
+        const format = $('exportFormat').value;
+        const quality = parseInt($('exportQuality').value, 10);
+        const filename = $('exportFilename').value.trim() || 'banner';
+        const transparent = $('exportTransparent').checked && format !== 'jpeg';
+        exportBanner(format, quality, filename, transparent);
+        $('exportModal').classList.add('hidden');
+      });
+
+      // ============================================================
+      // EXPORT — mirrors the live DOM layout (position, wrap, device)
+      // ============================================================
+      function wrapText(ctx, text, maxWidth) {
+        const words = text.split(' ');
+        const lines = [];
+        let line = '';
+        for (let i = 0; i < words.length; i++) {
+          const test = line + words[i] + ' ';
+          if (ctx.measureText(test).width > maxWidth && line !== '') {
+            lines.push(line.trim());
+            line = words[i] + ' ';
+          } else {
+            line = test;
+          }
+        }
+        lines.push(line.trim());
+        return lines;
+      }
+
+      function exportBanner(format, quality, filename, transparent) {
+        const canvas = $('exportCanvas');
+        const ctx = canvas.getContext('2d');
+        const W = state.canvas.width * quality;
+        const H = state.canvas.height * quality;
+        canvas.width = W; canvas.height = H;
+        ctx.clearRect(0, 0, W, H);
+
+        if (!transparent) {
+          if (state.gradientType === 'linear') {
+            const g = ctx.createLinearGradient(0, 0, W, H);
+            g.addColorStop(0, state.bgColor); g.addColorStop(1, shade(state.bgColor, -25));
+            ctx.fillStyle = g;
+          } else if (state.gradientType === 'radial') {
+            const g = ctx.createRadialGradient(W * 0.3, H * 0.3, 10, W * 0.3, H * 0.3, W * 0.8);
+            g.addColorStop(0, shade(state.bgColor, 15)); g.addColorStop(1, state.bgColor);
+            ctx.fillStyle = g;
+          } else {
+            ctx.fillStyle = state.bgColor;
+          }
+          ctx.fillRect(0, 0, W, H);
+        }
+
+        if (state.glowIntensity > 0 && !transparent) {
+          const glow = ctx.createRadialGradient(W * 0.15, H * 0.15, 10, W * 0.15, H * 0.15, W * 0.5);
+          const alphaHex = Math.round((state.glowIntensity / 100) * 0.6 * 255).toString(16).padStart(2, '0');
+          glow.addColorStop(0, state.primaryColor + alphaHex);
+          glow.addColorStop(1, 'transparent');
+          ctx.fillStyle = glow;
+          ctx.fillRect(0, 0, W, H);
+        }
+
+        const preset = layoutPresets[state.layout];
+        const isVertical = state.canvas.height > state.canvas.width || preset.direction === 'column';
+        const showDevice = preset.showDevice && !!uiImgElement;
+
+        let textAreaX, textAreaW, textAreaY, textAreaH;
+        let deviceCX, deviceCY, deviceW, deviceH;
+
+        if (isVertical) {
+          textAreaX = W * 0.08; textAreaW = W * 0.84; textAreaY = H * 0.06; textAreaH = showDevice ? H * 0.5 : H * 0.88;
+          deviceCX = W * 0.5; deviceCY = H * 0.75; deviceW = H * 0.4 * (9 / 16); deviceH = H * 0.4;
+        } else {
+          const textW = preset.textW / 100, devW = preset.deviceW / 100;
+          const deviceOnLeft = state.devicePos === 'left';
+          textAreaX = deviceOnLeft ? W * (devW) + W * 0.04 : W * 0.06;
+          textAreaW = W * textW * 0.86;
+          textAreaY = 0; textAreaH = H;
+          deviceCX = deviceOnLeft ? W * devW * 0.5 : W * (1 - devW) + W * devW * 0.5;
+          deviceCY = H * 0.5;
+          deviceH = H * 0.72; deviceW = deviceH * 0.5625;
+        }
+
+        // vertical alignment inside text block
+        ctx.textBaseline = 'alphabetic';
+        const titleFont = `bold ${state.titleSize * quality}px "${state.serifFont}", serif`;
+        const descFont = `400 ${state.descSize * quality}px "${state.sansFont}", sans-serif`;
+        ctx.font = titleFont;
+        const titleLines = wrapText(ctx, state.title, textAreaW);
+        ctx.font = descFont;
+        const descLines = wrapText(ctx, state.desc, textAreaW);
+
+        const logoH = logoImgElement ? state.logoSize * quality : 0;
+        const badgeH = 30 * quality;
+        const titleLineH = state.titleSize * quality * 1.25;
+        const descLineH = state.descSize * quality * 1.6;
+        const ctaH = 60 * quality;
+        const blockGap = state.spacingGap * quality;
+
+        let contentH = (logoImgElement ? logoH + blockGap : 0) + badgeH + blockGap + titleLines.length * titleLineH + blockGap + descLines.length * descLineH + blockGap + ctaH;
+        let cursorY;
+        if (state.verticalAlign === 'top') cursorY = textAreaY + H * 0.12;
+        else if (state.verticalAlign === 'bottom') cursorY = textAreaY + textAreaH - contentH - H * 0.08;
+        else cursorY = textAreaY + (textAreaH - contentH) / 2;
+
+        const alignMode = state.contentPos;
+        function drawAlignedText(text, x, y, maxW) {
+          let drawX = x;
+          const w = ctx.measureText(text).width;
+          if (alignMode === 'center') drawX = x + (maxW - w) / 2;
+          else if (alignMode === 'right') drawX = x + (maxW - w);
+          ctx.fillText(text, drawX, y);
+        }
+
+        // Logo
+        if (logoImgElement) {
+          let lw = (logoImgElement.width / logoImgElement.height) * logoH;
+          let lx = textAreaX;
+          if (alignMode === 'center') lx = textAreaX + (textAreaW - lw) / 2;
+          else if (alignMode === 'right') lx = textAreaX + (textAreaW - lw);
+          ctx.globalAlpha = state.logoOpacity / 100;
+          ctx.drawImage(logoImgElement, lx + state.positions.logo.x * quality, cursorY + state.positions.logo.y * quality, lw, logoH);
+          ctx.globalAlpha = 1;
+          cursorY += logoH + blockGap;
+        }
+
+        // Badge
+        ctx.font = `600 ${11 * quality}px "${state.sansFont}", monospace`;
+        ctx.fillStyle = state.primaryColor;
+        drawAlignedText(state.badge, textAreaX + state.positions.badge.x * quality, cursorY + badgeH * 0.7 + state.positions.badge.y * quality, textAreaW);
+        cursorY += badgeH + blockGap;
+
+        // Title
+        ctx.font = titleFont;
+        ctx.fillStyle = state.textColor;
+        titleLines.forEach((line, i) => {
+          drawAlignedText(line, textAreaX + state.positions.title.x * quality, cursorY + titleLineH * (i + 0.8) + state.positions.title.y * quality, textAreaW);
+        });
+        cursorY += titleLines.length * titleLineH + blockGap;
+
+        // Description
+        ctx.font = descFont;
+        ctx.fillStyle = state.textColor;
+        descLines.forEach((line, i) => {
+          drawAlignedText(line, textAreaX + state.positions.desc.x * quality, cursorY + descLineH * (i + 0.8) + state.positions.desc.y * quality, textAreaW);
+        });
+        cursorY += descLines.length * descLineH + blockGap;
+
+        // CTA
+        ctx.font = `bold ${13 * quality}px "${state.sansFont}", sans-serif`;
+        const ctaText = state.cta + '  →';
+        const ctaTextW = ctx.measureText(ctaText).width;
+        const ctaPadX = 22 * quality;
+        const ctaW = ctaTextW + ctaPadX * 2;
+        let ctaX = textAreaX;
+        if (alignMode === 'center') ctaX = textAreaX + (textAreaW - ctaW) / 2;
+        else if (alignMode === 'right') ctaX = textAreaX + (textAreaW - ctaW);
+        ctaX += state.positions.cta.x * quality;
+        const ctaY = cursorY + state.positions.cta.y * quality;
+        ctx.fillStyle = state.primaryColor;
+        ctx.beginPath();
+        ctx.roundRect(ctaX, ctaY, ctaW, ctaH, Math.max(4, state.borderRadius * 0.7 * quality));
+        ctx.fill();
+        ctx.fillStyle = isLight(state.bgColor) ? '#000000' : '#0B0F17';
+        ctx.fillText(ctaText, ctaX + ctaPadX, ctaY + ctaH * 0.63);
+
+        // Device
+        if (showDevice) {
+          ctx.save();
+          ctx.translate(deviceCX + state.positions.device.x * quality, deviceCY + state.positions.device.y * quality);
+          ctx.rotate((state.rotateZ * Math.PI) / 180);
+          const scaleF = state.deviceScale / 100;
+          const dW = deviceW * scaleF, dH = deviceH * scaleF;
+
+          ctx.fillStyle = '#1E293B';
+          ctx.beginPath();
+          ctx.roundRect(-dW / 2, -dH / 2, dW, dH, 28 * quality);
+          ctx.fill();
+
+          ctx.save();
+          ctx.beginPath();
+          const bezel = 8 * quality;
+          ctx.roundRect(-dW / 2 + bezel, -dH / 2 + bezel, dW - bezel * 2, dH - bezel * 2, 20 * quality);
+          ctx.clip();
+          ctx.drawImage(uiImgElement, -dW / 2 + bezel, -dH / 2 + bezel, dW - bezel * 2, dH - bezel * 2);
+          ctx.restore();
+          ctx.restore();
+        }
+
+        const mime = format === 'jpeg' ? 'image/jpeg' : format === 'webp' ? 'image/webp' : 'image/png';
+        canvas.toBlob(blob => {
+          if (!blob) { notify('✗ Export thất bại'); return; }
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url; a.download = `${filename}-${state.canvas.width}x${state.canvas.height}.${format === 'jpeg' ? 'jpg' : format}`;
+          a.click();
+          URL.revokeObjectURL(url);
+          notify('✓ Đã xuất banner');
+        }, mime, format === 'jpeg' ? 0.92 : undefined);
+      }
+
+      // ============================================================
+      // SYNC CONTROLS <- STATE (used after undo/redo/load/reset)
+      // ============================================================
+      function syncAllControlsFromState() {
+        $('titleInput').value = state.title;
+        $('descInput').value = state.desc;
+        $('badgeInput').value = state.badge;
+        $('ctaInput').value = state.cta;
+        $('titleSize').value = state.titleSize;
+        $('descSize').value = state.descSize;
+        $('logoSize').value = state.logoSize;
+        $('logoOpacity').value = state.logoOpacity;
+        $('primaryColor').value = state.primaryColor; $('primaryHex').value = state.primaryColor;
+        $('bgColor').value = state.bgColor; $('bgHex').value = state.bgColor;
+        $('textColor').value = state.textColor; $('textHex').value = state.textColor;
+        $('gradientType').value = state.gradientType;
+        $('serifFont').value = state.serifFont;
+        $('sansFont').value = state.sansFont;
+        $('borderRadius').value = state.borderRadius;
+        $('shadowIntensity').value = state.shadowIntensity;
+        $('glowIntensity').value = state.glowIntensity;
+        $('layoutPreset').value = state.layout;
+        $('deviceType').value = state.deviceType;
+        $('spacingGap').value = state.spacingGap;
+        $('customWidth').value = state.canvas.width;
+        $('customHeight').value = state.canvas.height;
+        $('enable3D').checked = state.enable3D;
+        $('rotateX').value = state.rotateX;
+        $('rotateY').value = state.rotateY;
+        $('rotateZ').value = state.rotateZ;
+        $('perspective').value = state.perspective;
+        $('deviceScale').value = state.deviceScale;
+
+        document.querySelectorAll('.canvas-btn').forEach(b => b.classList.toggle('active', parseInt(b.dataset.w) === state.canvas.width && parseInt(b.dataset.h) === state.canvas.height));
+        document.querySelectorAll('.pos-btn[data-target="content"]').forEach(b => b.classList.toggle('active', b.dataset.pos === state.contentPos));
+        document.querySelectorAll('.pos-btn[data-target="device"]').forEach(b => b.classList.toggle('active', b.dataset.pos === state.devicePos));
+        document.querySelectorAll('.valign-btn').forEach(b => b.classList.toggle('active', b.dataset.align === state.verticalAlign));
+        swatchGrid.querySelectorAll('.style-swatch').forEach(b => b.classList.toggle('active', b.dataset.style === state.style));
+      }
+
+      // ============================================================
+      // INIT
+      // ============================================================
+      render();
+      notify('🎨 Sẵn sàng — mọi control đã được gắn logic đầy đủ');
+    })();
+  </script>
+</body>
+
+</html>

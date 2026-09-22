@@ -1,0 +1,1186 @@
+<!DOCTYPE html>
+<html lang="vi" class="h-full">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Tool Hub</title>
+    <link rel="icon" type="image/svg+xml" href="assets/index.svg" />
+    <!-- Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+    <!-- Tailwind -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style type="text/tailwindcss">
+        @custom-variant dark (&:where(.dark, .dark *));
+    </style>
+
+    <script>
+        // Apply theme before page renders
+        (() => {
+            const savedTheme = localStorage.getItem("toolhub-theme");
+
+            if (
+                savedTheme === "dark" ||
+                (!savedTheme &&
+                    window.matchMedia("(prefers-color-scheme: dark)").matches)
+            ) {
+                document.documentElement.classList.add("dark");
+            }
+        })();
+    </script>
+</head>
+
+<body class="
+    h-full
+    bg-white text-zinc-900
+    dark:bg-zinc-950 dark:text-zinc-100
+    font-[Inter]
+  ">
+    <div class="flex h-screen overflow-hidden">
+
+        <!-- ========================================================= -->
+        <!-- SIDEBAR -->
+        <!-- ========================================================= -->
+
+        <aside id="sidebar" class="
+        fixed inset-y-0 left-0 z-40
+        flex w-56 -translate-x-full flex-col
+        border-r border-zinc-200 bg-white
+        transition-transform duration-200
+        dark:border-zinc-800 dark:bg-zinc-950
+        lg:static lg:translate-x-0
+      ">
+
+            <!-- Logo -->
+            <div class="
+          flex h-16 shrink-0 items-center
+          border-b border-zinc-200 px-5
+          dark:border-zinc-800
+        ">
+                <div class="flex items-center gap-3">
+                    <img src="assets/index.svg" alt="Logo" class="h-8 w-8 rounded-lg" />
+
+                    <div>
+                        <p class="text-sm font-semibold tracking-tight">
+                            Tool Hub
+                        </p>
+
+                        <p class="text-[10px] text-zinc-500 dark:text-zinc-500">
+                            Internal Workspace
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <nav class="flex-1 overflow-y-auto px-3 py-4">
+
+                <p class="
+            mb-2 px-2
+            text-[10px] font-semibold uppercase tracking-wider
+            text-zinc-400
+          ">
+                    Workspace
+                </p>
+
+                <div class="space-y-1">
+
+                    <a href="/" class="
+              flex items-center gap-3
+              rounded-lg bg-zinc-100
+              px-3 py-2.5
+              text-sm font-medium
+              text-zinc-900
+              dark:bg-zinc-900 dark:text-white
+            ">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                            <rect x="3" y="3" width="7" height="7" rx="1" />
+                            <rect x="14" y="3" width="7" height="7" rx="1" />
+                            <rect x="3" y="14" width="7" height="7" rx="1" />
+                            <rect x="14" y="14" width="7" height="7" rx="1" />
+                        </svg>
+
+                        Dashboard
+                    </a>
+
+                </div>
+
+                <p class="
+            mb-2 mt-7 px-2
+            text-[10px] font-semibold uppercase tracking-wider
+            text-zinc-400
+          ">
+                    Tools
+                </p>
+
+                <div class="space-y-1">
+
+                    <!-- ZaloSend -->
+                    <a href="/zalosend" class="
+              group flex items-center gap-3
+              rounded-lg px-3 py-2.5
+              text-sm text-zinc-600
+              transition
+              hover:bg-zinc-100 hover:text-zinc-900
+              dark:text-zinc-400
+              dark:hover:bg-zinc-900 dark:hover:text-white
+            ">
+                        <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="1.8"
+                            viewBox="0 0 24 24">
+                            <path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5
+                   8.4 8.4 0 0 1-4.2-1.1L4 20l1.1-4.3
+                   A8.4 8.4 0 0 1 3 11.5
+                   8.5 8.5 0 1 1 21 11.5Z" />
+                        </svg>
+
+                        ZaloSend
+                    </a>
+
+                    <!-- Screenshot -->
+                    <a href="/screenshoot" class="
+              group flex items-center gap-3
+              rounded-lg px-3 py-2.5
+              text-sm text-zinc-600
+              transition
+              hover:bg-zinc-100 hover:text-zinc-900
+              dark:text-zinc-400
+              dark:hover:bg-zinc-900 dark:hover:text-white
+            ">
+                        <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="1.8"
+                            viewBox="0 0 24 24">
+                            <rect x="5" y="2" width="14" height="20" rx="2" />
+                            <path d="M9 5h6" />
+                            <circle cx="12" cy="18" r="1" />
+                        </svg>
+
+                        ScreenShoot
+                    </a>
+
+                    <!-- VietQR -->
+                    <a href="/vietqr" class="
+              group flex items-center gap-3
+              rounded-lg px-3 py-2.5
+              text-sm text-zinc-600
+              transition
+              hover:bg-zinc-100 hover:text-zinc-900
+              dark:text-zinc-400
+              dark:hover:bg-zinc-900 dark:hover:text-white
+            ">
+                        <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="1.8"
+                            viewBox="0 0 24 24">
+                            <rect x="3" y="3" width="7" height="7" />
+                            <rect x="14" y="3" width="7" height="7" />
+                            <rect x="3" y="14" width="7" height="7" />
+                            <path d="M14 14h3v3h-3zM18 18h3v3h-3zM18 14h3" />
+                        </svg>
+
+                        VietQR
+                    </a>
+
+                    <!-- Banner -->
+                    <a href="/banner" class="
+              group flex items-center gap-3
+              rounded-lg px-3 py-2.5
+              text-sm text-zinc-600
+              transition
+              hover:bg-zinc-100 hover:text-zinc-900
+              dark:text-zinc-400
+              dark:hover:bg-zinc-900 dark:hover:text-white
+            ">
+                        <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="1.8"
+                            viewBox="0 0 24 24">
+                            <rect x="3" y="4" width="18" height="16" rx="2" />
+                            <circle cx="8" cy="9" r="1.5" />
+                            <path d="m21 16-5-5-4 4-2-2-7 7" />
+                        </svg>
+
+                        Banner Generator
+                    </a>
+
+                    <!-- Contract -->
+                    <a href="/sale-report" class="
+              group flex items-center gap-3
+              rounded-lg px-3 py-2.5
+              text-sm text-zinc-600
+              transition
+              hover:bg-zinc-100 hover:text-zinc-900
+              dark:text-zinc-400
+              dark:hover:bg-zinc-900 dark:hover:text-white
+            ">
+                        <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="1.8"
+                            viewBox="0 0 24 24">
+                            <path d="M6 3h9l3 3v15H6z" />
+                            <path d="M14 3v4h4" />
+                            <path d="M9 12h6M9 16h6" />
+                        </svg>
+
+                        Hợp đồng & Báo giá
+                    </a>
+
+                </div>
+
+                <p class="
+            mb-2 mt-7 px-2
+            text-[10px] font-semibold uppercase tracking-wider
+            text-zinc-400
+          ">
+                    System
+                </p>
+
+                <a href="/api/v1/health" target="_blank" class="
+            flex items-center gap-3
+            rounded-lg px-3 py-2.5
+            text-sm text-zinc-600
+            transition
+            hover:bg-zinc-100 hover:text-zinc-900
+            dark:text-zinc-400
+            dark:hover:bg-zinc-900 dark:hover:text-white
+          ">
+                    <span class="relative flex h-4 w-4 items-center justify-center">
+                        <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
+                    </span>
+
+                    API Health
+                </a>
+
+            </nav>
+
+            <!-- Sidebar Footer -->
+            <div class="
+          shrink-0
+          border-t border-zinc-200
+          px-4 py-3
+          dark:border-zinc-800
+        ">
+                <p class="text-[10px] text-zinc-400">
+                    Internal use only
+                </p>
+            </div>
+
+        </aside>
+
+
+        <!-- Mobile Overlay -->
+        <div id="sidebar-overlay" class="
+        fixed inset-0 z-30 hidden
+        bg-black/20
+        lg:hidden
+      "></div>
+
+
+        <!-- ========================================================= -->
+        <!-- MAIN -->
+        <!-- ========================================================= -->
+
+        <main class="flex min-w-0 flex-1 flex-col">
+
+            <!-- ======================================================= -->
+            <!-- HEADER -->
+            <!-- ======================================================= -->
+
+            <header class="
+          flex h-16 shrink-0 items-center
+          border-b border-zinc-200
+          bg-white
+          px-4 sm:px-6
+          dark:border-zinc-800
+          dark:bg-zinc-950
+        ">
+
+                <!-- Mobile menu -->
+                <button id="mobile-menu" type="button" class="
+            mr-3 flex h-9 w-9
+            items-center justify-center
+            rounded-lg
+            text-zinc-600
+            hover:bg-zinc-100
+            dark:text-zinc-300
+            dark:hover:bg-zinc-900
+            lg:hidden
+          " aria-label="Mở menu">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                        <path d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                </button>
+
+
+                <!-- Page title -->
+                <div class="min-w-0">
+                    <h1 class="truncate text-sm font-semibold">
+                        Dashboard
+                    </h1>
+
+                    <p class="
+              hidden text-[11px] text-zinc-400
+              sm:block
+            ">
+                        Internal tools
+                    </p>
+                </div>
+
+
+                <!-- ===================================================== -->
+                <!-- HEADER ACTIONS -->
+                <!-- ===================================================== -->
+
+                <div class="ml-auto flex items-center gap-1.5 sm:gap-2">
+
+                    <!-- Clock -->
+                    <div class="
+              hidden items-center gap-2
+              border-r border-zinc-200
+              pr-3
+              sm:flex
+              dark:border-zinc-800
+            ">
+                        <div class="text-right">
+                            <div id="clock" class="
+                  text-sm font-semibold
+                  tabular-nums tracking-tight
+                ">
+                                00:00:00
+                            </div>
+
+                            <div id="date" class="
+                  text-[10px]
+                  text-zinc-400
+                ">
+                                --/--/----
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <!-- ================================================= -->
+                    <!-- ATTENDANCE -->
+                    <!-- ================================================= -->
+
+                    <div class="
+              flex items-center gap-1
+              border-r border-zinc-200
+              pr-2
+              dark:border-zinc-800
+            ">
+
+                        <!-- Check In -->
+                        <button id="btn-check-in" type="button" class="
+                inline-flex h-9
+                items-center gap-1.5
+                rounded-lg
+                border border-zinc-200
+                bg-white
+                px-2.5
+                text-xs font-medium
+                text-zinc-700
+                transition
+                hover:bg-zinc-100
+                active:bg-zinc-200
+                dark:border-zinc-700
+                dark:bg-zinc-950
+                dark:text-zinc-200
+                dark:hover:bg-zinc-900
+                dark:active:bg-zinc-800
+                sm:px-3
+              " title="Điểm danh đến">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8"
+                                viewBox="0 0 24 24">
+                                <path d="M5 12h14" />
+                                <path d="m13 6 6 6-6 6" />
+                            </svg>
+
+                            <span class="hidden sm:inline">
+                                Đến
+                            </span>
+                        </button>
+
+
+                        <!-- Check Out -->
+                        <button id="btn-check-out" type="button" class="
+                inline-flex h-9
+                items-center gap-1.5
+                rounded-lg
+                border border-zinc-200
+                bg-white
+                px-2.5
+                text-xs font-medium
+                text-zinc-700
+                transition
+                hover:bg-zinc-100
+                active:bg-zinc-200
+                dark:border-zinc-700
+                dark:bg-zinc-950
+                dark:text-zinc-200
+                dark:hover:bg-zinc-900
+                dark:active:bg-zinc-800
+                sm:px-3
+              " title="Điểm danh về">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8"
+                                viewBox="0 0 24 24">
+                                <path d="M19 12H5" />
+                                <path d="m11 18-6-6 6-6" />
+                            </svg>
+
+                            <span class="hidden sm:inline">
+                                Về
+                            </span>
+                        </button>
+
+                    </div>
+
+
+                    <!-- Theme -->
+                    <button id="theme-toggle" type="button" class="
+              flex h-9 w-9
+              items-center justify-center
+              rounded-lg
+              text-zinc-600
+              transition
+              hover:bg-zinc-100
+              hover:text-zinc-900
+              dark:text-zinc-300
+              dark:hover:bg-zinc-900
+              dark:hover:text-white
+            " title="Đổi giao diện">
+
+                        <!-- Sun -->
+                        <svg id="sun-icon" class="hidden h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8"
+                            viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="4" />
+                            <path
+                                d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.65 17.65l1.42 1.42M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.65 6.35l1.42-1.42" />
+                        </svg>
+
+                        <!-- Moon -->
+                        <svg id="moon-icon" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8"
+                            viewBox="0 0 24 24">
+                            <path d="M21 12.8A8.5 8.5 0 1 1 11.2 3
+                   6.7 6.7 0 0 0 21 12.8Z" />
+                        </svg>
+
+                    </button>
+
+                </div>
+
+            </header>
+
+
+            <!-- ======================================================= -->
+            <!-- CONTENT -->
+            <!-- ======================================================= -->
+
+            <div class="flex-1 overflow-y-auto">
+
+                <div class="
+            mx-auto
+            w-full
+            max-w-[1600px]
+            px-4 py-5
+            sm:px-6
+            lg:px-8
+          ">
+
+                    <!-- Section Header -->
+                    <div class="mb-4 flex items-end justify-between">
+
+                        <div>
+                            <h2 class="
+                  text-base font-semibold
+                  tracking-tight
+                ">
+                                Công cụ
+                            </h2>
+
+                            <p class="
+                  mt-0.5
+                  text-xs
+                  text-zinc-500
+                  dark:text-zinc-400
+                ">
+                                Các công cụ nội bộ thường dùng
+                            </p>
+                        </div>
+
+                        <span class="
+                hidden
+                rounded-md
+                bg-zinc-100
+                px-2 py-1
+                text-[10px]
+                font-medium
+                text-zinc-500
+                sm:inline-flex
+                dark:bg-zinc-900
+                dark:text-zinc-400
+              ">
+                            5 Tools
+                        </span>
+
+                    </div>
+
+
+                    <!-- =================================================== -->
+                    <!-- TOOL GRID -->
+                    <!-- =================================================== -->
+
+                    <div class="
+              grid
+              grid-cols-1
+              gap-3
+              sm:grid-cols-2
+              xl:grid-cols-3
+              2xl:grid-cols-5
+            ">
+
+                        <!-- ZaloSend -->
+                        <a href="/zalosend" class="
+                group
+                rounded-xl
+                border border-zinc-200
+                bg-white
+                p-4
+                transition
+                hover:border-zinc-400
+                hover:bg-zinc-50
+                dark:border-zinc-800
+                dark:bg-zinc-950
+                dark:hover:border-zinc-600
+                dark:hover:bg-zinc-900
+              ">
+
+                            <div class="mb-4 flex items-start justify-between">
+
+                                <div class="
+                    flex h-9 w-9
+                    items-center justify-center
+                    rounded-lg
+                    bg-zinc-100
+                    text-zinc-700
+                    dark:bg-zinc-900
+                    dark:text-zinc-200
+                  ">
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8"
+                                        viewBox="0 0 24 24">
+                                        <path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5
+                         8.4 8.4 0 0 1-4.2-1.1L4 20l1.1-4.3
+                         A8.4 8.4 0 0 1 3 11.5
+                         8.5 8.5 0 1 1 21 11.5Z" />
+                                    </svg>
+                                </div>
+
+                                <svg class="
+                    h-4 w-4
+                    text-zinc-300
+                    transition
+                    group-hover:translate-x-0.5
+                    group-hover:text-zinc-600
+                    dark:text-zinc-700
+                    dark:group-hover:text-zinc-300
+                  " fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                                    <path d="M5 12h14" />
+                                    <path d="m13 6 6 6-6 6" />
+                                </svg>
+
+                            </div>
+
+                            <h3 class="text-sm font-semibold">
+                                ZaloSend CRM
+                            </h3>
+
+                            <p class="
+                  mt-1.5
+                  text-xs leading-5
+                  text-zinc-500
+                  dark:text-zinc-400
+                ">
+                                Gửi tin nhắn Zalo hàng loạt qua openzca.
+                            </p>
+
+                        </a>
+
+
+                        <!-- ScreenShoot -->
+                        <a href="/screenshoot" class="
+                group
+                rounded-xl
+                border border-zinc-200
+                bg-white
+                p-4
+                transition
+                hover:border-zinc-400
+                hover:bg-zinc-50
+                dark:border-zinc-800
+                dark:bg-zinc-950
+                dark:hover:border-zinc-600
+                dark:hover:bg-zinc-900
+              ">
+
+                            <div class="mb-4 flex items-start justify-between">
+
+                                <div class="
+                    flex h-9 w-9
+                    items-center justify-center
+                    rounded-lg
+                    bg-zinc-100
+                    text-zinc-700
+                    dark:bg-zinc-900
+                    dark:text-zinc-200
+                  ">
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8"
+                                        viewBox="0 0 24 24">
+                                        <rect x="5" y="2" width="14" height="20" rx="2" />
+                                        <path d="M9 5h6" />
+                                        <circle cx="12" cy="18" r="1" />
+                                    </svg>
+                                </div>
+
+                                <svg class="
+                    h-4 w-4
+                    text-zinc-300
+                    transition
+                    group-hover:translate-x-0.5
+                    group-hover:text-zinc-600
+                    dark:text-zinc-700
+                    dark:group-hover:text-zinc-300
+                  " fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                                    <path d="M5 12h14" />
+                                    <path d="m13 6 6 6-6 6" />
+                                </svg>
+
+                            </div>
+
+                            <h3 class="text-sm font-semibold">
+                                ScreenShoot
+                            </h3>
+
+                            <p class="
+                  mt-1.5
+                  text-xs leading-5
+                  text-zinc-500
+                  dark:text-zinc-400
+                ">
+                                Chụp mockup màn hình thiết bị.
+                            </p>
+
+                        </a>
+
+
+                        <!-- VietQR -->
+                        <a href="/vietqr" class="
+                group
+                rounded-xl
+                border border-zinc-200
+                bg-white
+                p-4
+                transition
+                hover:border-zinc-400
+                hover:bg-zinc-50
+                dark:border-zinc-800
+                dark:bg-zinc-950
+                dark:hover:border-zinc-600
+                dark:hover:bg-zinc-900
+              ">
+
+                            <div class="mb-4 flex items-start justify-between">
+
+                                <div class="
+                    flex h-9 w-9
+                    items-center justify-center
+                    rounded-lg
+                    bg-zinc-100
+                    text-zinc-700
+                    dark:bg-zinc-900
+                    dark:text-zinc-200
+                  ">
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8"
+                                        viewBox="0 0 24 24">
+                                        <rect x="3" y="3" width="7" height="7" />
+                                        <rect x="14" y="3" width="7" height="7" />
+                                        <rect x="3" y="14" width="7" height="7" />
+                                        <path d="M14 14h3v3h-3z" />
+                                        <path d="M18 18h3v3h-3z" />
+                                        <path d="M18 14h3" />
+                                    </svg>
+                                </div>
+
+                                <svg class="
+                    h-4 w-4
+                    text-zinc-300
+                    transition
+                    group-hover:translate-x-0.5
+                    group-hover:text-zinc-600
+                    dark:text-zinc-700
+                    dark:group-hover:text-zinc-300
+                  " fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                                    <path d="M5 12h14" />
+                                    <path d="m13 6 6 6-6 6" />
+                                </svg>
+
+                            </div>
+
+                            <h3 class="text-sm font-semibold">
+                                VietQR
+                            </h3>
+
+                            <p class="
+                  mt-1.5
+                  text-xs leading-5
+                  text-zinc-500
+                  dark:text-zinc-400
+                ">
+                                Tạo mã QR chuyển khoản VietQR.
+                            </p>
+
+                        </a>
+
+
+                        <!-- Banner -->
+                        <a href="/banner" class="
+                group
+                rounded-xl
+                border border-zinc-200
+                bg-white
+                p-4
+                transition
+                hover:border-zinc-400
+                hover:bg-zinc-50
+                dark:border-zinc-800
+                dark:bg-zinc-950
+                dark:hover:border-zinc-600
+                dark:hover:bg-zinc-900
+              ">
+
+                            <div class="mb-4 flex items-start justify-between">
+
+                                <div class="
+                    flex h-9 w-9
+                    items-center justify-center
+                    rounded-lg
+                    bg-zinc-100
+                    text-zinc-700
+                    dark:bg-zinc-900
+                    dark:text-zinc-200
+                  ">
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8"
+                                        viewBox="0 0 24 24">
+                                        <rect x="3" y="4" width="18" height="16" rx="2" />
+                                        <circle cx="8" cy="9" r="1.5" />
+                                        <path d="m21 16-5-5-4 4-2-2-7 7" />
+                                    </svg>
+                                </div>
+
+                                <svg class="
+                    h-4 w-4
+                    text-zinc-300
+                    transition
+                    group-hover:translate-x-0.5
+                    group-hover:text-zinc-600
+                    dark:text-zinc-700
+                    dark:group-hover:text-zinc-300
+                  " fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                                    <path d="M5 12h14" />
+                                    <path d="m13 6 6 6-6 6" />
+                                </svg>
+
+                            </div>
+
+                            <h3 class="text-sm font-semibold">
+                                Auto Banner
+                            </h3>
+
+                            <p class="
+                  mt-1.5
+                  text-xs leading-5
+                  text-zinc-500
+                  dark:text-zinc-400
+                ">
+                                Tạo banner quảng cáo tự động.
+                            </p>
+
+                        </a>
+
+
+                        <!-- Contract -->
+                        <a href="/sale-report" class="
+                group
+                rounded-xl
+                border border-zinc-200
+                bg-white
+                p-4
+                transition
+                hover:border-zinc-400
+                hover:bg-zinc-50
+                dark:border-zinc-800
+                dark:bg-zinc-950
+                dark:hover:border-zinc-600
+                dark:hover:bg-zinc-900
+              ">
+
+                            <div class="mb-4 flex items-start justify-between">
+
+                                <div class="
+                    flex h-9 w-9
+                    items-center justify-center
+                    rounded-lg
+                    bg-zinc-100
+                    text-zinc-700
+                    dark:bg-zinc-900
+                    dark:text-zinc-200
+                  ">
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8"
+                                        viewBox="0 0 24 24">
+                                        <path d="M6 3h9l3 3v15H6z" />
+                                        <path d="M14 3v4h4" />
+                                        <path d="M9 12h6M9 16h6" />
+                                    </svg>
+                                </div>
+
+                                <svg class="
+                    h-4 w-4
+                    text-zinc-300
+                    transition
+                    group-hover:translate-x-0.5
+                    group-hover:text-zinc-600
+                    dark:text-zinc-700
+                    dark:group-hover:text-zinc-300
+                  " fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                                    <path d="M5 12h14" />
+                                    <path d="m13 6 6 6-6 6" />
+                                </svg>
+
+                            </div>
+
+                            <h3 class="text-sm font-semibold">
+                                Hợp đồng & Báo giá
+                            </h3>
+
+                            <p class="
+                  mt-1.5
+                  text-xs leading-5
+                  text-zinc-500
+                  dark:text-zinc-400
+                ">
+                                Soạn form hợp đồng và báo giá bán hàng.
+                            </p>
+
+                        </a>
+
+                    </div>
+
+
+                    <!-- =================================================== -->
+                    <!-- SYSTEM STATUS -->
+                    <!-- =================================================== -->
+
+                    <div class="
+              mt-5
+              grid
+              grid-cols-1
+              gap-3
+              lg:grid-cols-2
+            ">
+
+                        <!-- API -->
+                        <a href="/api/v1/health" target="_blank" class="
+                flex items-center justify-between
+                rounded-xl
+                border border-zinc-200
+                bg-white
+                px-4 py-3
+                transition
+                hover:border-zinc-400
+                dark:border-zinc-800
+                dark:bg-zinc-950
+                dark:hover:border-zinc-600
+              ">
+
+                            <div class="flex items-center gap-3">
+
+                                <div class="
+                    flex h-8 w-8
+                    items-center justify-center
+                    rounded-lg
+                    bg-zinc-100
+                    dark:bg-zinc-900
+                  ">
+                                    <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
+                                </div>
+
+                                <div>
+                                    <p class="text-xs font-semibold">
+                                        API Service
+                                    </p>
+
+                                    <p class="
+                      mt-0.5
+                      text-[10px]
+                      text-zinc-400
+                    ">
+                                        Backend health check
+                                    </p>
+                                </div>
+
+                            </div>
+
+                            <span class="
+                  text-[10px]
+                  font-medium
+                  text-emerald-600
+                  dark:text-emerald-400
+                ">
+                                Operational
+                            </span>
+
+                        </a>
+
+
+                        <!-- Workspace -->
+                        <div class="
+                flex items-center justify-between
+                rounded-xl
+                border border-zinc-200
+                bg-white
+                px-4 py-3
+                dark:border-zinc-800
+                dark:bg-zinc-950
+              ">
+
+                            <div class="flex items-center gap-3">
+
+                                <div class="
+                    flex h-8 w-8
+                    items-center justify-center
+                    rounded-lg
+                    bg-zinc-100
+                    dark:bg-zinc-900
+                  ">
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8"
+                                        viewBox="0 0 24 24">
+                                        <path d="M4 7h16M4 12h16M4 17h16" />
+                                    </svg>
+                                </div>
+
+                                <div>
+                                    <p class="text-xs font-semibold">
+                                        Workspace
+                                    </p>
+
+                                    <p class="
+                      mt-0.5
+                      text-[10px]
+                      text-zinc-400
+                    ">
+                                        Internal tools workspace
+                                    </p>
+                                </div>
+
+                            </div>
+
+                            <span class="
+                  text-[10px]
+                  font-medium
+                  text-zinc-500
+                  dark:text-zinc-400
+                ">
+                                Ready
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </main>
+
+    </div>
+
+
+    <!-- =========================================================== -->
+    <!-- TOAST -->
+    <!-- =========================================================== -->
+
+    <div id="liveToast" class="
+      fixed bottom-5 right-5 z-50
+      hidden
+      w-[calc(100%-2rem)]
+      max-w-sm
+      rounded-xl
+      border border-zinc-200
+      bg-white
+      p-4
+      shadow-lg
+      dark:border-zinc-800
+      dark:bg-zinc-900
+    ">
+
+        <div class="flex items-start gap-3">
+
+            <div id="toastIcon" class="
+          flex h-8 w-8 shrink-0
+          items-center justify-center
+          rounded-lg
+          bg-zinc-100
+          dark:bg-zinc-800
+        ">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="m5 12 4 4L19 6" />
+                </svg>
+            </div>
+
+            <div class="min-w-0 flex-1">
+
+                <p class="text-xs font-semibold">
+                    Thông báo
+                </p>
+
+                <div class="
+            toast-body
+            mt-1
+            text-xs
+            leading-5
+            text-zinc-500
+            dark:text-zinc-400
+          "></div>
+
+            </div>
+
+            <button type="button" class="
+          shrink-0
+          text-zinc-400
+          hover:text-zinc-900
+          dark:hover:text-white
+        " data-bs-dismiss="toast" onclick="document.getElementById('liveToast').classList.add('hidden')"
+                aria-label="Đóng">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                    <path d="m6 6 12 12M18 6 6 18" />
+                </svg>
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================================================== -->
+    <!-- JAVASCRIPT -->
+    <!-- =========================================================== -->
+
+    <script>
+        // ============================================================
+        // CLOCK
+        // ============================================================
+
+        function updateClock() {
+            const now = new Date();
+
+            const time = now.toLocaleTimeString("vi-VN", {
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit",
+                hour12: false
+            });
+
+            const date = now.toLocaleDateString("vi-VN", {
+                weekday: "short",
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric"
+            });
+
+            const clock = document.getElementById("clock");
+            const dateElement = document.getElementById("date");
+
+            if (clock) {
+                clock.textContent = time;
+            }
+
+            if (dateElement) {
+                dateElement.textContent = date;
+            }
+        }
+
+        updateClock();
+        setInterval(updateClock, 1000);
+
+
+        // ============================================================
+        // THEME
+        // ============================================================
+
+        const themeToggle = document.getElementById("theme-toggle");
+        const sunIcon = document.getElementById("sun-icon");
+        const moonIcon = document.getElementById("moon-icon");
+
+        function updateThemeIcon() {
+            const isDark =
+                document.documentElement.classList.contains("dark");
+
+            if (isDark) {
+                sunIcon.classList.remove("hidden");
+                moonIcon.classList.add("hidden");
+            } else {
+                sunIcon.classList.add("hidden");
+                moonIcon.classList.remove("hidden");
+            }
+        }
+
+        updateThemeIcon();
+
+        themeToggle?.addEventListener("click", () => {
+            const isDark =
+                document.documentElement.classList.toggle("dark");
+
+            localStorage.setItem(
+                "toolhub-theme",
+                isDark ? "dark" : "light"
+            );
+
+            updateThemeIcon();
+        });
+
+
+        // ============================================================
+        // MOBILE SIDEBAR
+        // ============================================================
+
+        const sidebar = document.getElementById("sidebar");
+        const overlay = document.getElementById("sidebar-overlay");
+        const mobileMenu = document.getElementById("mobile-menu");
+
+        function openSidebar() {
+            sidebar.classList.remove("-translate-x-full");
+            overlay.classList.remove("hidden");
+        }
+
+        function closeSidebar() {
+            sidebar.classList.add("-translate-x-full");
+            overlay.classList.add("hidden");
+        }
+
+        mobileMenu?.addEventListener("click", openSidebar);
+        overlay?.addEventListener("click", closeSidebar);
+
+
+        // Close mobile sidebar after navigation
+        sidebar?.querySelectorAll("a").forEach((link) => {
+            link.addEventListener("click", () => {
+                if (window.innerWidth < 1024) {
+                    closeSidebar();
+                }
+            });
+        });
+    </script>
+
+
+    <!-- Existing attendance logic -->
+    <script src="/assets/attendance.js" defer></script>
+
+</body>
+
+</html>

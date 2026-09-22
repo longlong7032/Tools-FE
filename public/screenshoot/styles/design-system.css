@@ -1,0 +1,503 @@
+/* ==========================================================================
+   MONOCHROME DESIGN SYSTEM - BOOTSTRAP 5 COMPATIBLE
+   Primary Theme: Black & White / Minimalist / Swiss Style
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. DESIGN TOKENS (CSS Custom Properties)
+   -------------------------------------------------------------------------- */
+:root {
+  /* Color Palette - Monochrome Scale */
+  --mono-black: #09090b;
+  --mono-dark-surface: #18181b;
+  --mono-gray-800: #27272a;
+  --mono-gray-600: #52525b;
+  --mono-gray-500: #71717a;
+  --mono-gray-300: #d4d4d8;
+  --mono-gray-200: #e4e4e7;
+  --mono-gray-100: #f4f4f5;
+  --mono-white: #ffffff;
+
+  /* Bootstrap 5 Theme Overrides Mapping */
+  --bs-primary: var(--mono-black);
+  --bs-primary-rgb: 9, 9, 11;
+  --bs-secondary: var(--mono-gray-500);
+  --bs-secondary-rgb: 113, 113, 122;
+  --bs-dark: var(--mono-black);
+  --bs-dark-rgb: 9, 9, 11;
+  --bs-light: var(--mono-gray-100);
+  --bs-light-rgb: 244, 244, 245;
+  --bs-body-bg: var(--mono-white);
+  --bs-body-color: var(--mono-black);
+
+  /* "Subtle"/component-active variables: Bootstrap hardcodes these instead of deriving
+     them from --bs-primary at runtime, so they must be overridden explicitly or things
+     like accordion "active" state, nav-pills active tab, alerts... stay Bootstrap-blue. */
+  --bs-primary-bg-subtle: var(--mono-gray-100);
+  --bs-primary-border-subtle: var(--mono-gray-300);
+  --bs-primary-text-emphasis: var(--mono-black);
+  --bs-nav-pills-link-active-bg: var(--mono-black);
+  --bs-nav-pills-link-active-color: var(--mono-white);
+  --bs-accordion-active-bg: var(--mono-gray-100);
+  --bs-accordion-active-color: var(--mono-black);
+
+  /* Typography */
+  --bs-body-font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --mono-font-mono: 'JetBrains Mono', monospace, SFMono-Regular;
+
+  /* Focus & Borders */
+  --mono-focus-ring: 0 0 0 0.2rem rgba(9, 9, 11, 0.15);
+  --bs-border-color: var(--mono-gray-200);
+  --bs-border-radius: 4px;
+  --bs-border-radius-lg: 6px;
+  --bs-border-radius-sm: 2px;
+
+  /* Shadows - Minimalist High-Contrast Focus */
+  --bs-box-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --bs-box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  --bs-box-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+}
+
+/* Dark Mode Overrides (Optional / Automatic OS Theme Support) */
+[data-bs-theme="dark"] {
+  --mono-black: #ffffff;
+  --mono-dark-surface: #18181b;
+  --mono-gray-100: #18181b;
+  --mono-gray-200: #27272a;
+  --mono-gray-500: #a1a1aa;
+  --mono-white: #09090b;
+
+  /* Các biến *-rgb dùng cho rgba() (vd: .text-primary, .bg-light) không tự suy ra từ
+     --mono-black/--mono-gray-* như các biến còn lại nên phải lật màu thủ công ở đây,
+     nếu không .text-primary sẽ gần như vô hình (đen trên nền đen) khi bật Dark Mode. */
+  --bs-primary-rgb: 255, 255, 255;
+  --bs-dark-rgb: 255, 255, 255;
+  --bs-light-rgb: 24, 24, 27;
+  --bs-secondary-rgb: 161, 161, 170;
+
+  --bs-body-bg: #09090b;
+  --bs-body-color: #ffffff;
+  --bs-border-color: #27272a;
+  --mono-focus-ring: 0 0 0 0.2rem rgba(255, 255, 255, 0.2);
+}
+
+/* --------------------------------------------------------------------------
+   2. GLOBAL RESET & BASE STYLES
+   -------------------------------------------------------------------------- */
+body {
+  font-family: var(--bs-body-font-family);
+  color: var(--bs-body-color);
+  background-color: var(--bs-body-bg);
+  letter-spacing: -0.01em;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: var(--bs-body-color);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+
+/* --------------------------------------------------------------------------
+   3. BUTTON COMPONENTS
+   -------------------------------------------------------------------------- */
+/* Primary Button - Solid Black */
+.btn-primary,
+.btn-dark {
+  background-color: var(--mono-black) !important;
+  border-color: var(--mono-black) !important;
+  color: var(--mono-white) !important;
+  font-weight: 500;
+  transition: all 0.2s ease-in-out;
+}
+
+.btn-primary:hover,
+.btn-dark:hover,
+.btn-primary:focus,
+.btn-dark:focus {
+  background-color: var(--mono-gray-800) !important;
+  border-color: var(--mono-gray-800) !important;
+  color: var(--mono-white) !important;
+  box-shadow: var(--mono-focus-ring);
+}
+
+/* Secondary Button - Outline Black */
+.btn-outline-dark,
+.btn-outline-primary {
+  background-color: transparent !important;
+  border: 1px solid var(--mono-black) !important;
+  color: var(--mono-black) !important;
+  font-weight: 500;
+  transition: all 0.2s ease-in-out;
+}
+
+.btn-outline-dark:hover,
+.btn-outline-primary:hover {
+  background-color: var(--mono-black) !important;
+  color: var(--mono-white) !important;
+}
+
+/* Ghost / Link Button */
+.btn-link {
+  color: var(--mono-black) !important;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.btn-link:hover {
+  text-decoration: underline;
+  color: var(--mono-gray-800) !important;
+}
+
+/* --------------------------------------------------------------------------
+   4. FORM CONTROL COMPONENTS
+   -------------------------------------------------------------------------- */
+.form-control,
+.form-select {
+  border: 1px solid var(--mono-gray-200);
+  border-radius: var(--bs-border-radius);
+  color: var(--mono-black);
+  background-color: var(--mono-white);
+  padding: 0.625rem 0.875rem;
+  font-size: 0.9375rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--mono-black) !important;
+  box-shadow: var(--mono-focus-ring) !important;
+  outline: none;
+}
+
+.form-control::placeholder {
+  color: var(--mono-gray-500);
+}
+
+.form-check-input:checked {
+  background-color: var(--mono-black);
+  border-color: var(--mono-black);
+}
+
+.form-check-input:focus {
+  box-shadow: var(--mono-focus-ring);
+}
+
+/* --------------------------------------------------------------------------
+   5. CARDS & CONTAINERS
+   -------------------------------------------------------------------------- */
+.card {
+  border: 1px solid var(--mono-gray-200);
+  border-radius: var(--bs-border-radius-lg);
+  background-color: var(--mono-white);
+  box-shadow: var(--bs-box-shadow-sm);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card-header {
+  background-color: var(--mono-white);
+  border-bottom: 1px solid var(--mono-gray-200);
+  font-weight: 600;
+}
+
+.card-footer {
+  background-color: var(--mono-white);
+  border-top: 1px solid var(--mono-gray-200);
+}
+
+/* Dark Card Accent */
+.card-dark {
+  background-color: var(--mono-black);
+  color: var(--mono-white);
+  border: 1px solid var(--mono-gray-800);
+}
+
+.card-dark .text-muted {
+  color: var(--mono-gray-500) !important;
+}
+
+/* --------------------------------------------------------------------------
+   6. NAVIGATION & BADGES
+   -------------------------------------------------------------------------- */
+.navbar {
+  border-bottom: 1px solid var(--mono-gray-200);
+  background-color: var(--mono-white);
+}
+
+.navbar-dark {
+  background-color: var(--mono-black) !important;
+  border-bottom: 1px solid var(--mono-gray-800);
+}
+
+.nav-link {
+  color: var(--mono-black);
+  font-weight: 500;
+}
+
+.nav-link:hover,
+.nav-link.active {
+  color: var(--mono-gray-800);
+}
+
+.badge {
+  font-weight: 600;
+  padding: 0.35em 0.65em;
+  border-radius: 4px;
+}
+
+.badge-dark,
+.bg-dark {
+  background-color: var(--mono-black) !important;
+  color: var(--mono-white) !important;
+}
+
+/* Bootstrap's .text-bg-* utilities hard-code their text color in the compiled CSS
+   (vd: .text-bg-primary luôn color:#fff), nên chỉ override --bs-primary-rgb là chưa đủ:
+   ở Dark Mode, --mono-black lật thành trắng -> nền trắng + chữ trắng cứng = số 1/2/3 biến mất.
+   Override thẳng bằng token để nền/chữ luôn lật cùng nhau, luôn tương phản rõ ở cả 2 theme. */
+.text-bg-primary,
+.text-bg-dark {
+  background-color: var(--mono-black) !important;
+  color: var(--mono-white) !important;
+}
+
+.badge-outline {
+  background-color: transparent;
+  border: 1px solid var(--mono-black);
+  color: var(--mono-black);
+}
+
+/* --------------------------------------------------------------------------
+   7. UTILITY CLASSES & ACCENTS
+   -------------------------------------------------------------------------- */
+.border-monochrome {
+  border-color: var(--mono-gray-200) !important;
+}
+
+.border-monochrome-dark {
+  border-color: var(--mono-black) !important;
+}
+
+.bg-monochrome-light {
+  background-color: var(--mono-gray-100) !important;
+}
+
+.text-monochrome-muted {
+  color: var(--mono-gray-500) !important;
+}
+
+/* Section Header Left Accent Line */
+.heading-accent {
+  border-left: 3px solid var(--mono-black);
+  padding-left: 0.75rem;
+}
+
+/* Sticky panel that scrolls its own content instead of getting cut off
+   when the panel is taller than the viewport (pair with .sticky-top). */
+.sticky-scroll {
+  max-height: calc(100vh - 2rem);
+  overflow-y: auto;
+}
+
+/* Compact color swatch — a small square input[type=color] instead of Bootstrap's
+   full-width .form-control-color bar, used where several color pickers sit side by
+   side (screenshoot style panel) and a full-width bar would waste vertical space. */
+.color-swatch {
+  width: 44px;
+  height: 40px;
+  padding: 2px;
+  border: 1px solid var(--mono-gray-200);
+  border-radius: var(--bs-border-radius);
+  background-color: var(--mono-white);
+  cursor: pointer;
+}
+
+.color-swatch::-webkit-color-swatch-wrapper {
+  padding: 2px;
+}
+
+.color-swatch::-webkit-color-swatch {
+  border: none;
+  border-radius: 2px;
+}
+
+/* --------------------------------------------------------------------------
+   8. SIDEBAR SECTION HEADERS (screenshoot)
+   Thay cho badge tròn tô đặc (.text-bg-primary) trước đây — số bước dạng viền mỏng,
+   nhẹ mắt hơn, đi cùng đường kẻ mỏng (.border-bottom.border-monochrome) phân nhóm
+   thay vì khối nền đặc (.bg-monochrome-light) lấn át phần preview chính.
+   -------------------------------------------------------------------------- */
+.step-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  flex: none;
+  border-radius: 50%;
+  border: 1.5px solid var(--mono-gray-300);
+  color: var(--mono-gray-500);
+  font-size: .72rem;
+  font-weight: 700;
+}
+
+.section-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  flex: none;
+  font-size: .95rem;
+  line-height: 1;
+}
+
+.section-label {
+  letter-spacing: .04em;
+}
+
+/* --------------------------------------------------------------------------
+   9. FLOATING CANVAS TOOLBAR (screenshoot)
+   Thanh hành động (Copy/Đổi ảnh/Dán/Áp style/Random/Xuất/Xoá) của 1 thiết bị —
+   ẩn mặc định, chỉ hiện khi hover/focus vào vùng preview Canvas, nổi ngay sát
+   khung máy thay vì chiếm 1 hàng cố định phía trên như trước.
+   -------------------------------------------------------------------------- */
+/* Ghim (sticky) preview lại khi cuộn qua cột điều khiển bên cạnh (Theme/Nền/Font/Tiêu đề...)
+   thường dài hơn nhiều so với ảnh preview — luôn thấy được kết quả khi chỉnh, không phải
+   cuộn lên lại để kiểm tra. "sticky" vẫn đóng vai trò containing block cho toolbar nổi
+   (position:absolute bên trong) y hệt "relative" trước đây, không cần thêm class riêng. */
+.canvas-hover-wrap {
+  position: sticky;
+  top: 1rem;
+  z-index: 1;
+}
+
+/* Lớp phủ mờ dần phía trên preview lúc hover, giúp icon toolbar luôn tương phản
+   rõ dù ảnh/nền Canvas bên dưới đang là màu gì (sáng hay tối). */
+.canvas-hover-wrap::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 96px;
+  background: linear-gradient(rgba(0, 0, 0, .45), transparent);
+  border-radius: var(--bs-border-radius-lg) var(--bs-border-radius-lg) 0 0;
+  opacity: 0;
+  transition: opacity .18s ease;
+  pointer-events: none;
+}
+
+.canvas-hover-wrap:hover::before,
+.canvas-hover-wrap:focus-within::before {
+  opacity: 1;
+}
+
+.canvas-floating-toolbar {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-6px);
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 6px;
+  border-radius: 999px;
+  background: rgba(24, 24, 27, .85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: var(--bs-box-shadow-lg);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .18s ease, transform .18s ease;
+}
+
+.canvas-hover-wrap:hover .canvas-floating-toolbar,
+.canvas-hover-wrap:focus-within .canvas-floating-toolbar {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0);
+}
+
+.canvas-toolbar-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  flex: none;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: #fff;
+  font-size: 1rem;
+  line-height: 1;
+  transition: background-color .15s ease;
+}
+
+.canvas-toolbar-btn:hover,
+.canvas-toolbar-btn:focus-visible {
+  background-color: rgba(255, 255, 255, .2);
+  color: #fff;
+  outline: none;
+}
+
+/* Nhãn mô tả nút — tự vẽ bằng CSS (đọc data-tooltip) thay vì "title" mặc định của trình
+   duyệt, để hiện NGAY (không có độ trễ ~1s) và luôn đồng bộ style dark/blur với toolbar. */
+.canvas-toolbar-btn::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%) translateY(-4px);
+  white-space: nowrap;
+  background: rgba(9, 9, 11, .92);
+  color: #fff;
+  font-size: .72rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  padding: 5px 9px;
+  border-radius: 6px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .12s ease .1s, transform .12s ease .1s;
+  z-index: 3;
+}
+
+/* Mũi tên nhỏ trỏ lên nút, cùng màu nền với nhãn */
+.canvas-toolbar-btn::before {
+  content: '';
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-bottom-color: rgba(9, 9, 11, .92);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .12s ease .1s;
+  z-index: 3;
+}
+
+.canvas-toolbar-btn:hover::after,
+.canvas-toolbar-btn:focus-visible::after {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.canvas-toolbar-btn:hover::before,
+.canvas-toolbar-btn:focus-visible::before {
+  opacity: 1;
+}
+
+.canvas-toolbar-btn-danger:hover,
+.canvas-toolbar-btn-danger:focus-visible {
+  background-color: rgba(239, 68, 68, .45);
+}
+
+.canvas-toolbar-divider {
+  width: 1px;
+  height: 20px;
+  flex: none;
+  background: rgba(255, 255, 255, .25);
+  margin: 0 2px;
+}

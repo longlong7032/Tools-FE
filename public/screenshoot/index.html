@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="vi">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Multi-Device Store Screenshot Generator - BLOB & JSON State Manager</title>
+  <link rel="icon" type="image/x-icon" href="/screenshoot/assets/image/favicon.svg">
+  <script src="/screenshoot/scripts/security.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Poppins:wght@400;700;800&family=Montserrat:wght@400;700;800&family=Bebas+Neue&family=Playfair+Display:wght@700;800&display=swap"
+    rel="stylesheet">
+  <link href="/screenshoot/styles/design-system.css" rel="stylesheet">
+  <script>
+    // Áp dụng theme đã lưu (hoặc theo hệ thống) ngay từ đầu để tránh bị nháy sáng/tối khi tải trang
+    (function () {
+      var saved = localStorage.getItem('screenshotGeneratorTheme');
+      var theme = (saved === 'dark' || saved === 'light')
+        ? saved
+        : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      document.documentElement.setAttribute('data-bs-theme', theme);
+    })();
+  </script>
+
+  <script type="module" src="/screenshoot/src/app.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+
+<body class="bg-body-tertiary">
+  <div class="container-fluid py-4">
+    <div class="row g-4">
+      <!-- Panel điều khiển -->
+      <div class="col-xl-4">
+        <div class="card border-0 rounded-4 shadow-sm sticky-top sticky-scroll">
+          <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-start pb-3 mb-4 border-bottom border-monochrome">
+              <h4 class="fw-bold mb-0">Screenshot Generator</h4>
+              <button id="themeToggleBtn" type="button" class="btn btn-sm btn-outline-dark"
+                title="Chuyển chế độ Sáng / Tối">🌙</button>
+            </div>
+
+            <!-- IMPORT / EXPORT JSON STATE -->
+            <section class="pb-4 mb-4 border-bottom border-monochrome">
+              <div class="d-flex align-items-center gap-2 mb-3">
+                <span class="section-icon">💾</span>
+                <span class="text-monochrome-muted fw-semibold small text-uppercase section-label">Quản lý cấu hình</span>
+              </div>
+              <div class="btn-group w-100">
+                <button id="exportJsonBtn" class="btn btn-sm btn-outline-dark fw-semibold">📤 Export JSON</button>
+                <button id="importJsonTriggerBtn" class="btn btn-sm btn-outline-dark fw-semibold">📥 Import
+                  JSON</button>
+                <input type="file" id="importJsonInput" accept=".json" class="d-none">
+              </div>
+            </section>
+
+            <!-- STEP 1: Chọn loại thiết bị -->
+            <section class="pb-4 mb-4 border-bottom border-monochrome">
+              <div class="d-flex align-items-center gap-2 mb-3">
+                <span class="step-number">1</span>
+                <span class="text-monochrome-muted fw-semibold small text-uppercase section-label">Loại thiết bị Store</span>
+              </div>
+              <!-- Options được sinh tự động từ config/device-specs.js (xem ui/device-type-select.js) -->
+              <select id="deviceTypeSelect" class="form-select"></select>
+            </section>
+
+            <!-- STEP 2: Color Token -->
+            <section class="pb-4 mb-4 border-bottom border-monochrome">
+              <div class="d-flex align-items-center gap-2 mb-3">
+                <span class="step-number">2</span>
+                <span class="text-monochrome-muted fw-semibold small text-uppercase section-label">Import Color Token</span>
+              </div>
+              <textarea id="colorTokenJson" class="form-control form-control-sm font-monospace" rows="3"
+                placeholder='{"Primary": "#3B82F6", "TextLight": "#FFFFFF", "TextMuted": "#E2E8F0", "Dark": "#0F172A", "Accent": "#EF4444"}'></textarea>
+              <button id="applyTokenBtn" class="btn btn-sm btn-outline-dark mt-2 w-100 fw-semibold">Cập nhật Color
+                Tokens</button>
+            </section>
+
+            <!-- STEP 3: Tải ảnh hàng loạt -->
+            <section class="pb-4 mb-4 border-bottom border-monochrome">
+              <div class="d-flex align-items-center gap-2 mb-3">
+                <span class="step-number">3</span>
+                <span class="text-monochrome-muted fw-semibold small text-uppercase section-label">Tải ảnh (Tạo BLOB Binary)</span>
+                <button id="imageGuideBtn" type="button" class="btn btn-sm btn-link p-0 ms-auto"
+                  title="Ảnh nên có kích cỡ/tỉ lệ nào để không bị cắt?">ℹ️</button>
+              </div>
+              <input id="multiImageInput" type="file" multiple class="form-control"
+                accept="image/png, image/jpeg, image/webp">
+            </section>
+
+            <div class="d-grid gap-2">
+              <div class="d-flex gap-2">
+                <button id="randomAllPositionsBtn" class="btn btn-outline-dark fw-semibold flex-grow-1" disabled>🎲
+                  Random vị trí</button>
+                <button id="resetAllBtn" class="btn btn-outline-danger fw-semibold"
+                  title="Xoá tất cả thiết bị & làm lại từ đầu">↻ Xoá tất cả</button>
+              </div>
+
+              <button id="exportAllBtn" class="btn btn-success btn-lg fw-bold" disabled>
+                <span id="exportBtnSpinner" class="spinner-border spinner-border-sm me-2 d-none" role="status"></span>
+                <span id="exportBtnText">⬇ Tải toàn bộ xuống (ZIP File)</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Preview -->
+      <div class="col-xl-8">
+        <div id="deviceContainer" class="vstack gap-4">
+          <div class="card border-0 rounded-4 shadow-sm p-5 text-center text-secondary">
+            <h5>Chưa có dữ liệu Preview</h5>
+            <p class="mb-0">Tải ảnh lên ở Bước 3 hoặc bấm <strong>Import JSON</strong> để khôi phục cấu hình làm việc.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Đặt tên file & chọn Tải về máy / Chia sẻ — dùng chung cho Export ZIP và Export JSON -->
+  <div class="modal fade" id="exportFileModal" tabindex="-1" aria-labelledby="exportFileModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title fw-bold" id="exportFileModalLabel">📦 Xuất file</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+        </div>
+        <div class="modal-body">
+          <label for="exportFileFilename" class="form-label small fw-semibold">Tên file</label>
+          <div class="input-group">
+            <input type="text" id="exportFileFilename" class="form-control" placeholder="ten-file" autocomplete="off">
+            <span id="exportFileExtSuffix" class="input-group-text">.zip</span>
+          </div>
+          <div id="exportFileShareNote" class="form-text text-muted small d-none">
+            *Trình duyệt/thiết bị này không hỗ trợ Chia sẻ file trực tiếp — chỉ dùng được "Tải về máy".
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" id="exportFileShareBtn" class="btn btn-outline-dark">📤 Chia sẻ</button>
+          <button type="button" id="exportFileDownloadBtn" class="btn btn-dark">⬇ Tải về máy</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Hướng dẫn kích cỡ/tỉ lệ ảnh nên dùng để không bị cắt khi ghép vào khung thiết bị -->
+  <div class="modal fade" id="imageGuideModal" tabindex="-1" aria-labelledby="imageGuideModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title fw-bold" id="imageGuideModalLabel">ℹ️ Ảnh nên có tỉ lệ nào?</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+        </div>
+        <div class="modal-body">
+          <p class="small text-secondary">
+            Kích cỡ canvas xuất ra (vd 2048×2732) là kích cỡ <strong>toàn bộ ảnh xuất</strong>, không phải kích cỡ vùng
+            hiển thị ảnh thật — vùng đó nhỏ hơn vì phải chừa chỗ cho viền máy/tai thỏ. Ảnh luôn được phóng to để
+            <strong>lấp đầy</strong> vùng đó (không méo hình), nên phần dư theo tỉ lệ sẽ bị <strong>cắt bớt</strong>.
+            Để hạn chế bị cắt, hãy dùng ảnh có tỉ lệ khung hình (W : H) gần với cột "Tỉ lệ khuyên dùng" dưới đây —
+            nếu bạn bật Tiêu đề/Mô tả, vùng ảnh sẽ hẹp lại thêm theo chiều dọc nên độ cắt có thể nhiều hơn mức này.
+          </p>
+          <div class="table-responsive">
+            <table class="table table-sm align-middle mb-0">
+              <thead>
+                <tr class="small text-uppercase text-secondary">
+                  <th>Thiết bị</th>
+                  <th>Kích cỡ canvas</th>
+                  <th>Tỉ lệ khuyên dùng</th>
+                </tr>
+              </thead>
+              <tbody id="imageGuideTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST: Thông báo thành công/thất bại (vd: Import JSON) -->
+  <div class="toast-container position-fixed top-0 end-0 p-3">
+    <div id="appToast" class="toast align-items-center border-0" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="d-flex">
+        <div id="appToastBody" class="toast-body fw-semibold"></div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+          aria-label="Đóng"></button>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>

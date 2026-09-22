@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hợp Đồng Dịch Vụ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        serif: ['"Times New Roman"', 'Times', 'serif'],
+                    },
+                },
+            },
+        };
+    </script>
+    <style>
+        @page {
+            size: A4;
+            margin: 18mm 16mm;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-200 print:bg-white">
+    <div class="print:hidden sticky top-0 z-10 bg-white border-b shadow-sm px-4 py-3 flex items-center justify-between">
+        <a href="index.html" class="text-blue-600 hover:underline text-sm">&larr; Quay lại form</a>
+        <div class="flex gap-2">
+            <button id="printBtn"
+                class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed">🖨️
+                In</button>
+            <button id="copyBtn"
+                class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed">Xuất
+                HTML</button>
+            <button id="pdfBtn"
+                class="px-4 py-2 bg-rose-600 text-white rounded-lg hover:bg-rose-700 font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed">Xuất
+                PDF</button>
+        </div>
+    </div>
+    <div id="document"
+        class="w-full md:w-[210mm] md:min-h-[297mm] mx-auto my-6 p-5 md:p-[20mm] box-border bg-white shadow-lg print:w-auto print:min-h-0 print:m-0 print:p-0 print:shadow-none">
+    </div>
+
+    <script src="scripts/format.js"></script>
+    <script src="scripts/storage.js"></script>
+    <script src="scripts/bank-accounts.js"></script>
+    <script src="scripts/letterhead-template.js"></script>
+    <script src="scripts/contract-template.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="scripts/contract.js"></script>
+</body>
+
+</html>

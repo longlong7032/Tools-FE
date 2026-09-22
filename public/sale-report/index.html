@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form Hợp Đồng & Báo Giá</title>
+    <link favicon rel="icon" href="/assets/index.svg" type="image/x-icon">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style type="text/tailwindcss">
+        @custom-variant dark (&:where(.dark, .dark *));
+    </style>
+    <style>
+        html.dark body {
+            background-color: #09090b;
+            color: #f4f4f5;
+        }
+
+        html.dark header,
+        html.dark section,
+        html.dark aside>div {
+            border-color: #27272a;
+            background-color: #09090b;
+        }
+
+        html.dark section>details>summary:hover,
+        html.dark aside a:hover {
+            background-color: #18181b;
+        }
+
+        html.dark input,
+        html.dark select,
+        html.dark textarea {
+            border-color: #3f3f46;
+            background-color: #18181b;
+            color: #f4f4f5;
+        }
+
+        html.dark input::placeholder,
+        html.dark textarea::placeholder {
+            color: #71717a;
+        }
+
+        html.dark [class*="bg-zinc-50"],
+        html.dark [class*="bg-white"] {
+            background-color: #18181b;
+        }
+
+        html.dark [class*="border-zinc-200"],
+        html.dark [class*="border-zinc-300"] {
+            border-color: #3f3f46;
+        }
+
+        html.dark [class*="text-zinc-500"],
+        html.dark [class*="text-zinc-600"] {
+            color: #a1a1aa;
+        }
+
+        html.dark [class*="text-zinc-700"] {
+            color: #d4d4d8;
+        }
+
+        .field-invalid {
+            border-color: #dc2626 !important;
+            box-shadow: 0 0 0 2px rgb(220 38 38 / 0.12);
+        }
+
+        .section-invalid {
+            border-color: #f87171 !important;
+        }
+    </style>
+    <script>
+        (() => {
+            const savedTheme = localStorage.getItem('toolhub-theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+                document.documentElement.classList.add('dark');
+            }
+        })();
+    </script>
+</head>
+
+<body class="min-h-screen bg-zinc-50 font-[Inter] text-zinc-950 antialiased">
+    <div class="min-h-screen">
+        <!-- Top bar -->
+        <header class="sticky top-0 z-30 border-b border-zinc-200 bg-white/95 backdrop-blur">
+            <div class="mx-auto flex max-w-[1440px] items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
+                <a href="/" aria-label="Quay về trang chính" title="Quay về trang chính"
+                    class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-900 dark:hover:text-white">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"
+                        aria-hidden="true">
+                        <path d="M19 12H5" />
+                        <path d="m11 18-6-6 6-6" />
+                    </svg>
+                </a>
+                <div class="min-w-0">
+                    <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-500">Document Workspace
+                    </p>
+                    <h1 class="truncate text-lg font-semibold tracking-tight sm:text-xl">Hợp đồng & Báo giá</h1>
+                </div>
+
+                <div class="flex shrink-0 items-center gap-2">
+                    <button id="theme-toggle" type="button"
+                        class="flex h-9 w-9 items-center justify-center rounded-lg text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-900 dark:hover:text-white"
+                        title="Đổi giao diện" aria-label="Đổi giao diện">
+                        <svg id="sun-icon" class="hidden h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8"
+                            viewBox="0 0 24 24" aria-hidden="true">
+                            <circle cx="12" cy="12" r="4" />
+                            <path
+                                d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.65 17.65l1.42 1.42M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.65 6.35l1.42-1.42" />
+                        </svg>
+                        <svg id="moon-icon" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8"
+                            viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M21 12.8A8.5 8.5 0 1 1 11.2 3 6.7 6.7 0 0 0 21 12.8Z" />
+                        </svg>
+                    </button>
+
+                    <button id="importJsonBtn" type="button"
+                        class="inline-flex items-center gap-2 rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm font-medium text-zinc-800 transition hover:border-zinc-400 hover:bg-zinc-50 focus:outline-none focus:ring-2 focus:ring-zinc-300"
+                        title="Import snapshot JSON">
+                        <span aria-hidden="true">↑</span>
+                        <span class="hidden sm:inline">Import JSON</span>
+                    </button>
+
+                    <button id="exportJsonBtn" type="button"
+                        class="inline-flex items-center gap-2 rounded-lg bg-zinc-950 px-3 py-2 text-sm font-medium text-white transition hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-300"
+                        title="Export snapshot JSON">
+                        <span aria-hidden="true">↓</span>
+                        <span class="hidden sm:inline">Export JSON</span>
+                    </button>
+
+                    <input id="importJsonInput" type="file" accept=".json,application/json" class="hidden">
+                </div>
+            </div>
+        </header>
+
+        <main class="mx-auto grid max-w-[1440px] gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[minmax(0,1fr)_280px] lg:px-8">
+            <!-- Main form -->
+            <div class="min-w-0">
+                <div class="mb-5">
+                    <h2 class="text-2xl font-semibold tracking-tight">Tạo tài liệu</h2>
+                    <p class="mt-1 text-sm text-zinc-500">Nhập thông tin và xuất bản Hợp đồng hoặc Báo giá.</p>
+                </div>
+                <div id="validationSummary"
+                    class="mb-4 hidden rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+                    role="alert"></div>
+
+                <div class="space-y-3">
+                    <!-- General -->
+                    <section id="section-general" class="overflow-hidden rounded-xl border border-zinc-200 bg-white">
+                        <details open>
+                            <summary
+                                class="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 hover:bg-zinc-50 [&::-webkit-details-marker]:hidden">
+                                <div class="flex min-w-0 items-center gap-3">
+                                    <span
+                                        class="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-zinc-950 text-xs font-semibold text-white">01</span>
+                                    <div>
+                                        <h3 class="text-sm font-semibold">Thông tin chung</h3>
+                                        <p class="text-xs text-zinc-500">Số hợp đồng, ngày và địa điểm ký kết</p>
+                                    </div>
+                                </div>
+                                <span class="text-zinc-400">⌄</span>
+                            </summary>
+                            <div class="border-t border-zinc-200 px-5 py-5">
+                                <div class="grid gap-4 md:grid-cols-3">
+                                    <label class="block">
+                                        <span class="mb-1.5 block text-xs font-medium text-zinc-600">Số hợp đồng</span>
+                                        <input type="text" placeholder="VD: HDW00001" id="contractNumber"
+                                            class="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm outline-none transition placeholder:text-zinc-400 focus:border-zinc-950 focus:ring-2 focus:ring-zinc-200">
+                                    </label>
+                                    <label class="block">
+                                        <span class="mb-1.5 block text-xs font-medium text-zinc-600">Ngày ký hợp
+                                            đồng</span>
+                                        <input type="date" id="contractDay"
+                                            class="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-zinc-950 focus:ring-2 focus:ring-zinc-200">
+                                    </label>
+                                    <label class="block">
+                                        <span class="mb-1.5 block text-xs font-medium text-zinc-600">Địa điểm ký
+                                            kết</span>
+                                        <input type="text" placeholder="VD: Thành phố Hồ Chí Minh" id="contractPlace"
+                                            class="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm outline-none transition placeholder:text-zinc-400 focus:border-zinc-950 focus:ring-2 focus:ring-zinc-200">
+                                    </label>
+                                </div>
+                            </div>
+                        </details>
+                    </section>
+
+                    <!-- Customer -->
+                    <section id="section-customer" class="overflow-hidden rounded-xl border border-zinc-200 bg-white">
+                        <details open>
+                            <summary
+                                class="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 hover:bg-zinc-50 [&::-webkit-details-marker]:hidden">
+                                <div class="flex min-w-0 items-center gap-3">
+                                    <span
+                                        class="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-zinc-100 text-xs font-semibold text-zinc-700">02</span>
+                                    <div>
+                                        <h3 class="text-sm font-semibold">Bên A: Khách hàng</h3>
+                                        <p class="text-xs text-zinc-500">Thông tin đơn vị / cá nhân đại diện</p>
+                                    </div>
+                                </div>
+                                <span class="text-zinc-400">⌄</span>
+                            </summary>
+                            <div class="border-t border-zinc-200 px-5 py-5">
+                                <div class="grid gap-4 md:grid-cols-2">
+                                    <label class="block md:col-span-2">
+                                        <span class="mb-1.5 block text-xs font-medium text-zinc-600">Tên đơn vị / Cá
+                                            nhân</span>
+                                        <input type="text" placeholder="VD: Công ty TNHH ABC" id="customerName"
+                                            class="w-full rounded-lg border border-zinc-300 px-3 py-2.5 text-sm outline-none placeholder:text-zinc-400 focus:border-zinc-950 focus:ring-2 focus:ring-zinc-200">
+                                    </label>
+                                    <label class="block">
+                                        <span class="mb-1.5 block text-xs font-medium text-zinc-600">Người đại
+                                            diện</span>
+                                        <input type="text" placeholder="Họ và tên" id="customerRep"
+                                            class="w-full rounded-lg border border-zinc-300 px-3 py-2.5 text-sm outline-none placeholder:text-zinc-400 focus:border-zinc-950 focus:ring-2 focus:ring-zinc-200">
+                                    </label>
+                                    <label class="block">
+                                        <span class="mb-1.5 block text-xs font-medium text-zinc-600">Chức vụ</span>
+                                        <input type="text" placeholder="VD: Giám đốc" id="customerPosition"
+                                            class="w-full rounded-lg border border-zinc-300 px-3 py-2.5 text-sm outline-none placeholder:text-zinc-400 focus:border-zinc-950 focus:ring-2 focus:ring-zinc-200">
+                                    </label>
+                                    <label class="block">
+                                        <span class="mb-1.5 block text-xs font-medium text-zinc-600">Mã số thuế</span>
+                                        <input type="text" placeholder="Mã số thuế" id="customerTaxCode"
+                                            class="w-full rounded-lg border border-zinc-300 px-3 py-2.5 text-sm outline-none placeholder:text-zinc-400 focus:border-zinc-950 focus:ring-2 focus:ring-zinc-200">
+                                    </label>
+                                    <label class="block">
+                                        <span class="mb-1.5 block text-xs font-medium text-zinc-600">Số điện
+                                            thoại</span>
+                                        <input type="tel" placeholder="Số điện thoại" id="customerPhone"
+                                            class="w-full rounded-lg border border-zinc-300 px-3 py-2.5 text-sm outline-none placeholder:text-zinc-400 focus:border-zinc-950 focus:ring-2 focus:ring-zinc-200">
+                                    </label>
+                                    <label class="block md:col-span-2">
+                                        <span class="mb-1.5 block text-xs font-medium text-zinc-600">Email</span>
+                                        <input type="email" placeholder="Email" id="customerEmail"
+                                            class="w-full rounded-lg border border-zinc-300 px-3 py-2.5 text-sm outline-none placeholder:text-zinc-400 focus:border-zinc-950 focus:ring-2 focus:ring-zinc-200">
+                                    </label>
+                                    <label class="block md:col-span-2">
+                                        <span class="mb-1.5 block text-xs font-medium text-zinc-600">Địa chỉ</span>
+                                        <input type="text" placeholder="Địa chỉ" id="customerAddress"
+                                            class="w-full rounded-lg border border-zinc-300 px-3 py-2.5 text-sm outline-none placeholder:text-zinc-400 focus:border-zinc-950 focus:ring-2 focus:ring-zinc-200">
+                                    </label>
+                                </div>
+                            </div>
+                        </details>
+                    </section>
+
+                    <!-- Project -->
+                    <section id="section-project" class="overflow-hidden rounded-xl border border-zinc-200 bg-white">
+                        <details open>
+                            <summary
+                                class="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 hover:bg-zinc-50 [&::-webkit-details-marker]:hidden">
+                                <div class="flex items-center gap-3">
+                                    <span
+                                        class="flex h-7 w-7 items-center justify-center rounded-md bg-zinc-100 text-xs font-semibold text-zinc-700">03</span>
+                                    <div>
+                                        <h3 class="text-sm font-semibold">Thông tin dự án</h3>
+                                        <p class="text-xs text-zinc-500">Phạm vi cơ bản và thời gian thực hiện</p>
+                                    </div>
+                                </div>
+                                <span class="text-zinc-400">⌄</span>
+                            </summary>
+                            <div class="border-t border-zinc-200 px-5 py-5">
+                                <div class="grid gap-4 md:grid-cols-3">
+                                    <label class="block md:col-span-2">
+                                        <span class="mb-1.5 block text-xs font-medium text-zinc-600">Tên dự án</span>
+                                        <input type="text" placeholder="Tên dự án" id="projectName"
+                                            class="w-full rounded-lg border border-zinc-300 px-3 py-2.5 text-sm outline-none placeholder:text-zinc-400 focus:border-zinc-950 focus:ring-2 focus:ring-zinc-200">
+                                    </label>
+                                    <label class="block">
+                                        <span class="mb-1.5 block text-xs font-medium text-zinc-600">Loại sản
+                                            phẩm</span>
+                                        <select id="productType"
+                                            class="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-zinc-950 focus:ring-2 focus:ring-zinc-200">
+                                            <option value="">-- Chọn loại sản phẩm --</option>
+                                            <option value="Website">Website</option>
+                                            <option value="Web App">Web App</option>
+                                            <option value="Mobile App">Mobile App</option>
+                                            <option value="Phần mềm">Phần mềm</option>
+                                        </select>
+                                    </label>
+                                    <label class="block">
+                                        <span class="mb-1.5 block text-xs font-medium text-zinc-600">Thời gian thực hiện
+                                            (ngày)</span>
+                                        <input type="number" min="0" placeholder="VD: 30" id="duration"
+                                            class="w-full rounded-lg border border-zinc-300 px-3 py-2.5 text-sm outline-none placeholder:text-zinc-400 focus:border-zinc-950 focus:ring-2 focus:ring-zinc-200">
+                                    </label>
+                                </div>
+                            </div>
+                        </details>
+                    </section>
+
+                    <!-- Work items -->
+                    <section id="section-work" class="overflow-hidden rounded-xl border border-zinc-200 bg-white">
+                        <details open>
+                            <summary
+                                class="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 hover:bg-zinc-50 [&::-webkit-details-marker]:hidden">
+                                <div class="flex items-center gap-3">
+                                    <span
+                                        class="flex h-7 w-7 items-center justify-center rounded-md bg-zinc-100 text-xs font-semibold text-zinc-700">04</span>
+                                    <div>
+                                        <h3 class="text-sm font-semibold">Khối lượng công việc</h3>
+                                        <p class="text-xs text-zinc-500">Danh sách chức năng và phạm vi đã chốt</p>
+                                    </div>
+                                </div>
+                                <span class="text-zinc-400">⌄</span>
+                            </summary>
+                            <div class="border-t border-zinc-200 px-5 py-5">
+                                <div id="workItems" class="space-y-3 mb-3">
+                                    <div class="work-item rounded-lg border border-zinc-200 bg-zinc-50/70 p-4">
+                                        <div class="mb-3 flex items-center justify-between">
+                                            <span
+                                                class="work-item-label text-xs font-semibold uppercase tracking-wider text-zinc-500">Chức
+                                                năng #1</span>
+                                            <button type="button"
+                                                class="remove-item rounded-md px-2 py-1 text-xs font-medium text-zinc-500 hover:bg-zinc-200 hover:text-zinc-950">Xóa</button>
+                                        </div>
+                                        <div class="grid gap-4 md:grid-cols-2">
+                                            <label class="block">
+                                                <span class="mb-1.5 block text-xs font-medium text-zinc-600">Tên chức
+                                                    năng</span>
+                                                <input type="text" placeholder="Tên chức năng"
+                                                    class="function-name w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm outline-none placeholder:text-zinc-400 focus:border-zinc-950 focus:ring-2 focus:ring-zinc-200">
+                                            </label>
+                                            <label class="block">
+                                                <span class="mb-1.5 block text-xs font-medium text-zinc-600">Quyền sử
+                                                    dụng</span>
+                                                <select
+                                                    class="function-role w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-zinc-950 focus:ring-2 focus:ring-zinc-200">
+                                                    <option>User</option>
+                                                    <option>Admin</option>
+                                                    <option>System</option>
+                                                </select>
+                                            </label>
+                                            <label class="block md:col-span-2">
+                                                <span class="mb-1.5 block text-xs font-medium text-zinc-600">Mô tả công
+                                                    việc đã chốt</span>
+                                                <textarea placeholder="Mô tả công việc đã chốt" rows="2"
+                                                    class="function-desc w-full resize-y rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm outline-none placeholder:text-zinc-400 focus:border-zinc-950 focus:ring-2 focus:ring-zinc-200"></textarea>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button type="button" id="addItem"
+                                    class="w-full rounded-lg border border-dashed border-zinc-300 px-4 py-2.5 text-sm font-medium text-zinc-700 transition hover:border-zinc-500 hover:bg-zinc-50">
+                                    + Thêm chức năng
+                                </button>
+                            </div>
+                        </details>
+                    </section>
+
+                    <!-- Other costs -->
+                    <section id="section-other-costs"
+                        class="overflow-hidden rounded-xl border border-zinc-200 bg-white">
+                        <details>
+                            <summary
+                                class="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 hover:bg-zinc-50 [&::-webkit-details-marker]:hidden">
+                                <div class="flex items-center gap-3">
+                                    <span
+                                        class="flex h-7 w-7 items-center justify-center rounded-md bg-zinc-100 text-xs font-semibold text-zinc-700">05</span>
+                                    <div>
+                                        <h3 class="text-sm font-semibold">Chi phí dịch vụ khác</h3>
+                                        <p class="text-xs text-zinc-500">Tên miền, server, SMS, OTP và dịch vụ bên thứ
+                                            ba</p>
+                                    </div>
+                                </div>
+                                <span class="text-zinc-400">⌄</span>
+                            </summary>
+                            <div class="border-t border-zinc-200 px-5 py-5">
+                                <p
+                                    class="mb-4 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2.5 text-xs leading-5 text-zinc-600">
+                                    Các chi phí ngoài phạm vi hợp đồng. Có thể để trống số lượng hoặc đơn giá nếu chưa
+                                    xác định.
+                                </p>
+                                <div id="otherCostItems" class="space-y-3 mb-3">
+                                    <div class="other-cost-item rounded-lg border border-zinc-200 bg-zinc-50/70 p-4">
+                                        <div class="mb-3 flex items-center justify-between">
+                                            <span
+                                                class="other-cost-item-label text-xs font-semibold uppercase tracking-wider text-zinc-500">Dịch
+                                                vụ #1</span>
+                                            <button type="button"
+                                                class="remove-other-cost-item rounded-md px-2 py-1 text-xs font-medium text-zinc-500 hover:bg-zinc-200 hover:text-zinc-950">Xóa</button>
+                                        </div>
+                                        <div class="grid gap-4 md:grid-cols-2">
+                                            <label class="block">
+                                                <span class="mb-1.5 block text-xs font-medium text-zinc-600">Danh mục
+                                                    dịch vụ</span>
+                                                <input type="text" value="Tên miền (Domain)"
+                                                    placeholder="Danh mục dịch vụ"
+                                                    class="other-cost-name w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm outline-none placeholder:text-zinc-400 focus:border-zinc-950 focus:ring-2 focus:ring-zinc-200">
+                                            </label>
+                                            <label class="block">
+                                                <span class="mb-1.5 block text-xs font-medium text-zinc-600">Mô tả / Quy
+                                                    cách</span>
+                                                <input type="text" value="Khách hàng cung cấp hoặc Mevivu hỗ trợ mua"
+                                                    placeholder="Mô tả / Quy cách"
+                                                    class="other-cost-desc w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm outline-none placeholder:text-zinc-400 focus:border-zinc-950 focus:ring-2 focus:ring-zinc-200">
+                                            </label>
+                                            <label class="block">
+                                                <span class="mb-1.5 block text-xs font-medium text-zinc-600">Hình thức
+                                                    tính phí</span>
+                                                <input type="text" value="Theo năm" placeholder="Hình thức tính phí"
+                                                    class="other-cost-billing w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm outline-none placeholder:text-zinc-400 focus:border-zinc-950 focus:ring-2 focus:ring-zinc-200">
+                                            </label>
+                                            <label class="block">
+                                                <span class="mb-1.5 block text-xs font-medium text-zinc-600">Đơn vị
+                                                    tính</span>
+                                                <input type="text" value="năm" placeholder="Đơn vị tính"
+                                                    class="other-cost-unit w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm outline-none placeholder:text-zinc-400 focus:border-zinc-950 focus:ring-2 focus:ring-zinc-200">
+                                            </label>
+                                            <label class="block">
+                                                <span class="mb-1.5 block text-xs font-medium text-zinc-600">Số
+                                                    lượng</span>
+                                                <input type="number" min="0" placeholder="Số lượng"
+                                                    class="other-cost-qty w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm outline-none placeholder:text-zinc-400 focus:border-zinc-950 focus:ring-2 focus:ring-zinc-200">
+                                            </label>
+                                            <label class="block">
+                                                <span class="mb-1.5 block text-xs font-medium text-zinc-600">Đơn giá
+                                                    (VNĐ)</span>
+                                                <input type="number" min="0" placeholder="Đơn giá (VNĐ)"
+                                                    class="other-cost-price w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm outline-none placeholder:text-zinc-400 focus:border-zinc-950 focus:ring-2 focus:ring-zinc-200">
+                                            </label>
+                                            <label class="block md:col-span-2">
+                                                <span class="mb-1.5 block text-xs font-medium text-zinc-600">Ghi
+                                                    chú</span>
+                                                <input type="text" placeholder="Ghi chú"
+                                                    class="other-cost-note w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm outline-none placeholder:text-zinc-400 focus:border-zinc-950 focus:ring-2 focus:ring-zinc-200">
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="other-cost-item rounded-lg border border-zinc-200 bg-zinc-50/70 p-4">
+                                        <div class="mb-3 flex items-center justify-between">
+                                            <span
+                                                class="other-cost-item-label text-xs font-semibold uppercase tracking-wider text-zinc-500">Dịch
+                                                vụ #2</span>
+                                            <button type="button"
+                                                class="remove-other-cost-item rounded-md px-2 py-1 text-xs font-medium text-zinc-500 hover:bg-zinc-200 hover:text-zinc-950">Xóa</button>
+                                        </div>
+                                        <div class="grid gap-4 md:grid-cols-2">
+                                            <label class="block">
+                                                <span class="mb-1.5 block text-xs font-medium text-zinc-600">Danh mục
+                                                    dịch vụ</span>
+                                                <input type="text" value="Server / Hosting"
+                                                    placeholder="Danh mục dịch vụ"
+                                                    class="other-cost-name w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm outline-none placeholder:text-zinc-400 focus:border-zinc-950 focus:ring-2 focus:ring-zinc-200">
+                                            </label>
+                                            <label class="block">
+                                                <span class="mb-1.5 block text-xs font-medium text-zinc-600">Mô tả / Quy
+                                                    cách</span>
+                                                <input type="text" value="Cấu hình được đề xuất theo quy mô hệ thống"
+                                                    placeholder="Mô tả / Quy cách"
+                                                    class="other-cost-desc w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm outline-none placeholder:text-zinc-400 focus:border-zinc-950 focus:ring-2 focus:ring-zinc-200">
+                                            </label>
+                                            <label class="block">
+                                                <span class="mb-1.5 block text-xs font-medium text-zinc-600">Hình thức
+                                                    tính phí</span>
+                                                <input type="text" value="Theo năm" placeholder="Hình thức tính phí"
+                                                    class="other-cost-billing w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm outline-none placeholder:text-zinc-400 focus:border-zinc-950 focus:ring-2 focus:ring-zinc-200">
+                                            </label>
+                                            <label class="block">
+                                                <span class="mb-1.5 block text-xs font-medium text-zinc-600">Đơn vị
+                                                    tính</span>
+                                                <input type="text" value="năm" placeholder="Đơn vị tính"
+                                                    class="other-cost-unit w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm outline-none placeholder:text-zinc-400 focus:border-zinc-950 focus:ring-2 focus:ring-zinc-200">
+                                            </label>
+                                            <label class="block">
+                                                <span class="mb-1.5 block text-xs font-medium text-zinc-600">Số
+                                                    lượng</span>
+                                                <input type="number" min="0" placeholder="Số lượng"
+                                                    class="other-cost-qty w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm outline-none placeholder:text-zinc-400 focus:border-zinc-950 focus:ring-2 focus:ring-zinc-200">
+                                            </label>
+                                            <label class="block">
+                                                <span class="mb-1.5 block text-xs font-medium text-zinc-600">Đơn giá
+                                                    (VNĐ)</span>
+                                                <input type="number" min="0" placeholder="Đơn giá (VNĐ)"
+                                                    class="other-cost-price w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm outline-none placeholder:text-zinc-400 focus:border-zinc-950 focus:ring-2 focus:ring-zinc-200">
+                                            </label>
+                                            <label class="block md:col-span-2">
+                                                <span class="mb-1.5 block text-xs font-medium text-zinc-600">Ghi
+                                                    chú</span>
+                                                <input type="text" placeholder="Ghi chú"
+                                                    class="other-cost-note w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm outline-none placeholder:text-zinc-400 focus:border-zinc-950 focus:ring-2 focus:ring-zinc-200">
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="other-cost-item rounded-lg border border-zinc-200 bg-zinc-50/70 p-4">
+                                        <div class="mb-3 flex items-center justify-between">
+                                            <span
+                                                class="other-cost-item-label text-xs font-semibold uppercase tracking-wider text-zinc-500">Dịch
+                                                vụ #3</span>
+                                            <button type="button"
+                                                class="remove-other-cost-item rounded-md px-2 py-1 text-xs font-medium text-zinc-500 hover:bg-zinc-200 hover:text-zinc-950">Xóa</button>
+                                        </div>
+                                        <div class="grid gap-4 md:grid-cols-2">
+                                            <label class="block">
+                                                <span class="mb-1.5 block text-xs font-medium text-zinc-600">Danh mục
+                                                    dịch vụ</span>
+                                                <input type="text" value="SMS / OTP / Google Play / Apple Developer"
+                                                    placeholder="Danh mục dịch vụ"
+                                                    class="other-cost-name w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm outline-none placeholder:text-zinc-400 focus:border-zinc-950 focus:ring-2 focus:ring-zinc-200">
+                                            </label>
+                                            <label class="block">
+                                                <span class="mb-1.5 block text-xs font-medium text-zinc-600">Mô tả / Quy
+                                                    cách</span>
+                                                <input type="text" value="Chi phí phát sinh nếu sử dụng dịch vụ"
+                                                    placeholder="Mô tả / Quy cách"
+                                                    class="other-cost-desc w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm outline-none placeholder:text-zinc-400 focus:border-zinc-950 focus:ring-2 focus:ring-zinc-200">
+                                            </label>
+                                            <label class="block">
+                                                <span class="mb-1.5 block text-xs font-medium text-zinc-600">Hình thức
+                                                    tính phí</span>
+                                                <input type="text" value="Theo thực tế sử dụng"
+                                                    placeholder="Hình thức tính phí"
+                                                    class="other-cost-billing w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm outline-none placeholder:text-zinc-400 focus:border-zinc-950 focus:ring-2 focus:ring-zinc-200">
+                                            </label>
+                                            <label class="block">
+                                                <span class="mb-1.5 block text-xs font-medium text-zinc-600">Đơn vị
+                                                    tính</span>
+                                                <input type="text" placeholder="Đơn vị tính"
+                                                    class="other-cost-unit w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm outline-none placeholder:text-zinc-400 focus:border-zinc-950 focus:ring-2 focus:ring-zinc-200">
+                                            </label>
+                                            <label class="block">
+                                                <span class="mb-1.5 block text-xs font-medium text-zinc-600">Số
+                                                    lượng</span>
+                                                <input type="number" min="0" placeholder="Số lượng"
+                                                    class="other-cost-qty w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm outline-none placeholder:text-zinc-400 focus:border-zinc-950 focus:ring-2 focus:ring-zinc-200">
+                                            </label>
+                                            <label class="block">
+                                                <span class="mb-1.5 block text-xs font-medium text-zinc-600">Đơn giá
+                                                    (VNĐ)</span>
+                                                <input type="number" min="0" placeholder="Đơn giá (VNĐ)"
+                                                    class="other-cost-price w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm outline-none placeholder:text-zinc-400 focus:border-zinc-950 focus:ring-2 focus:ring-zinc-200">
+                                            </label>
+                                            <label class="block md:col-span-2">
+                                                <span class="mb-1.5 block text-xs font-medium text-zinc-600">Ghi
+                                                    chú</span>
+                                                <input type="text" placeholder="Ghi chú"
+                                                    class="other-cost-note w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm outline-none placeholder:text-zinc-400 focus:border-zinc-950 focus:ring-2 focus:ring-zinc-200">
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button type="button" id="addOtherCostItem"
+                                    class="w-full rounded-lg border border-dashed border-zinc-300 px-4 py-2.5 text-sm font-medium text-zinc-700 transition hover:border-zinc-500 hover:bg-zinc-50">
+                                    + Thêm dịch vụ khác
+                                </button>
+                            </div>
+                        </details>
+                    </section>
+
+                    <!-- Contract value -->
+                    <section id="section-value" class="overflow-hidden rounded-xl border border-zinc-200 bg-white">
+                        <details open>
+                            <summary
+                                class="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 hover:bg-zinc-50 [&::-webkit-details-marker]:hidden">
+                                <div class="flex items-center gap-3">
+                                    <span
+                                        class="flex h-7 w-7 items-center justify-center rounded-md bg-zinc-100 text-xs font-semibold text-zinc-700">06</span>
+                                    <div>
+                                        <h3 class="text-sm font-semibold">Giá trị hợp đồng</h3>
+                                        <p class="text-xs text-zinc-500">Chi phí xây dựng, hạng mục khác và VAT</p>
+                                    </div>
+                                </div>
+                                <span class="text-zinc-400">⌄</span>
+                            </summary>
+                            <div class="border-t border-zinc-200 px-5 py-5">
+                                <div class="grid gap-4 md:grid-cols-3">
+                                    <label class="block">
+                                        <span class="mb-1.5 block text-xs font-medium text-zinc-600">Chi phí xây dựng
+                                            (VNĐ)</span>
+                                        <input type="text" inputmode="numeric" min="0" data-number-format="money"
+                                            id="systemCost" placeholder="0"
+                                            class="w-full rounded-lg border border-zinc-300 px-3 py-2.5 text-sm outline-none placeholder:text-zinc-400 focus:border-zinc-950 focus:ring-2 focus:ring-zinc-200">
+                                    </label>
+                                    <label class="block">
+                                        <span class="mb-1.5 block text-xs font-medium text-zinc-600">Hạng mục khác
+                                            (VNĐ)</span>
+                                        <input type="text" inputmode="numeric" min="0" data-number-format="money"
+                                            id="otherCost" placeholder="0"
+                                            class="w-full rounded-lg border border-zinc-300 px-3 py-2.5 text-sm outline-none placeholder:text-zinc-400 focus:border-zinc-950 focus:ring-2 focus:ring-zinc-200">
+                                    </label>
+                                    <label class="block">
+                                        <span
+                                            class="mb-1.5 flex items-center justify-between text-xs font-medium text-zinc-600">
+                                            <span>VAT (%)</span>
+                                            <span class="inline-flex items-center gap-1.5">
+                                                <input type="checkbox" id="vatEnabled" checked
+                                                    class="h-3.5 w-3.5 rounded border-zinc-300 text-zinc-950 focus:ring-2 focus:ring-zinc-200">
+                                                <span class="text-[11px] font-normal text-zinc-500">Áp dụng</span>
+                                            </span>
+                                        </span>
+                                        <input type="number" min="0" id="vatPercent" value="10" placeholder="10"
+                                            class="w-full rounded-lg border border-zinc-300 px-3 py-2.5 text-sm outline-none placeholder:text-zinc-400 focus:border-zinc-950 focus:ring-2 focus:ring-zinc-200 disabled:bg-zinc-100 disabled:text-zinc-400">
+                                    </label>
+                                </div>
+                                <div
+                                    class="mt-4 flex items-center justify-between rounded-lg border border-zinc-200 bg-zinc-950 px-4 py-3 text-white">
+                                    <span class="text-sm font-medium text-zinc-300">Tổng giá trị</span>
+                                    <input type="text" id="totalValue" placeholder="0" readonly
+                                        class="w-auto min-w-0 bg-transparent text-right text-lg font-semibold outline-none">
+                                    <span class="text-sm font-medium text-zinc-400">VNĐ</span>
+                                </div>
+                            </div>
+                        </details>
+                    </section>
+
+                    <!-- Payments -->
+                    <section id="section-payment" class="overflow-hidden rounded-xl border border-zinc-200 bg-white">
+                        <details open>
+                            <summary
+                                class="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 hover:bg-zinc-50 [&::-webkit-details-marker]:hidden">
+                                <div class="flex items-center gap-3">
+                                    <span
+                                        class="flex h-7 w-7 items-center justify-center rounded-md bg-zinc-100 text-xs font-semibold text-zinc-700">07</span>
+                                    <div>
+                                        <h3 class="text-sm font-semibold">Tiến độ thanh toán</h3>
+                                        <p class="text-xs text-zinc-500">Tỷ lệ hoặc số tiền theo từng đợt</p>
+                                    </div>
+                                </div>
+                                <span class="text-zinc-400">⌄</span>
+                            </summary>
+                            <div class="border-t border-zinc-200 px-5 py-5">
+                                <label class="mb-4 block">
+                                    <span class="mb-1.5 block text-xs font-medium text-zinc-600">Thông tin nhận thanh
+                                        toán</span>
+                                    <select id="paymentAccount"
+                                        class="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-zinc-950 focus:ring-2 focus:ring-zinc-200"></select>
+                                    <span class="mt-1.5 block text-xs text-zinc-500">Tài khoản này sẽ hiển thị kèm mã
+                                        VietQR trong hợp đồng xuất ra.</span>
+                                </label>
+                                <p
+                                    class="mb-4 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2.5 text-xs leading-5 text-zinc-600">
+                                    Nhập <strong>Tỷ lệ (%)</strong> hoặc <strong>Số tiền (VNĐ)</strong>. Tổng các đợt
+                                    phải khớp tổng giá trị hợp đồng.
+                                </p>
+                                <div id="paymentItems" class="space-y-3 mb-3">
+                                    <div class="payment-item rounded-lg border border-zinc-200 bg-zinc-50/70 p-4">
+                                        <div class="mb-3 flex items-center justify-between">
+                                            <span
+                                                class="payment-item-label text-xs font-semibold uppercase tracking-wider text-zinc-500">Đợt
+                                                thanh toán #1</span>
+                                            <button type="button"
+                                                class="remove-payment-item rounded-md px-2 py-1 text-xs font-medium text-zinc-500 hover:bg-zinc-200 hover:text-zinc-950">Xóa</button>
+                                        </div>
+                                        <label class="block">
+                                            <span class="mb-1.5 block text-xs font-medium text-zinc-600">Điều kiện thanh
+                                                toán</span>
+                                            <input type="text" value="Thanh toán để bắt đầu dự án"
+                                                placeholder="VD: Thanh toán để bắt đầu dự án"
+                                                class="payment-condition w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm outline-none placeholder:text-zinc-400 focus:border-zinc-950 focus:ring-2 focus:ring-zinc-200">
+                                        </label>
+                                        <div class="mt-4 grid gap-4 md:grid-cols-2">
+                                            <label class="block">
+                                                <span class="mb-1.5 block text-xs font-medium text-zinc-600">Tỷ lệ
+                                                    (%)</span>
+                                                <input type="number" min="0" value="50" placeholder="Tỷ lệ (%)"
+                                                    class="payment-percent w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm outline-none placeholder:text-zinc-400 focus:border-zinc-950 focus:ring-2 focus:ring-zinc-200">
+                                            </label>
+                                            <label class="block">
+                                                <span class="mb-1.5 block text-xs font-medium text-zinc-600">Hoặc số
+                                                    tiền (VNĐ)</span>
+                                                <input type="text" inputmode="numeric" min="0"
+                                                    data-number-format="money" placeholder="Hoặc số tiền (VNĐ)"
+                                                    class="payment-amount w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm outline-none placeholder:text-zinc-400 focus:border-zinc-950 focus:ring-2 focus:ring-zinc-200">
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="payment-item rounded-lg border border-zinc-200 bg-zinc-50/70 p-4">
+                                        <div class="mb-3 flex items-center justify-between">
+                                            <span
+                                                class="payment-item-label text-xs font-semibold uppercase tracking-wider text-zinc-500">Đợt
+                                                thanh toán #2</span>
+                                            <button type="button"
+                                                class="remove-payment-item rounded-md px-2 py-1 text-xs font-medium text-zinc-500 hover:bg-zinc-200 hover:text-zinc-950">Xóa</button>
+                                        </div>
+                                        <label class="block">
+                                            <span class="mb-1.5 block text-xs font-medium text-zinc-600">Điều kiện thanh
+                                                toán</span>
+                                            <input type="text" value="Khi sản phẩm hoàn thiện theo phạm vi Hợp đồng"
+                                                placeholder="Điều kiện thanh toán"
+                                                class="payment-condition w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm outline-none placeholder:text-zinc-400 focus:border-zinc-950 focus:ring-2 focus:ring-zinc-200">
+                                        </label>
+                                        <div class="mt-4 grid gap-4 md:grid-cols-2">
+                                            <label class="block">
+                                                <span class="mb-1.5 block text-xs font-medium text-zinc-600">Tỷ lệ
+                                                    (%)</span>
+                                                <input type="number" min="0" value="50" placeholder="Tỷ lệ (%)"
+                                                    class="payment-percent w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm outline-none placeholder:text-zinc-400 focus:border-zinc-950 focus:ring-2 focus:ring-zinc-200">
+                                            </label>
+                                            <label class="block">
+                                                <span class="mb-1.5 block text-xs font-medium text-zinc-600">Hoặc số
+                                                    tiền (VNĐ)</span>
+                                                <input type="text" inputmode="numeric" min="0"
+                                                    data-number-format="money" placeholder="Hoặc số tiền (VNĐ)"
+                                                    class="payment-amount w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm outline-none placeholder:text-zinc-400 focus:border-zinc-950 focus:ring-2 focus:ring-zinc-200">
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button type="button" id="addPaymentItem"
+                                    class="w-full rounded-lg border border-dashed border-zinc-300 px-4 py-2.5 text-sm font-medium text-zinc-700 transition hover:border-zinc-500 hover:bg-zinc-50">
+                                    + Thêm đợt thanh toán
+                                </button>
+                                <div id="paymentSummary"
+                                    class="mt-3 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2.5 text-sm font-medium text-zinc-500">
+                                </div>
+                            </div>
+                        </details>
+                    </section>
+
+                    <!-- Warranty -->
+                    <section id="section-warranty" class="overflow-hidden rounded-xl border border-zinc-200 bg-white">
+                        <details>
+                            <summary
+                                class="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 hover:bg-zinc-50 [&::-webkit-details-marker]:hidden">
+                                <div class="flex items-center gap-3">
+                                    <span
+                                        class="flex h-7 w-7 items-center justify-center rounded-md bg-zinc-100 text-xs font-semibold text-zinc-700">08</span>
+                                    <div>
+                                        <h3 class="text-sm font-semibold">Bảo hành & Hỗ trợ</h3>
+                                        <p class="text-xs text-zinc-500">Thời gian bảo hành và phí bảo trì</p>
+                                    </div>
+                                </div>
+                                <span class="text-zinc-400">⌄</span>
+                            </summary>
+                            <div class="border-t border-zinc-200 px-5 py-5">
+                                <div class="grid gap-4 md:grid-cols-2">
+                                    <label class="block">
+                                        <span class="mb-1.5 block text-xs font-medium text-zinc-600">Thời gian bảo hành
+                                            (tháng)</span>
+                                        <input type="number" min="0" placeholder="VD: 12" id="warrantyMonths" value="12"
+                                            class="w-full rounded-lg border border-zinc-300 px-3 py-2.5 text-sm outline-none placeholder:text-zinc-400 focus:border-zinc-950 focus:ring-2 focus:ring-zinc-200">
+                                    </label>
+                                    <label class="block">
+                                        <span class="mb-1.5 block text-xs font-medium text-zinc-600">Phí bảo trì /
+                                            năm</span>
+                                        <input type="text" placeholder="VD: 2.000.000 VNĐ" id="maintenanceFee"
+                                            class="w-full rounded-lg border border-zinc-300 px-3 py-2.5 text-sm outline-none placeholder:text-zinc-400 focus:border-zinc-950 focus:ring-2 focus:ring-zinc-200">
+                                    </label>
+                                </div>
+                            </div>
+                        </details>
+                    </section>
+
+                    <!-- Actions -->
+                    <section
+                        class="sticky bottom-3 z-20 overflow-hidden rounded-xl border border-zinc-200 bg-white/95 p-4 shadow-sm backdrop-blur">
+                        <div class="grid gap-2 sm:grid-cols-2">
+                            <button id="previewContractBtn" type="button"
+                                class="rounded-lg bg-zinc-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-300">
+                                Xem Hợp Đồng
+                            </button>
+                            <button id="previewQuoteBtn" type="button"
+                                class="rounded-lg border border-zinc-300 bg-white px-4 py-3 text-sm font-semibold text-zinc-900 transition hover:bg-zinc-50 focus:outline-none focus:ring-2 focus:ring-zinc-300">
+                                Xem Báo Giá
+                            </button>
+                        </div>
+                        <button id="resetBtn" type="button"
+                            class="mt-2 w-full rounded-lg px-4 py-2.5 text-sm font-medium text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-950">
+                            Xóa dữ liệu
+                        </button>
+                    </section>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <aside class="hidden lg:block">
+                <div class="sticky top-24 space-y-4">
+                    <div class="rounded-xl border border-zinc-200 bg-white p-4">
+                        <div class="mb-4 flex items-center justify-between">
+                            <div>
+                                <p class="text-xs font-semibold uppercase tracking-wider text-zinc-500">Sections</p>
+                                <p class="mt-0.5 text-sm font-medium">Document setup</p>
+                            </div>
+                            <button id="expandAllBtn" type="button"
+                                class="text-xs font-medium text-zinc-600 hover:text-zinc-950">Mở tất cả</button>
+                        </div>
+                        <nav class="space-y-1 text-sm">
+                            <a href="#section-general"
+                                class="block rounded-md px-2.5 py-2 text-zinc-600 hover:bg-zinc-100 hover:text-zinc-950">01
+                                · Thông tin chung</a>
+                            <a href="#section-customer"
+                                class="block rounded-md px-2.5 py-2 text-zinc-600 hover:bg-zinc-100 hover:text-zinc-950">02
+                                · Khách hàng</a>
+                            <a href="#section-project"
+                                class="block rounded-md px-2.5 py-2 text-zinc-600 hover:bg-zinc-100 hover:text-zinc-950">03
+                                · Dự án</a>
+                            <a href="#section-work"
+                                class="block rounded-md px-2.5 py-2 text-zinc-600 hover:bg-zinc-100 hover:text-zinc-950">04
+                                · Công việc</a>
+                            <a href="#section-other-costs"
+                                class="block rounded-md px-2.5 py-2 text-zinc-600 hover:bg-zinc-100 hover:text-zinc-950">05
+                                · Chi phí khác</a>
+                            <a href="#section-value"
+                                class="block rounded-md px-2.5 py-2 text-zinc-600 hover:bg-zinc-100 hover:text-zinc-950">06
+                                · Giá trị</a>
+                            <a href="#section-payment"
+                                class="block rounded-md px-2.5 py-2 text-zinc-600 hover:bg-zinc-100 hover:text-zinc-950">07
+                                · Thanh toán</a>
+                            <a href="#section-warranty"
+                                class="block rounded-md px-2.5 py-2 text-zinc-600 hover:bg-zinc-100 hover:text-zinc-950">08
+                                · Bảo hành</a>
+                        </nav>
+                    </div>
+
+                    <div class="rounded-xl border border-zinc-200 bg-zinc-950 p-4 text-white">
+                        <p class="text-xs font-semibold uppercase tracking-wider text-zinc-400">Snapshot</p>
+                        <p class="mt-2 text-sm leading-5 text-zinc-300">Xuất toàn bộ dữ liệu form thành JSON để lưu trữ,
+                            versioning hoặc import lại sau.</p>
+                        <button id="sidebarExportJsonBtn" type="button"
+                            class="mt-4 w-full rounded-lg border border-zinc-700 px-3 py-2 text-sm font-medium text-white hover:bg-zinc-900">
+                            Export snapshot
+                        </button>
+                    </div>
+                </div>
+            </aside>
+        </main>
+    </div>
+
+    <script src="/sale-report/scripts/bank-accounts.js"></script>
+    <script src="/sale-report/scripts/storage.js"></script>
+    <script src="/sale-report/scripts/form.js"></script>
+
+    <script>
+        const themeToggle = document.getElementById('theme-toggle');
+        const sunIcon = document.getElementById('sun-icon');
+        const moonIcon = document.getElementById('moon-icon');
+
+        function updateThemeIcon() {
+            const isDark = document.documentElement.classList.contains('dark');
+            sunIcon?.classList.toggle('hidden', !isDark);
+            moonIcon?.classList.toggle('hidden', isDark);
+        }
+
+        updateThemeIcon();
+        themeToggle?.addEventListener('click', () => {
+            const isDark = document.documentElement.classList.toggle('dark');
+            localStorage.setItem('toolhub-theme', isDark ? 'dark' : 'light');
+            updateThemeIcon();
+        });
+
+        (() => {
+            const details = () => Array.from(document.querySelectorAll('main details'));
+
+            document.getElementById('expandAllBtn')?.addEventListener('click', () => {
+                const all = details();
+                const shouldOpen = all.some(item => !item.open);
+                all.forEach(item => item.open = shouldOpen);
+                document.getElementById('expandAllBtn').textContent = shouldOpen ? 'Đóng tất cả' : 'Mở tất cả';
+            });
+
+            const getFormSnapshot = () => {
+                const snapshot = {};
+
+                document.querySelectorAll('input[id], select[id], textarea[id]').forEach(el => {
+                    if (el.type === 'file') return;
+                    snapshot[el.id] = el.type === 'checkbox' ? el.checked : el.value;
+                });
+
+                snapshot.workItems = Array.from(document.querySelectorAll('.work-item')).map(item => ({
+                    name: item.querySelector('.function-name')?.value ?? '',
+                    role: item.querySelector('.function-role')?.value ?? '',
+                    desc: item.querySelector('.function-desc')?.value ?? ''
+                }));
+
+                snapshot.otherCostItems = Array.from(document.querySelectorAll('.other-cost-item')).map(item => ({
+                    name: item.querySelector('.other-cost-name')?.value ?? '',
+                    desc: item.querySelector('.other-cost-desc')?.value ?? '',
+                    billing: item.querySelector('.other-cost-billing')?.value ?? '',
+                    unit: item.querySelector('.other-cost-unit')?.value ?? '',
+                    qty: item.querySelector('.other-cost-qty')?.value ?? '',
+                    price: item.querySelector('.other-cost-price')?.value ?? '',
+                    note: item.querySelector('.other-cost-note')?.value ?? ''
+                }));
+
+                snapshot.paymentItems = Array.from(document.querySelectorAll('.payment-item')).map(item => ({
+                    condition: item.querySelector('.payment-condition')?.value ?? '',
+                    percent: item.querySelector('.payment-percent')?.value ?? '',
+                    amount: item.querySelector('.payment-amount')?.value ?? ''
+                }));
+
+                snapshot.meta = {
+                    format: 'contract-quote-snapshot',
+                    version: 1,
+                    exportedAt: new Date().toISOString()
+                };
+
+                return snapshot;
+            };
+
+            const downloadSnapshot = () => {
+                const blob = new Blob([JSON.stringify(getFormSnapshot(), null, 2)], { type: 'application/json;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                const number = document.getElementById('contractNumber')?.value?.trim() || 'contract-quote';
+                a.href = url;
+                a.download = `${number.replace(/[^a-zA-Z0-9_-]+/g, '-')}-snapshot.json`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(url);
+            };
+
+            document.getElementById('exportJsonBtn')?.addEventListener('click', downloadSnapshot);
+            document.getElementById('sidebarExportJsonBtn')?.addEventListener('click', downloadSnapshot);
+
+            // Tiền VNĐ trong JSON snapshot có thể được gõ tay theo định dạng có dấu chấm
+            // phân cách hàng nghìn (vd "7.600.000"). <input type="number"> không chấp nhận
+            // chuỗi này — gán thẳng sẽ bị trình duyệt âm thầm reset về rỗng, khiến chi phí
+            // xây dựng/hạng mục khác biến mất sau khi import. Bóc dấu chấm hàng nghìn trước
+            // khi gán, chỉ khi chuỗi đúng định dạng nhóm-3-số để không đụng vào số thập phân.
+            const denormalizeMoneyString = (value) => {
+                if (typeof value !== 'string') return value;
+                return /^-?\d{1,3}(\.\d{3})+$/.test(value) ? value.replace(/\./g, '') : value;
+            };
+
+            const applySnapshot = (snapshot) => {
+                if (!snapshot || typeof snapshot !== 'object') throw new Error('JSON snapshot không hợp lệ.');
+
+                Object.entries(snapshot).forEach(([key, value]) => {
+                    if (['workItems', 'otherCostItems', 'paymentItems', 'meta'].includes(key)) return;
+                    const el = document.getElementById(key);
+                    if (!el) return;
+                    if (el.type === 'checkbox') {
+                        el.checked = !!value;
+                    } else if (typeof value !== 'object') {
+                        el.value = (el.type === 'number' ? denormalizeMoneyString(value) : value) ?? '';
+                    }
+                });
+
+                // Rebuild dynamic lists only if their corresponding containers exist.
+                const rebuild = (containerId, items, templateFactory) => {
+                    const container = document.getElementById(containerId);
+                    if (!container || !Array.isArray(items)) return;
+                    container.innerHTML = '';
+                    items.forEach((item, index) => container.insertAdjacentHTML('beforeend', templateFactory(item, index)));
+                };
+
+                rebuild('workItems', snapshot.workItems, (item, index) => `
+                    <div class="work-item rounded-lg border border-zinc-200 bg-zinc-50/70 p-4">
+                        <div class="mb-3 flex items-center justify-between">
+                            <span class="work-item-label text-xs font-semibold uppercase tracking-wider text-zinc-500">Chức năng #${index + 1}</span>
+                            <button type="button" class="remove-item rounded-md px-2 py-1 text-xs font-medium text-zinc-500 hover:bg-zinc-200 hover:text-zinc-950">Xóa</button>
+                        </div>
+                        <div class="grid gap-4 md:grid-cols-2">
+                            <label class="block"><span class="mb-1.5 block text-xs font-medium text-zinc-600">Tên chức năng</span>
+                                <input type="text" value="${escapeHtml(item.name)}" class="function-name w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-zinc-950 focus:ring-2 focus:ring-zinc-200"></label>
+                            <label class="block"><span class="mb-1.5 block text-xs font-medium text-zinc-600">Quyền sử dụng</span>
+                                <select class="function-role w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-zinc-950 focus:ring-2 focus:ring-zinc-200">
+                                    ${['User', 'Admin', 'System'].map(r => `<option ${r === item.role ? 'selected' : ''}>${r}</option>`).join('')}
+                                </select></label>
+                            <label class="block md:col-span-2"><span class="mb-1.5 block text-xs font-medium text-zinc-600">Mô tả công việc đã chốt</span>
+                                <textarea rows="2" class="function-desc w-full resize-y rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-zinc-950 focus:ring-2 focus:ring-zinc-200">${escapeHtml(item.desc)}</textarea></label>
+                        </div>
+                    </div>`);
+
+                rebuild('paymentItems', snapshot.paymentItems, (item, index) => `
+                    <div class="payment-item rounded-lg border border-zinc-200 bg-zinc-50/70 p-4">
+                        <div class="mb-3 flex items-center justify-between">
+                            <span class="payment-item-label text-xs font-semibold uppercase tracking-wider text-zinc-500">Đợt thanh toán #${index + 1}</span>
+                            <button type="button" class="remove-payment-item rounded-md px-2 py-1 text-xs font-medium text-zinc-500 hover:bg-zinc-200 hover:text-zinc-950">Xóa</button>
+                        </div>
+                        <label class="block"><span class="mb-1.5 block text-xs font-medium text-zinc-600">Điều kiện thanh toán</span>
+                            <input type="text" value="${escapeHtml(item.condition)}" class="payment-condition w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-zinc-950 focus:ring-2 focus:ring-zinc-200"></label>
+                        <div class="mt-4 grid gap-4 md:grid-cols-2">
+                            <label class="block"><span class="mb-1.5 block text-xs font-medium text-zinc-600">Tỷ lệ (%)</span>
+                                <input type="number" min="0" value="${escapeHtml(denormalizeMoneyString(item.percent))}" class="payment-percent w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-zinc-950 focus:ring-2 focus:ring-zinc-200"></label>
+                            <label class="block"><span class="mb-1.5 block text-xs font-medium text-zinc-600">Hoặc số tiền (VNĐ)</span>
+                                <input type="text" inputmode="numeric" min="0" data-number-format="money" value="${escapeHtml(denormalizeMoneyString(item.amount))}" class="payment-amount w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-zinc-950 focus:ring-2 focus:ring-zinc-200"></label>
+                        </div>
+                    </div>`);
+
+                // For other-cost snapshots, use the existing first item's structure as a base.
+                rebuild('otherCostItems', snapshot.otherCostItems, (item, index) => `
+                    <div class="other-cost-item rounded-lg border border-zinc-200 bg-zinc-50/70 p-4">
+                        <div class="mb-3 flex items-center justify-between">
+                            <span class="other-cost-item-label text-xs font-semibold uppercase tracking-wider text-zinc-500">Dịch vụ #${index + 1}</span>
+                            <button type="button" class="remove-other-cost-item rounded-md px-2 py-1 text-xs font-medium text-zinc-500 hover:bg-zinc-200 hover:text-zinc-950">Xóa</button>
+                        </div>
+                        <div class="grid gap-4 md:grid-cols-2">
+                            ${field('Danh mục dịch vụ', 'other-cost-name', item.name)}
+                            ${field('Mô tả / Quy cách', 'other-cost-desc', item.desc)}
+                            ${field('Hình thức tính phí', 'other-cost-billing', item.billing)}
+                            ${field('Đơn vị tính', 'other-cost-unit', item.unit)}
+                            ${field('Số lượng', 'other-cost-qty', item.qty, 'number')}
+                            ${field('Đơn giá (VNĐ)', 'other-cost-price', item.price, 'money')}
+                            <label class="block md:col-span-2"><span class="mb-1.5 block text-xs font-medium text-zinc-600">Ghi chú</span>
+                                <input type="text" value="${escapeHtml(item.note)}" class="other-cost-note w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-zinc-950 focus:ring-2 focus:ring-zinc-200"></label>
+                        </div>
+                    </div>`);
+
+                // Trigger input/change handlers already installed by form.js.
+                // Excludes the file input itself — dispatching 'change' on it would
+                // re-invoke the import handler below while the same file is still
+                // selected, firing the success alert twice.
+                document.querySelectorAll('input:not([type="file"]), select, textarea').forEach(el => {
+                    el.dispatchEvent(new Event('input', { bubbles: true }));
+                    el.dispatchEvent(new Event('change', { bubbles: true }));
+                });
+            };
+
+            const field = (label, cls, value, type = 'text') => `
+                <label class="block"><span class="mb-1.5 block text-xs font-medium text-zinc-600">${label}</span>
+                    <input type="${type === 'money' ? 'text' : type}" ${type === 'number' || type === 'money' ? 'min="0"' : ''} ${type === 'money' ? 'inputmode="numeric" data-number-format="money"' : ''} value="${escapeHtml(type === 'number' || type === 'money' ? denormalizeMoneyString(value) : value)}" class="${cls} w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-zinc-950 focus:ring-2 focus:ring-zinc-200"></label>`;
+
+            const escapeHtml = (value) => String(value ?? '')
+                .replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;').replaceAll("'", '&#039;');
+
+            document.getElementById('importJsonBtn')?.addEventListener('click', () => {
+                document.getElementById('importJsonInput')?.click();
+            });
+
+            document.getElementById('importJsonInput')?.addEventListener('change', async (event) => {
+                const file = event.target.files?.[0];
+                if (!file) return;
+
+                try {
+                    const snapshot = JSON.parse(await file.text());
+                    applySnapshot(snapshot);
+                    alert('Import snapshot thành công.');
+                } catch (error) {
+                    alert(`Không thể import JSON: ${error.message}`);
+                } finally {
+                    event.target.value = '';
+                }
+            });
+        })();
+    </script>
+</body>
+
+</html>

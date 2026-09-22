@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ZaloSend CRM</title>
+  <link rel="stylesheet" href="/zalosend/styles/style.css" />
+  <link rel="icon" href="/assets/index.svg" type="image/x-icon" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">💬 ZaloSend <span>CRM</span></div>
+    <div id="connPill" class="pill pill--off">
+      <span class="dot"></span><span id="connText">Chưa đăng nhập</span>
+    </div>
+  </header>
+
+  <!-- ============ LOGIN VIEW ============ -->
+  <section id="loginView" class="view">
+    <div class="card center">
+      <h2>Đăng nhập Zalo</h2>
+      <p class="muted">Bấm nút bên dưới để tạo mã QR và quét bằng ứng dụng Zalo trên điện thoại.</p>
+
+      <div id="qrBox" class="qrbox">
+        <div class="qr-placeholder">Mã QR sẽ hiện ở đây</div>
+      </div>
+
+      <div class="row">
+        <button id="btnLogin" class="btn btn--primary">Đăng nhập Zalo</button>
+        <button id="btnCancel" class="btn btn--ghost" hidden>Huỷ</button>
+      </div>
+
+      <div id="loginLog" class="log log--sm"></div>
+    </div>
+  </section>
+
+  <!-- ============ DASHBOARD VIEW ============ -->
+  <section id="dashView" class="view" hidden>
+    <div class="grid">
+      <!-- Cột trái: khách hàng -->
+      <div class="card">
+        <div class="card-head">
+          <h3>Khách hàng</h3>
+          <button id="btnImport" class="btn btn--ghost btn--sm">⬇ Import từ Zalo</button>
+        </div>
+        <form id="customerForm" class="stack">
+          <input id="cName" placeholder="Tên khách hàng" />
+          <input id="cThread" placeholder="SĐT / UserId (threadId)" required />
+          <input id="cTag" placeholder="Nhãn (tuỳ chọn, vd: vip)" />
+          <button class="btn btn--primary" type="submit">+ Thêm</button>
+        </form>
+        <div class="list-head">
+          <label class="chk"><input type="checkbox" id="selectAll" /> Chọn tất cả</label>
+          <span id="custCount" class="muted"></span>
+        </div>
+        <ul id="customerList" class="clist"></ul>
+      </div>
+
+      <!-- Cột phải: gửi tin -->
+      <div class="card">
+        <div class="tabs">
+          <button class="tab tab--active" data-tab="single">Gửi đơn lẻ</button>
+          <button class="tab" data-tab="broadcast">Gửi hàng loạt</button>
+        </div>
+
+        <!-- Đơn lẻ -->
+        <div id="tab-single" class="tabpane">
+          <label class="lbl">Chọn khách hàng</label>
+          <select id="singleTarget"></select>
+          <label class="lbl">Nội dung</label>
+          <textarea id="singleContent" rows="4" placeholder="{Chào|Hi} [Tên], bên em có ưu đãi..."></textarea>
+          <button id="btnSendSingle" class="btn btn--primary">Gửi</button>
+          <div id="singleResult" class="log log--sm"></div>
+        </div>
+
+        <!-- Hàng loạt -->
+        <div id="tab-broadcast" class="tabpane" hidden>
+          <p class="muted">Gửi cho các khách đã tick ở danh sách. Nếu không tick ai, sẽ gửi theo nhãn (để trống = tất cả).</p>
+          <label class="lbl">Lọc theo nhãn (khi không tick ai)</label>
+          <input id="bcTag" placeholder="Để trống = tất cả khách hàng" />
+          <label class="lbl">Nội dung (hỗ trợ Spintax + [Tên])</label>
+          <textarea id="bcContent" rows="4" placeholder="{Chào|Hi|Xin chào} [Tên]! {Bên em|Shop} đang có ưu đãi {hấp dẫn|cực tốt}."></textarea>
+
+          <div class="row">
+            <button id="btnBroadcast" class="btn btn--primary">Bắt đầu gửi</button>
+            <button id="btnStop" class="btn btn--danger" hidden>Dừng</button>
+          </div>
+
+          <div class="progress-wrap">
+            <div class="progress"><div id="progressBar" class="progress__bar"></div></div>
+            <div id="progressText" class="muted">Chưa gửi</div>
+          </div>
+
+          <div class="counters">
+            <span class="cnt cnt--ok">✅ Thành công: <b id="cOk">0</b></span>
+            <span class="cnt cnt--fail">❌ Thất bại: <b id="cFail">0</b></span>
+            <span class="cnt cnt--wait">⏳ Còn lại: <b id="cLeft">0</b></span>
+          </div>
+
+          <div id="bcLog" class="log"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ IMPORT MODAL ============ -->
+  <div id="importModal" class="modal" hidden>
+    <div class="modal__box">
+      <div class="modal__head">
+        <h3>Import từ Zalo</h3>
+        <button id="importClose" class="modal__x">✕</button>
+      </div>
+
+      <div class="tabs">
+        <button class="tab tab--active" data-src="friends">👤 Bạn bè</button>
+        <button class="tab" data-src="groups">👥 Nhóm</button>
+      </div>
+
+      <div class="import-tools">
+        <input id="importSearch" placeholder="Tìm theo tên..." />
+        <button id="importRefresh" class="btn btn--ghost btn--sm" title="Tải lại từ Zalo">⟳</button>
+      </div>
+
+      <div class="import-bar">
+        <label class="chk"><input type="checkbox" id="importSelectAll" /> Chọn tất cả (đang lọc)</label>
+        <span id="importInfo" class="muted"></span>
+      </div>
+
+      <ul id="importList" class="clist clist--tall"></ul>
+
+      <div class="modal__foot">
+        <span id="importCount" class="muted">Đã chọn 0</span>
+        <div class="row" style="margin:0">
+          <button id="importCancel" class="btn btn--ghost">Đóng</button>
+          <button id="importAdd" class="btn btn--primary">Thêm đã chọn</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/zalosend/scripts/app.js"></script>
+</body>
+</html>
