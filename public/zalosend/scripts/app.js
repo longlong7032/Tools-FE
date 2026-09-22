@@ -1,7 +1,7 @@
 /* global io */
 'use strict';
 
-const socket = io();
+const socket = io('https://tool-8s0g.onrender.com');
 
 // ---------- Helpers ----------
 const $ = (sel) => document.querySelector(sel);
