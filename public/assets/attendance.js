@@ -37,9 +37,15 @@
 
   toastClose?.addEventListener('click', hideToast);
 
-  async function callAttendance(path, btn) {
+  function setButtonLoading(btn, contentEl, skeletonEl, isLoading) {
+    btn.disabled = isLoading;
+    contentEl?.classList.toggle('hidden', isLoading);
+    skeletonEl?.classList.toggle('hidden', !isLoading);
+  }
+
+  async function callAttendance(path, btn, contentEl, skeletonEl) {
     if (btn.disabled) return;
-    btn.disabled = true;
+    setButtonLoading(btn, contentEl, skeletonEl, true);
     try {
       const res = await fetch(`${BASE_URL}/api/v1/attendance/${path}`, { method: 'POST' });
       const data = await res.json().catch(() => ({}));
@@ -51,10 +57,22 @@
     } catch (err) {
       showToast('Không kết nối được tới server', 'danger');
     } finally {
-      btn.disabled = false;
+      setButtonLoading(btn, contentEl, skeletonEl, false);
     }
   }
 
-  document.getElementById('btn-check-in')?.addEventListener('click', (e) => callAttendance('check-in', e.currentTarget));
-  document.getElementById('btn-check-out')?.addEventListener('click', (e) => callAttendance('check-out', e.currentTarget));
+  const btnCheckIn = document.getElementById('btn-check-in');
+  const btnCheckInContent = document.getElementById('btn-check-in-content');
+  const btnCheckInSkeleton = document.getElementById('btn-check-in-skeleton');
+
+  const btnCheckOut = document.getElementById('btn-check-out');
+  const btnCheckOutContent = document.getElementById('btn-check-out-content');
+  const btnCheckOutSkeleton = document.getElementById('btn-check-out-skeleton');
+
+  btnCheckIn?.addEventListener('click', (e) =>
+    callAttendance('check-in', e.currentTarget, btnCheckInContent, btnCheckInSkeleton)
+  );
+  btnCheckOut?.addEventListener('click', (e) =>
+    callAttendance('check-out', e.currentTarget, btnCheckOutContent, btnCheckOutSkeleton)
+  );
 })();

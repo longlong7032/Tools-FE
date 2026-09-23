@@ -385,15 +385,23 @@
                 dark:hover:bg-zinc-900
                 dark:active:bg-zinc-800
                 sm:px-3
+                disabled:cursor-not-allowed
               " title="Điểm danh đến">
-                            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8"
-                                viewBox="0 0 24 24">
-                                <path d="M5 12h14" />
-                                <path d="m13 6 6 6-6 6" />
-                            </svg>
+                            <span id="btn-check-in-content" class="inline-flex items-center gap-1.5">
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8"
+                                    viewBox="0 0 24 24">
+                                    <path d="M5 12h14" />
+                                    <path d="m13 6 6 6-6 6" />
+                                </svg>
 
-                            <span class="hidden sm:inline">
-                                Đến
+                                <span class="hidden sm:inline">
+                                    Đến
+                                </span>
+                            </span>
+
+                            <span id="btn-check-in-skeleton" class="hidden inline-flex animate-pulse items-center gap-1.5">
+                                <span class="h-4 w-4 rounded bg-zinc-300 dark:bg-zinc-700"></span>
+                                <span class="hidden h-3 w-6 rounded bg-zinc-300 sm:inline-block dark:bg-zinc-700"></span>
                             </span>
                         </button>
 
@@ -417,15 +425,23 @@
                 dark:hover:bg-zinc-900
                 dark:active:bg-zinc-800
                 sm:px-3
+                disabled:cursor-not-allowed
               " title="Điểm danh về">
-                            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8"
-                                viewBox="0 0 24 24">
-                                <path d="M19 12H5" />
-                                <path d="m11 18-6-6 6-6" />
-                            </svg>
+                            <span id="btn-check-out-content" class="inline-flex items-center gap-1.5">
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8"
+                                    viewBox="0 0 24 24">
+                                    <path d="M19 12H5" />
+                                    <path d="m11 18-6-6 6-6" />
+                                </svg>
 
-                            <span class="hidden sm:inline">
-                                Về
+                                <span class="hidden sm:inline">
+                                    Về
+                                </span>
+                            </span>
+
+                            <span id="btn-check-out-skeleton" class="hidden inline-flex animate-pulse items-center gap-1.5">
+                                <span class="h-4 w-4 rounded bg-zinc-300 dark:bg-zinc-700"></span>
+                                <span class="hidden h-3 w-6 rounded bg-zinc-300 sm:inline-block dark:bg-zinc-700"></span>
                             </span>
                         </button>
 

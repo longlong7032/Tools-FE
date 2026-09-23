@@ -11,158 +11,10 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
     rel="stylesheet">
-  <style>
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      padding: 0;
-    }
-
-    .font-serif-brand {
-      font-family: 'Playfair Display', serif;
-    }
-
-    .font-sans-brand {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-    }
-
-    .checker {
-      background-image:
-        linear-gradient(45deg, #111827 25%, transparent 25%),
-        linear-gradient(-45deg, #111827 25%, transparent 25%),
-        linear-gradient(45deg, transparent 75%, #111827 75%),
-        linear-gradient(-45deg, transparent 75%, #111827 75%);
-      background-size: 20px 20px;
-      background-position: 0 0, 0 10px, 10px -10px, -10px 0;
-    }
-
-    .draggable {
-      cursor: grab;
-      touch-action: none;
-    }
-
-    .draggable.dragging {
-      cursor: grabbing;
-      outline: 2px dashed #D4AF37;
-      outline-offset: 4px;
-      z-index: 30;
-    }
-
-    .draggable:hover {
-      outline: 1px dashed rgba(212, 175, 55, .4);
-      outline-offset: 4px;
-    }
-
-    .draggable.layer-hidden {
-      display: none !important;
-    }
-
-    .draggable.layer-locked {
-      cursor: not-allowed;
-    }
-
-    .editor-control {
-      background: rgba(255, 255, 255, .04);
-      border: 1px solid rgba(255, 255, 255, .08);
-      border-radius: 12px;
-      padding: 14px;
-    }
-
-    .icon-btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 32px;
-      height: 32px;
-      border-radius: 10px;
-      background: rgba(255, 255, 255, .08);
-      font-size: 13px;
-      transition: background .15s;
-    }
-
-    .icon-btn:hover {
-      background: rgba(255, 255, 255, .16);
-    }
-
-    .icon-btn.on {
-      background: rgba(212, 175, 55, .35);
-      color: #D4AF37;
-    }
-
-    .modal-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, .55);
-      backdrop-filter: blur(4px);
-      z-index: 60;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .modal-content {
-      background: linear-gradient(180deg, #151b28, #0c111b);
-      border: 1px solid rgba(255, 255, 255, .08);
-      border-radius: 16px;
-      max-width: 480px;
-      width: 100%;
-      margin: 0 16px;
-    }
-
-    .range-slider {
-      width: 100%;
-      accent-color: #D4AF37;
-    }
-
-    .layer-row {
-      padding: 8px 10px;
-      border-radius: 10px;
-      background: rgba(255, 255, 255, .04);
-      border: 1px solid rgba(255, 255, 255, .08);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 6px;
-      font-size: 11px;
-    }
-
-    .tab-active {
-      border-color: #D4AF37;
-      color: #D4AF37;
-    }
-
-    .tab-inactive {
-      border-color: transparent;
-      color: #94a3b8;
-    }
-
-    .canvas-btn.active,
-    .style-swatch.active {
-      border-color: #D4AF37 !important;
-      color: #D4AF37 !important;
-      background: rgba(212, 175, 55, .12) !important;
-    }
-
-    .pos-btn.active,
-    .valign-btn.active {
-      border-color: #D4AF37 !important;
-      background: rgba(212, 175, 55, .15) !important;
-      color: #D4AF37 !important;
-    }
-
-    select,
-    input[type=text],
-    input[type=number] {
-      color-scheme: dark;
-    }
-  </style>
 </head>
 
 <body
-  class="bg-gradient-to-br from-[#0B0F17] to-[#0F1621] text-slate-100 font-sans-brand antialiased min-h-screen overflow-hidden">
+  class="bg-gradient-to-br from-[#0B0F17] to-[#0F1621] text-slate-100 antialiased [color-scheme:dark] font-[family-name:'Plus_Jakarta_Sans',sans-serif] min-h-screen overflow-hidden">
 
   <header class="border-b border-white/10 bg-[#0B0F17]/95 sticky top-0 z-40 backdrop-blur-xl">
     <div class="px-6 py-3 flex items-center justify-between h-16">
@@ -171,17 +23,17 @@
           class="h-9 w-9 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-700 flex items-center justify-center font-bold text-white shadow-lg shadow-amber-500/20">
           ⚡</div>
         <div>
-          <h1 class="font-serif-brand text-base font-bold tracking-wide text-white">Auto Banner Pro</h1>
+          <h1 class="font-[family-name:'Playfair_Display',serif] text-base font-bold tracking-wide text-white">Auto Banner Pro</h1>
           <p class="text-[10px] text-slate-400">Studio Banner Enterprise-Grade</p>
         </div>
       </div>
       <div class="flex items-center gap-2">
-        <button id="modeToggle" class="icon-btn" title="Basic ↔ Advanced">⚙️</button>
-        <button id="saveTemplateBtn" class="icon-btn" title="Lưu template (JSON)">💾</button>
-        <button id="loadTemplateBtn" class="icon-btn" title="Tải template (JSON)">📂</button>
+        <button id="modeToggle" class="inline-flex h-8 w-8 items-center justify-center rounded-[10px] bg-white/[0.08] text-[13px] transition-colors hover:bg-white/[0.16] data-[active=true]:bg-[rgba(212,175,55,0.35)] data-[active=true]:text-[#D4AF37]" title="Basic ↔ Advanced">⚙️</button>
+        <button id="saveTemplateBtn" class="inline-flex h-8 w-8 items-center justify-center rounded-[10px] bg-white/[0.08] text-[13px] transition-colors hover:bg-white/[0.16] data-[active=true]:bg-[rgba(212,175,55,0.35)] data-[active=true]:text-[#D4AF37]" title="Lưu template (JSON)">💾</button>
+        <button id="loadTemplateBtn" class="inline-flex h-8 w-8 items-center justify-center rounded-[10px] bg-white/[0.08] text-[13px] transition-colors hover:bg-white/[0.16] data-[active=true]:bg-[rgba(212,175,55,0.35)] data-[active=true]:text-[#D4AF37]" title="Tải template (JSON)">📂</button>
         <input id="templateFileInput" type="file" accept="application/json" class="hidden">
-        <button id="undoBtn" class="icon-btn" title="Hoàn tác (Ctrl+Z)">↶</button>
-        <button id="redoBtn" class="icon-btn" title="Làm lại (Ctrl+Y)">↷</button>
+        <button id="undoBtn" class="inline-flex h-8 w-8 items-center justify-center rounded-[10px] bg-white/[0.08] text-[13px] transition-colors hover:bg-white/[0.16] data-[active=true]:bg-[rgba(212,175,55,0.35)] data-[active=true]:text-[#D4AF37]" title="Hoàn tác (Ctrl+Z)">↶</button>
+        <button id="redoBtn" class="inline-flex h-8 w-8 items-center justify-center rounded-[10px] bg-white/[0.08] text-[13px] transition-colors hover:bg-white/[0.16] data-[active=true]:bg-[rgba(212,175,55,0.35)] data-[active=true]:text-[#D4AF37]" title="Làm lại (Ctrl+Y)">↷</button>
         <button id="exportBtn"
           class="bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 font-semibold px-4 py-2 rounded-xl text-xs shadow-xl shadow-amber-900/30 transition-all">📥
           Export</button>
@@ -200,13 +52,13 @@
       </div>
 
       <div class="px-4 py-3 border-b border-white/10 flex gap-4 overflow-x-auto">
-        <button class="tab-btn tab-active text-xs font-semibold pb-2 border-b-2 whitespace-nowrap" data-tab="layout">📐
+        <button class="text-xs font-semibold pb-2 border-b-2 whitespace-nowrap border-transparent text-slate-400 data-[active=true]:border-[#D4AF37] data-[active=true]:text-[#D4AF37]" data-group="tab" data-active="true" data-tab="layout">📐
           Layout</button>
-        <button class="tab-btn tab-inactive text-xs font-semibold pb-2 border-b-2 whitespace-nowrap"
+        <button class="text-xs font-semibold pb-2 border-b-2 whitespace-nowrap border-transparent text-slate-400 data-[active=true]:border-[#D4AF37] data-[active=true]:text-[#D4AF37]" data-group="tab" data-active="false"
           data-tab="content">📝 Nội Dung</button>
-        <button class="tab-btn tab-inactive text-xs font-semibold pb-2 border-b-2 whitespace-nowrap"
+        <button class="text-xs font-semibold pb-2 border-b-2 whitespace-nowrap border-transparent text-slate-400 data-[active=true]:border-[#D4AF37] data-[active=true]:text-[#D4AF37]" data-group="tab" data-active="false"
           data-tab="design">🎨 Thiết Kế</button>
-        <button class="tab-btn tab-inactive text-xs font-semibold pb-2 border-b-2 whitespace-nowrap hidden"
+        <button class="text-xs font-semibold pb-2 border-b-2 whitespace-nowrap border-transparent text-slate-400 data-[active=true]:border-[#D4AF37] data-[active=true]:text-[#D4AF37] hidden" data-group="tab" data-active="false"
           data-tab="advanced" id="advancedTabBtn">⚙️ Nâng Cao</button>
       </div>
 
@@ -214,21 +66,21 @@
 
         <!-- LAYOUT TAB -->
         <div id="tab-layout" class="space-y-4">
-          <div class="editor-control">
+          <div class="bg-white/[0.04] border border-white/[0.08] rounded-xl p-3.5">
             <label class="text-xs font-semibold uppercase tracking-wider text-amber-400 block mb-2">Kích Thước
               Canvas</label>
             <div class="grid grid-cols-2 gap-2">
               <button
-                class="canvas-btn active bg-slate-900 border-2 border-transparent text-slate-300 text-xs py-2 rounded-lg font-medium"
+                class="bg-slate-900 border-2 border-transparent text-slate-300 text-xs py-2 rounded-lg font-medium data-[active=true]:border-[#D4AF37] data-[active=true]:text-[#D4AF37] data-[active=true]:bg-[rgba(212,175,55,0.12)]" data-group="canvas" data-active="true"
                 data-w="1200" data-h="628">1200×628<br><span class="text-[9px] text-slate-400">Landscape</span></button>
               <button
-                class="canvas-btn bg-slate-900 border-2 border-transparent text-slate-300 text-xs py-2 rounded-lg font-medium"
+                class="bg-slate-900 border-2 border-transparent text-slate-300 text-xs py-2 rounded-lg font-medium data-[active=true]:border-[#D4AF37] data-[active=true]:text-[#D4AF37] data-[active=true]:bg-[rgba(212,175,55,0.12)]" data-group="canvas" data-active="false"
                 data-w="1080" data-h="1080">1080×1080<br><span class="text-[9px] text-slate-400">Square</span></button>
               <button
-                class="canvas-btn bg-slate-900 border-2 border-transparent text-slate-300 text-xs py-2 rounded-lg font-medium"
+                class="bg-slate-900 border-2 border-transparent text-slate-300 text-xs py-2 rounded-lg font-medium data-[active=true]:border-[#D4AF37] data-[active=true]:text-[#D4AF37] data-[active=true]:bg-[rgba(212,175,55,0.12)]" data-group="canvas" data-active="false"
                 data-w="1080" data-h="1920">1080×1920<br><span class="text-[9px] text-slate-400">Story</span></button>
               <button
-                class="canvas-btn bg-slate-900 border-2 border-transparent text-slate-300 text-xs py-2 rounded-lg font-medium"
+                class="bg-slate-900 border-2 border-transparent text-slate-300 text-xs py-2 rounded-lg font-medium data-[active=true]:border-[#D4AF37] data-[active=true]:text-[#D4AF37] data-[active=true]:bg-[rgba(212,175,55,0.12)]" data-group="canvas" data-active="false"
                 data-w="1920" data-h="1080">1920×1080<br><span class="text-[9px] text-slate-400">4K Wide</span></button>
             </div>
             <div class="mt-3">
@@ -243,7 +95,7 @@
             </div>
           </div>
 
-          <div class="editor-control">
+          <div class="bg-white/[0.04] border border-white/[0.08] rounded-xl p-3.5">
             <label class="text-xs font-semibold uppercase tracking-wider text-amber-400 block mb-2">Layout
               Preset</label>
             <select id="layoutPreset"
@@ -258,49 +110,49 @@
             </p>
           </div>
 
-          <div class="editor-control">
+          <div class="bg-white/[0.04] border border-white/[0.08] rounded-xl p-3.5">
             <label class="text-xs font-semibold uppercase tracking-wider text-amber-400 block mb-2">Vị Trí Nội Dung
               (ngang)</label>
             <div class="grid grid-cols-3 gap-2">
-              <button class="pos-btn text-xs py-1.5 rounded-lg border border-white/10" data-target="content"
+              <button class="text-xs py-1.5 rounded-lg border border-white/10 data-[active=true]:border-[#D4AF37] data-[active=true]:bg-[rgba(212,175,55,0.15)] data-[active=true]:text-[#D4AF37]" data-group="pos" data-active="false" data-target="content"
                 data-pos="left">← Trái</button>
-              <button class="pos-btn active text-xs py-1.5 rounded-lg border border-white/10" data-target="content"
+              <button class="text-xs py-1.5 rounded-lg border border-white/10 data-[active=true]:border-[#D4AF37] data-[active=true]:bg-[rgba(212,175,55,0.15)] data-[active=true]:text-[#D4AF37]" data-group="pos" data-active="true" data-target="content"
                 data-pos="center">Giữa</button>
-              <button class="pos-btn text-xs py-1.5 rounded-lg border border-white/10" data-target="content"
+              <button class="text-xs py-1.5 rounded-lg border border-white/10 data-[active=true]:border-[#D4AF37] data-[active=true]:bg-[rgba(212,175,55,0.15)] data-[active=true]:text-[#D4AF37]" data-group="pos" data-active="false" data-target="content"
                 data-pos="right">Phải →</button>
             </div>
           </div>
 
-          <div class="editor-control">
+          <div class="bg-white/[0.04] border border-white/[0.08] rounded-xl p-3.5">
             <label class="text-xs font-semibold uppercase tracking-wider text-amber-400 block mb-2">Vị Trí Thiết Bị
               (ngang)</label>
             <div class="grid grid-cols-3 gap-2">
-              <button class="pos-btn text-xs py-1.5 rounded-lg border border-white/10" data-target="device"
+              <button class="text-xs py-1.5 rounded-lg border border-white/10 data-[active=true]:border-[#D4AF37] data-[active=true]:bg-[rgba(212,175,55,0.15)] data-[active=true]:text-[#D4AF37]" data-group="pos" data-active="false" data-target="device"
                 data-pos="left">← Trái</button>
-              <button class="pos-btn text-xs py-1.5 rounded-lg border border-white/10" data-target="device"
+              <button class="text-xs py-1.5 rounded-lg border border-white/10 data-[active=true]:border-[#D4AF37] data-[active=true]:bg-[rgba(212,175,55,0.15)] data-[active=true]:text-[#D4AF37]" data-group="pos" data-active="false" data-target="device"
                 data-pos="center">Giữa</button>
-              <button class="pos-btn active text-xs py-1.5 rounded-lg border border-white/10" data-target="device"
+              <button class="text-xs py-1.5 rounded-lg border border-white/10 data-[active=true]:border-[#D4AF37] data-[active=true]:bg-[rgba(212,175,55,0.15)] data-[active=true]:text-[#D4AF37]" data-group="pos" data-active="true" data-target="device"
                 data-pos="right">Phải →</button>
             </div>
           </div>
 
-          <div class="editor-control">
+          <div class="bg-white/[0.04] border border-white/[0.08] rounded-xl p-3.5">
             <label class="text-xs font-semibold uppercase tracking-wider text-amber-400 block mb-2">Căn Dọc Nội
               Dung</label>
             <div class="grid grid-cols-3 gap-2">
-              <button class="valign-btn text-xs py-1.5 rounded-lg border border-white/10" data-align="top">⬆
+              <button class="text-xs py-1.5 rounded-lg border border-white/10 data-[active=true]:border-[#D4AF37] data-[active=true]:bg-[rgba(212,175,55,0.15)] data-[active=true]:text-[#D4AF37]" data-group="valign" data-active="false" data-align="top">⬆
                 Trên</button>
-              <button class="valign-btn active text-xs py-1.5 rounded-lg border border-white/10" data-align="center">⬍
+              <button class="text-xs py-1.5 rounded-lg border border-white/10 data-[active=true]:border-[#D4AF37] data-[active=true]:bg-[rgba(212,175,55,0.15)] data-[active=true]:text-[#D4AF37]" data-group="valign" data-active="true" data-align="center">⬍
                 Giữa</button>
-              <button class="valign-btn text-xs py-1.5 rounded-lg border border-white/10" data-align="bottom">⬇
+              <button class="text-xs py-1.5 rounded-lg border border-white/10 data-[active=true]:border-[#D4AF37] data-[active=true]:bg-[rgba(212,175,55,0.15)] data-[active=true]:text-[#D4AF37]" data-group="valign" data-active="false" data-align="bottom">⬇
                 Dưới</button>
             </div>
           </div>
 
-          <div class="editor-control">
+          <div class="bg-white/[0.04] border border-white/[0.08] rounded-xl p-3.5">
             <label class="text-xs font-semibold uppercase tracking-wider text-amber-400 block mb-2">Khoảng Cách Giữa Các
               Khối</label>
-            <input id="spacingGap" type="range" min="0" max="48" value="12" class="range-slider">
+            <input id="spacingGap" type="range" min="0" max="48" value="12" class="w-full accent-[#D4AF37]">
             <div class="flex justify-between text-[10px] text-slate-400 mt-1"><span>0px</span><span
                 id="gapValue">12px</span><span>48px</span></div>
           </div>
@@ -312,7 +164,7 @@
 
         <!-- CONTENT TAB -->
         <div id="tab-content" class="space-y-4 hidden">
-          <div class="editor-control">
+          <div class="bg-white/[0.04] border border-white/[0.08] rounded-xl p-3.5">
             <label class="text-xs font-semibold uppercase tracking-wider text-amber-400 block mb-2">Logo Thương
               Hiệu</label>
             <input id="logoInput" type="file" accept="image/*"
@@ -320,22 +172,22 @@
             <div class="mt-2">
               <label class="text-[11px] text-slate-300 block mb-1">Kích thước: <span
                   id="logoSizeValue">50px</span></label>
-              <input id="logoSize" type="range" min="20" max="150" value="50" class="range-slider">
+              <input id="logoSize" type="range" min="20" max="150" value="50" class="w-full accent-[#D4AF37]">
             </div>
             <div class="mt-2">
               <label class="text-[11px] text-slate-300 block mb-1">Độ trong suốt: <span
                   id="logoOpacityValue">100%</span></label>
-              <input id="logoOpacity" type="range" min="0" max="100" value="100" class="range-slider">
+              <input id="logoOpacity" type="range" min="0" max="100" value="100" class="w-full accent-[#D4AF37]">
             </div>
           </div>
 
-          <div class="editor-control">
+          <div class="bg-white/[0.04] border border-white/[0.08] rounded-xl p-3.5">
             <label class="text-xs font-semibold uppercase tracking-wider text-amber-400 block mb-2">Badge</label>
             <input id="badgeInput" value="✦ EST. 2026 — APEX ENTERPRISE"
               class="w-full bg-slate-900 border border-white/10 rounded-lg px-3 py-2 text-xs text-amber-300 focus:outline-none focus:border-amber-500">
           </div>
 
-          <div class="editor-control">
+          <div class="bg-white/[0.04] border border-white/[0.08] rounded-xl p-3.5">
             <label class="text-xs font-semibold uppercase tracking-wider text-amber-400 block mb-2">Tiêu Đề
               Chính</label>
             <textarea id="titleInput" rows="2"
@@ -347,7 +199,7 @@
             </div>
           </div>
 
-          <div class="editor-control">
+          <div class="bg-white/[0.04] border border-white/[0.08] rounded-xl p-3.5">
             <label class="text-xs font-semibold uppercase tracking-wider text-amber-400 block mb-2">Mô Tả</label>
             <textarea id="descInput" rows="2"
               class="w-full bg-slate-900 border border-white/10 rounded-lg px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-amber-500 resize-none">Giải pháp chuẩn hóa quy trình, bảo mật đa tầng và tối ưu hiệu suất cho doanh nghiệp.</textarea>
@@ -358,20 +210,20 @@
             </div>
           </div>
 
-          <div class="editor-control">
+          <div class="bg-white/[0.04] border border-white/[0.08] rounded-xl p-3.5">
             <label class="text-xs font-semibold uppercase tracking-wider text-amber-400 block mb-2">Nút CTA</label>
             <input id="ctaInput" value="KHÁM PHÁ GIẢI PHÁP"
               class="w-full bg-slate-900 border border-white/10 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
           </div>
 
-          <div class="editor-control">
+          <div class="bg-white/[0.04] border border-white/[0.08] rounded-xl p-3.5">
             <label class="text-xs font-semibold uppercase tracking-wider text-amber-400 block mb-2">Màn Hình Device
               UI</label>
             <input id="uiInput" type="file" accept="image/*"
               class="w-full text-xs text-slate-400 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:bg-slate-800 file:text-slate-200 cursor-pointer">
           </div>
 
-          <div class="editor-control">
+          <div class="bg-white/[0.04] border border-white/[0.08] rounded-xl p-3.5">
             <label class="text-xs font-semibold uppercase tracking-wider text-amber-400 block mb-2">Loại Device</label>
             <select id="deviceType"
               class="w-full bg-slate-900 border border-white/10 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
@@ -384,13 +236,13 @@
 
         <!-- DESIGN TAB -->
         <div id="tab-design" class="space-y-4 hidden">
-          <div class="editor-control">
+          <div class="bg-white/[0.04] border border-white/[0.08] rounded-xl p-3.5">
             <label class="text-xs font-semibold uppercase tracking-wider text-amber-400 block mb-2">Design Style
               Preset</label>
             <div class="grid grid-cols-2 gap-2" id="styleSwatchGrid"></div>
           </div>
 
-          <div class="editor-control">
+          <div class="bg-white/[0.04] border border-white/[0.08] rounded-xl p-3.5">
             <label class="text-xs font-semibold uppercase tracking-wider text-amber-400 block mb-2">Màu Chính (Primary /
               CTA)</label>
             <div class="flex gap-2"><input id="primaryColor" type="color" value="#D4AF37"
@@ -399,7 +251,7 @@
                 class="flex-1 bg-slate-900 border border-white/10 rounded-lg px-2 py-2 text-xs focus:outline-none focus:border-amber-500">
             </div>
           </div>
-          <div class="editor-control">
+          <div class="bg-white/[0.04] border border-white/[0.08] rounded-xl p-3.5">
             <label class="text-xs font-semibold uppercase tracking-wider text-amber-400 block mb-2">Màu Nền</label>
             <div class="flex gap-2"><input id="bgColor" type="color" value="#0A0E17"
                 class="w-12 h-10 rounded-lg border border-white/20 cursor-pointer bg-transparent"><input id="bgHex"
@@ -407,7 +259,7 @@
                 class="flex-1 bg-slate-900 border border-white/10 rounded-lg px-2 py-2 text-xs focus:outline-none focus:border-amber-500">
             </div>
           </div>
-          <div class="editor-control">
+          <div class="bg-white/[0.04] border border-white/[0.08] rounded-xl p-3.5">
             <label class="text-xs font-semibold uppercase tracking-wider text-amber-400 block mb-2">Màu Chữ</label>
             <div class="flex gap-2"><input id="textColor" type="color" value="#FFFFFF"
                 class="w-12 h-10 rounded-lg border border-white/20 cursor-pointer bg-transparent"><input id="textHex"
@@ -416,7 +268,7 @@
             </div>
           </div>
 
-          <div class="editor-control">
+          <div class="bg-white/[0.04] border border-white/[0.08] rounded-xl p-3.5">
             <label class="text-xs font-semibold uppercase tracking-wider text-amber-400 block mb-2">Nền Gradient</label>
             <select id="gradientType"
               class="w-full bg-slate-900 border border-white/10 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
@@ -426,7 +278,7 @@
             </select>
           </div>
 
-          <div class="editor-control">
+          <div class="bg-white/[0.04] border border-white/[0.08] rounded-xl p-3.5">
             <label class="text-xs font-semibold uppercase tracking-wider text-amber-400 block mb-2">Font Heading
               (Serif)</label>
             <select id="serifFont"
@@ -436,7 +288,7 @@
               <option value="Inter">Inter</option>
             </select>
           </div>
-          <div class="editor-control">
+          <div class="bg-white/[0.04] border border-white/[0.08] rounded-xl p-3.5">
             <label class="text-xs font-semibold uppercase tracking-wider text-amber-400 block mb-2">Font Body
               (Sans)</label>
             <select id="sansFont"
@@ -446,13 +298,13 @@
             </select>
           </div>
 
-          <div class="editor-control">
+          <div class="bg-white/[0.04] border border-white/[0.08] rounded-xl p-3.5">
             <label class="text-xs font-semibold uppercase tracking-wider text-amber-400 block mb-2">Border Radius: <span
                 id="borderRadiusValue">16px</span></label>
-            <input id="borderRadius" type="range" min="0" max="40" value="16" class="range-slider">
+            <input id="borderRadius" type="range" min="0" max="40" value="16" class="w-full accent-[#D4AF37]">
           </div>
 
-          <div class="editor-control">
+          <div class="bg-white/[0.04] border border-white/[0.08] rounded-xl p-3.5">
             <label class="text-xs font-semibold uppercase tracking-wider text-amber-400 block mb-2">Shadow</label>
             <select id="shadowIntensity"
               class="w-full bg-slate-900 border border-white/10 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
@@ -463,49 +315,49 @@
             </select>
           </div>
 
-          <div class="editor-control">
+          <div class="bg-white/[0.04] border border-white/[0.08] rounded-xl p-3.5">
             <label class="text-xs font-semibold uppercase tracking-wider text-amber-400 block mb-2">Glow: <span
                 id="glowValue">30%</span></label>
-            <input id="glowIntensity" type="range" min="0" max="100" value="30" class="range-slider">
+            <input id="glowIntensity" type="range" min="0" max="100" value="30" class="w-full accent-[#D4AF37]">
           </div>
         </div>
 
         <!-- ADVANCED TAB -->
         <div id="tab-advanced" class="space-y-4 hidden">
-          <div class="editor-control">
+          <div class="bg-white/[0.04] border border-white/[0.08] rounded-xl p-3.5">
             <label class="flex items-center gap-2 text-xs text-slate-300"><input id="enable3D" type="checkbox"
                 class="w-4 h-4 accent-amber-500"> Bật 3D Tilt cho khung Device</label>
           </div>
-          <div class="editor-control space-y-3">
+          <div class="bg-white/[0.04] border border-white/[0.08] rounded-xl p-3.5 space-y-3">
             <label class="text-xs font-semibold uppercase tracking-wider text-amber-400 block">Xoay Device (3D)</label>
             <div><label class="text-[11px] text-slate-300 block mb-1">Rotate X: <span
                   id="rotateXValue">0</span>°</label><input id="rotateX" type="range" min="-45" max="45" value="0"
-                class="range-slider"></div>
+                class="w-full accent-[#D4AF37]"></div>
             <div><label class="text-[11px] text-slate-300 block mb-1">Rotate Y: <span
                   id="rotateYValue">0</span>°</label><input id="rotateY" type="range" min="-45" max="45" value="0"
-                class="range-slider"></div>
+                class="w-full accent-[#D4AF37]"></div>
             <div><label class="text-[11px] text-slate-300 block mb-1">Rotate Z: <span
                   id="rotateZValue">-6</span>°</label><input id="rotateZ" type="range" min="-45" max="45" value="-6"
-                class="range-slider"></div>
+                class="w-full accent-[#D4AF37]"></div>
           </div>
-          <div class="editor-control">
+          <div class="bg-white/[0.04] border border-white/[0.08] rounded-xl p-3.5">
             <label class="text-xs font-semibold uppercase tracking-wider text-amber-400 block mb-2">Perspective: <span
                 id="perspectiveValue">1000</span>px</label>
-            <input id="perspective" type="range" min="400" max="2000" value="1000" class="range-slider">
+            <input id="perspective" type="range" min="400" max="2000" value="1000" class="w-full accent-[#D4AF37]">
           </div>
-          <div class="editor-control">
+          <div class="bg-white/[0.04] border border-white/[0.08] rounded-xl p-3.5">
             <label class="text-xs font-semibold uppercase tracking-wider text-amber-400 block mb-2">Device Scale: <span
                 id="deviceScaleValue">100</span>%</label>
-            <input id="deviceScale" type="range" min="50" max="150" value="100" class="range-slider">
+            <input id="deviceScale" type="range" min="50" max="150" value="100" class="w-full accent-[#D4AF37]">
           </div>
-          <div class="editor-control">
+          <div class="bg-white/[0.04] border border-white/[0.08] rounded-xl p-3.5">
             <label class="text-xs font-semibold uppercase tracking-wider text-amber-400 block mb-2">Layers (khoá / ẩn /
               vị trí)</label>
             <div id="layersList"></div>
             <p class="text-[10px] text-slate-500 mt-1">Kéo trực tiếp phần tử trên canvas để đổi vị trí (offset). Khoá để
               tránh kéo nhầm.</p>
           </div>
-          <div class="editor-control">
+          <div class="bg-white/[0.04] border border-white/[0.08] rounded-xl p-3.5">
             <label class="text-xs font-semibold uppercase tracking-wider text-amber-400 block mb-2">Generate
               Variation</label>
             <button id="generateVariationBtn"
@@ -523,7 +375,7 @@
     <!-- CANVAS -->
     <main class="flex-1 overflow-hidden flex flex-col bg-gradient-to-br from-slate-900/20 to-transparent">
       <div class="border-b border-white/10 bg-[#0B0F17]/50 backdrop-blur-sm px-4 py-3 flex items-center gap-3">
-        <button id="zoomOut" class="icon-btn" title="Thu nhỏ">−</button>
+        <button id="zoomOut" class="inline-flex h-8 w-8 items-center justify-center rounded-[10px] bg-white/[0.08] text-[13px] transition-colors hover:bg-white/[0.16] data-[active=true]:bg-[rgba(212,175,55,0.35)] data-[active=true]:text-[#D4AF37]" title="Thu nhỏ">−</button>
         <select id="zoomLevel"
           class="bg-slate-900 border border-white/10 rounded-lg px-2 py-1 text-xs text-white focus:outline-none focus:border-amber-500">
           <option value="50">50%</option>
@@ -532,65 +384,60 @@
           <option value="150">150%</option>
           <option value="200">200%</option>
         </select>
-        <button id="zoomIn" class="icon-btn" title="Phóng to">+</button>
+        <button id="zoomIn" class="inline-flex h-8 w-8 items-center justify-center rounded-[10px] bg-white/[0.08] text-[13px] transition-colors hover:bg-white/[0.16] data-[active=true]:bg-[rgba(212,175,55,0.35)] data-[active=true]:text-[#D4AF37]" title="Phóng to">+</button>
         <div class="w-px h-6 bg-white/10"></div>
-        <button id="toggleGrid" class="icon-btn" title="Lưới">📐</button>
-        <button id="toggleSafeZone" class="icon-btn" title="Safe zone">⚠️</button>
-        <button id="previewDesktop" class="icon-btn on" title="Xem full">🖥️</button>
-        <button id="previewMobile" class="icon-btn" title="Xem thu nhỏ giả lập mobile">📱</button>
+        <button id="toggleGrid" class="inline-flex h-8 w-8 items-center justify-center rounded-[10px] bg-white/[0.08] text-[13px] transition-colors hover:bg-white/[0.16] data-[active=true]:bg-[rgba(212,175,55,0.35)] data-[active=true]:text-[#D4AF37]" title="Lưới">📐</button>
+        <button id="toggleSafeZone" class="inline-flex h-8 w-8 items-center justify-center rounded-[10px] bg-white/[0.08] text-[13px] transition-colors hover:bg-white/[0.16] data-[active=true]:bg-[rgba(212,175,55,0.35)] data-[active=true]:text-[#D4AF37]" title="Safe zone">⚠️</button>
+        <button id="previewDesktop" class="inline-flex h-8 w-8 items-center justify-center rounded-[10px] bg-white/[0.08] text-[13px] transition-colors hover:bg-white/[0.16] data-[active=true]:bg-[rgba(212,175,55,0.35)] data-[active=true]:text-[#D4AF37]" data-active="true" title="Xem full">🖥️</button>
+        <button id="previewMobile" class="inline-flex h-8 w-8 items-center justify-center rounded-[10px] bg-white/[0.08] text-[13px] transition-colors hover:bg-white/[0.16] data-[active=true]:bg-[rgba(212,175,55,0.35)] data-[active=true]:text-[#D4AF37]" title="Xem thu nhỏ giả lập mobile">📱</button>
         <div class="flex-1"></div>
         <span id="canvasSizeLabel" class="text-[11px] text-slate-400 font-mono">1200 × 628</span>
       </div>
 
-      <div id="canvasContainer" class="checker flex-1 flex items-center justify-center overflow-auto p-6">
-        <div id="bannerViewport" style="width:100%; max-width:900px; transition: max-width .2s;">
-          <div id="bannerDOM" class="relative bg-[#0A0E17] overflow-hidden shadow-2xl"
-            style="aspect-ratio: 1200/628; width:100%; border-radius:16px;">
+      <div id="canvasContainer" class="flex-1 flex items-center justify-center overflow-auto p-6 [background-image:linear-gradient(45deg,#111827_25%,transparent_25%),linear-gradient(-45deg,#111827_25%,transparent_25%),linear-gradient(45deg,transparent_75%,#111827_75%),linear-gradient(-45deg,transparent_75%,#111827_75%)] [background-size:20px_20px] [background-position:0_0,0_10px,10px_-10px,-10px_0]">
+        <div id="bannerViewport" class="w-full max-w-[900px] transition-[max-width] duration-200">
+          <div id="bannerDOM"
+            class="relative bg-[#0A0E17] overflow-hidden shadow-2xl aspect-[1200/628] w-full rounded-2xl">
 
             <div id="bgGlow"
               class="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-amber-500/10 blur-[100px] pointer-events-none">
             </div>
-            <div id="gridOverlay" class="absolute inset-0 pointer-events-none z-40"
-              style="background-image: linear-gradient(rgba(255,255,255,.12) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.12) 1px, transparent 1px); background-size: 40px 40px; display:none;">
+            <div id="gridOverlay"
+              class="absolute inset-0 pointer-events-none z-40 hidden [background-image:linear-gradient(rgba(255,255,255,.12)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.12)_1px,transparent_1px)] [background-size:40px_40px]">
             </div>
             <div id="safeZoneOverlay"
-              class="absolute inset-[6%] pointer-events-none z-40 border-2 border-dashed border-red-400/50"
-              style="display:none;"></div>
+              class="absolute inset-[6%] pointer-events-none z-40 hidden border-2 border-dashed border-red-400/50"></div>
 
-            <div id="contentWrap" class="absolute inset-0 flex" style="flex-direction: row;">
-              <div id="textCol" class="flex flex-col relative"
-                style="width:58%; padding: 0 6% 0 6%; justify-content:center;">
-                <div id="logoArea" class="draggable inline-block w-fit" style="margin-bottom:12px;">
+            <div id="contentWrap" class="absolute inset-0 flex flex-row">
+              <div id="textCol" class="flex flex-col relative w-[58%] px-[6%] justify-center">
+                <div id="logoArea" class="cursor-grab touch-none outline-offset-4 hover:outline-1 hover:outline-dashed hover:outline-[rgba(212,175,55,0.4)] data-[dragging=true]:cursor-grabbing data-[dragging=true]:outline-2 data-[dragging=true]:outline-dashed data-[dragging=true]:outline-[#D4AF37] data-[dragging=true]:z-30 data-[locked=true]:cursor-not-allowed data-[hidden=true]:hidden inline-block w-fit mb-3">
                   <img id="domLogoImg" class="h-12 object-contain hidden" alt="Brand Logo">
                   <div id="domLogoPlaceholder"
                     class="text-[10px] font-mono text-slate-500 italic border border-dashed border-white/10 px-2.5 py-1 rounded">
                     [Logo]</div>
                 </div>
-                <div id="badgeArea" class="draggable inline-block w-fit" style="margin-bottom:12px;">
+                <div id="badgeArea" class="cursor-grab touch-none outline-offset-4 hover:outline-1 hover:outline-dashed hover:outline-[rgba(212,175,55,0.4)] data-[dragging=true]:cursor-grabbing data-[dragging=true]:outline-2 data-[dragging=true]:outline-dashed data-[dragging=true]:outline-[#D4AF37] data-[dragging=true]:z-30 data-[locked=true]:cursor-not-allowed data-[hidden=true]:hidden inline-block w-fit mb-3">
                   <div id="domBadge"
                     class="inline-flex items-center gap-2 border border-amber-500/30 bg-amber-500/10 px-3 py-1 rounded-full text-[10px] font-mono tracking-widest text-amber-300">
                     ✦ EST. 2026 — APEX ENTERPRISE</div>
                 </div>
-                <div id="titleArea" class="draggable" style="margin-bottom:12px;">
-                  <h2 id="domTitle" class="font-serif-brand font-bold text-white leading-[1.15] tracking-tight"
-                    style="font-size:34px;">Nền Tảng Quản Trị Số Thế Hệ Mới</h2>
+                <div id="titleArea" class="cursor-grab touch-none outline-offset-4 hover:outline-1 hover:outline-dashed hover:outline-[rgba(212,175,55,0.4)] data-[dragging=true]:cursor-grabbing data-[dragging=true]:outline-2 data-[dragging=true]:outline-dashed data-[dragging=true]:outline-[#D4AF37] data-[dragging=true]:z-30 data-[locked=true]:cursor-not-allowed data-[hidden=true]:hidden mb-3">
+                  <h2 id="domTitle" class="font-[family-name:'Playfair_Display',serif] font-bold text-white leading-[1.15] tracking-tight text-[34px]">Nền Tảng Quản Trị Số Thế Hệ Mới</h2>
                 </div>
-                <div id="descArea" class="draggable" style="margin-bottom:16px;">
-                  <p id="domDesc" class="text-slate-300 leading-relaxed" style="font-size:13px; max-width:28rem;">Giải
+                <div id="descArea" class="cursor-grab touch-none outline-offset-4 hover:outline-1 hover:outline-dashed hover:outline-[rgba(212,175,55,0.4)] data-[dragging=true]:cursor-grabbing data-[dragging=true]:outline-2 data-[dragging=true]:outline-dashed data-[dragging=true]:outline-[#D4AF37] data-[dragging=true]:z-30 data-[locked=true]:cursor-not-allowed data-[hidden=true]:hidden mb-3">
+                  <p id="domDesc" class="text-slate-300 leading-relaxed text-[13px] max-w-md">Giải
                     pháp chuẩn hóa quy trình, bảo mật đa tầng và tối ưu hiệu suất cho doanh nghiệp.</p>
                 </div>
-                <div id="ctaArea" class="draggable inline-block w-fit">
+                <div id="ctaArea" class="cursor-grab touch-none outline-offset-4 hover:outline-1 hover:outline-dashed hover:outline-[rgba(212,175,55,0.4)] data-[dragging=true]:cursor-grabbing data-[dragging=true]:outline-2 data-[dragging=true]:outline-dashed data-[dragging=true]:outline-[#D4AF37] data-[dragging=true]:z-30 data-[locked=true]:cursor-not-allowed data-[hidden=true]:hidden inline-block w-fit">
                   <span id="domCta"
                     class="inline-flex items-center gap-2 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-bold px-5 py-2.5 rounded-xl text-xs tracking-wider">KHÁM
                     PHÁ GIẢI PHÁP <span>→</span></span>
                 </div>
               </div>
 
-              <div id="mockupCol" class="flex items-center justify-center relative"
-                style="width:42%; perspective:1000px;">
+              <div id="mockupCol" class="flex items-center justify-center relative w-[42%] [perspective:1000px]">
                 <div id="deviceFrame"
-                  class="draggable relative rounded-[2rem] bg-slate-900 border-[6px] border-slate-700/60 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)] overflow-hidden"
-                  style="width:65%; aspect-ratio:9/16; transform: rotateZ(-6deg);">
+                  class="cursor-grab touch-none outline-offset-4 hover:outline-1 hover:outline-dashed hover:outline-[rgba(212,175,55,0.4)] data-[dragging=true]:cursor-grabbing data-[dragging=true]:outline-2 data-[dragging=true]:outline-dashed data-[dragging=true]:outline-[#D4AF37] data-[dragging=true]:z-30 data-[locked=true]:cursor-not-allowed data-[hidden=true]:hidden relative rounded-[2rem] bg-slate-900 border-[6px] border-slate-700/60 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)] overflow-hidden w-[65%] aspect-[9/16] -rotate-6">
                   <div
                     class="absolute inset-0 bg-gradient-to-tr from-white/10 via-transparent to-transparent z-20 pointer-events-none">
                   </div>
@@ -609,11 +456,11 @@
 
   <canvas id="exportCanvas" class="hidden"></canvas>
 
-  <div id="exportModal" class="modal-overlay hidden">
-    <div class="modal-content">
+  <div id="exportModal" class="fixed inset-0 z-[60] hidden flex items-center justify-center bg-black/[0.55] backdrop-blur-sm">
+    <div class="mx-4 w-full max-w-[480px] rounded-2xl border border-white/[0.08] bg-gradient-to-b from-[#151b28] to-[#0c111b]">
       <div class="border-b border-white/10 px-6 py-4 flex items-center justify-between">
-        <h2 class="font-serif-brand text-lg font-bold">Export Banner</h2>
-        <button id="closeExportModal" class="icon-btn">×</button>
+        <h2 class="font-[family-name:'Playfair_Display',serif] text-lg font-bold">Export Banner</h2>
+        <button id="closeExportModal" class="inline-flex h-8 w-8 items-center justify-center rounded-[10px] bg-white/[0.08] text-[13px] transition-colors hover:bg-white/[0.16] data-[active=true]:bg-[rgba(212,175,55,0.35)] data-[active=true]:text-[#D4AF37]">×</button>
       </div>
       <div class="p-6 space-y-4">
         <div>
@@ -903,8 +750,8 @@
         Object.keys(state.layers).forEach(key => {
           const node = areaEls[key];
           if (!node) return;
-          node.classList.toggle('layer-hidden', !!state.layers[key].hidden);
-          node.classList.toggle('layer-locked', !!state.layers[key].locked);
+          node.dataset.hidden = String(!!state.layers[key].hidden);
+          node.dataset.locked = String(!!state.layers[key].locked);
         });
 
         renderLayersPanel();
@@ -954,18 +801,22 @@
       // LAYERS PANEL
       // ============================================================
       const layerLabels = { logo: 'Logo', badge: 'Badge', title: 'Tiêu đề', desc: 'Mô tả', cta: 'CTA', device: 'Device Mockup' };
+      // Tailwind bundle for the small icon buttons built by JS (24px variant of the toolbar buttons)
+      const LAYER_ICON_BTN = 'inline-flex h-6 w-6 items-center justify-center rounded-[10px] bg-white/[0.08] '
+        + 'text-[11px] transition-colors hover:bg-white/[0.16] data-[active=true]:bg-[rgba(212,175,55,0.35)] '
+        + 'data-[active=true]:text-[#D4AF37]';
       function renderLayersPanel() {
         el.layersList.innerHTML = '';
         Object.keys(state.layers).forEach(key => {
           const row = document.createElement('div');
-          row.className = 'layer-row';
+          row.className = 'mb-1.5 flex items-center justify-between rounded-[10px] border border-white/[0.08] bg-white/[0.04] px-2.5 py-2 text-[11px]';
           const L = state.layers[key];
           row.innerHTML = `
         <span class="text-slate-200">${layerLabels[key]}</span>
         <span class="flex items-center gap-1">
-          <button data-act="hide" data-key="${key}" class="icon-btn" style="width:24px;height:24px;font-size:11px;" title="Ẩn/hiện">${L.hidden ? '🚫' : '👁️'}</button>
-          <button data-act="lock" data-key="${key}" class="icon-btn" style="width:24px;height:24px;font-size:11px;" title="Khoá kéo-thả">${L.locked ? '🔒' : '🔓'}</button>
-          <button data-act="reset" data-key="${key}" class="icon-btn" style="width:24px;height:24px;font-size:11px;" title="Reset vị trí">↺</button>
+          <button data-act="hide" data-key="${key}" class="${LAYER_ICON_BTN}" title="Ẩn/hiện">${L.hidden ? '🚫' : '👁️'}</button>
+          <button data-act="lock" data-key="${key}" class="${LAYER_ICON_BTN}" title="Khoá kéo-thả">${L.locked ? '🔒' : '🔓'}</button>
+          <button data-act="reset" data-key="${key}" class="${LAYER_ICON_BTN}" title="Reset vị trí">↺</button>
         </span>`;
           el.layersList.appendChild(row);
         });
@@ -992,7 +843,7 @@
           const key = posKeyFor(node.id);
           if (!key || state.layers[key].locked) return;
           e.preventDefault();
-          node.classList.add('dragging');
+          node.dataset.dragging = 'true';
           dragCtx = { key, startX: e.clientX, startY: e.clientY, origin: { ...state.positions[key] } };
           node.setPointerCapture(e.pointerId);
         });
@@ -1004,7 +855,7 @@
           applyOffset(node, state.positions[dragCtx.key]);
         });
         ['pointerup', 'pointercancel'].forEach(evt => node.addEventListener(evt, () => {
-          if (dragCtx) { node.classList.remove('dragging'); pushHistory(); dragCtx = null; }
+          if (dragCtx) { node.dataset.dragging = 'false'; pushHistory(); dragCtx = null; }
         }));
       });
 
@@ -1058,8 +909,10 @@
       const swatchGrid = $('styleSwatchGrid');
       Object.entries(stylePresets).forEach(([key, preset]) => {
         const btn = document.createElement('button');
-        btn.className = 'style-swatch bg-slate-900 border-2 border-transparent text-xs py-2 px-3 rounded-lg text-left font-medium text-slate-300' + (key === state.style ? ' active' : '');
+        btn.className = 'bg-slate-900 border-2 border-transparent text-xs py-2 px-3 rounded-lg text-left font-medium text-slate-300 data-[active=true]:border-[#D4AF37] data-[active=true]:text-[#D4AF37] data-[active=true]:bg-[rgba(212,175,55,0.12)]';
+        btn.dataset.group = 'style';
         btn.dataset.style = key;
+        btn.dataset.active = String(key === state.style);
         btn.textContent = preset.label;
         btn.addEventListener('click', () => {
           applyStylePreset(key);
@@ -1075,7 +928,7 @@
         $('bgColor').value = p.bg; $('bgHex').value = p.bg;
         $('textColor').value = p.text; $('textHex').value = p.text;
         $('serifFont').value = p.serif; $('sansFont').value = p.sans;
-        swatchGrid.querySelectorAll('.style-swatch').forEach(b => b.classList.toggle('active', b.dataset.style === key));
+        swatchGrid.querySelectorAll('[data-group="style"]').forEach(b => b.dataset.active = String(b.dataset.style === key));
         render();
       }
 
@@ -1083,10 +936,10 @@
       $('layoutPreset').addEventListener('change', e => { state.layout = e.target.value; render(); pushHistory(); });
 
       // Canvas size buttons
-      document.querySelectorAll('.canvas-btn').forEach(btn => {
+      document.querySelectorAll('[data-group="canvas"]').forEach(btn => {
         btn.addEventListener('click', () => {
-          document.querySelectorAll('.canvas-btn').forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
+          document.querySelectorAll('[data-group="canvas"]').forEach(b => b.dataset.active = 'false');
+          btn.dataset.active = 'true';
           state.canvas.width = parseInt(btn.dataset.w, 10);
           state.canvas.height = parseInt(btn.dataset.h, 10);
           $('customWidth').value = state.canvas.width;
@@ -1098,26 +951,26 @@
         const w = parseInt($('customWidth').value, 10), h = parseInt($('customHeight').value, 10);
         if (!w || !h || w < 100 || h < 100) { notify('Kích thước không hợp lệ'); return; }
         state.canvas.width = w; state.canvas.height = h;
-        document.querySelectorAll('.canvas-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('[data-group="canvas"]').forEach(b => b.dataset.active = 'false');
         render(); pushHistory();
       }
       $('customWidth').addEventListener('change', applyCustomSize);
       $('customHeight').addEventListener('change', applyCustomSize);
 
       // Position buttons
-      document.querySelectorAll('.pos-btn').forEach(btn => {
+      document.querySelectorAll('[data-group="pos"]').forEach(btn => {
         btn.addEventListener('click', () => {
           const target = btn.dataset.target, pos = btn.dataset.pos;
-          document.querySelectorAll(`.pos-btn[data-target="${target}"]`).forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
+          document.querySelectorAll(`[data-group="pos"][data-target="${target}"]`).forEach(b => b.dataset.active = 'false');
+          btn.dataset.active = 'true';
           if (target === 'content') state.contentPos = pos; else state.devicePos = pos;
           render(); pushHistory();
         });
       });
-      document.querySelectorAll('.valign-btn').forEach(btn => {
+      document.querySelectorAll('[data-group="valign"]').forEach(btn => {
         btn.addEventListener('click', () => {
-          document.querySelectorAll('.valign-btn').forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
+          document.querySelectorAll('[data-group="valign"]').forEach(b => b.dataset.active = 'false');
+          btn.dataset.active = 'true';
           state.verticalAlign = btn.dataset.align;
           render(); pushHistory();
         });
@@ -1196,7 +1049,7 @@
       $('modeToggle').addEventListener('click', () => {
         state.isAdvancedMode = !state.isAdvancedMode;
         $('modeLabel').textContent = state.isAdvancedMode ? 'Nâng Cao' : 'Cơ Bản';
-        $('modeToggle').classList.toggle('on', state.isAdvancedMode);
+        $('modeToggle').dataset.active = String(state.isAdvancedMode);
         $('advancedTabBtn').classList.toggle('hidden', !state.isAdvancedMode);
         if (!state.isAdvancedMode) {
           // if currently on advanced tab, switch back to layout tab
@@ -1207,10 +1060,10 @@
 
       // Tabs
       function switchTab(name) {
-        document.querySelectorAll('.tab-btn').forEach(b => { b.classList.toggle('tab-active', b.dataset.tab === name); b.classList.toggle('tab-inactive', b.dataset.tab !== name); });
+        document.querySelectorAll('[data-group="tab"]').forEach(b => { b.dataset.active = String(b.dataset.tab === name); });
         document.querySelectorAll('[id^="tab-"]').forEach(t => t.classList.toggle('hidden', t.id !== 'tab-' + name));
       }
-      document.querySelectorAll('.tab-btn').forEach(btn => btn.addEventListener('click', () => switchTab(btn.dataset.tab)));
+      document.querySelectorAll('[data-group="tab"]').forEach(btn => btn.addEventListener('click', () => switchTab(btn.dataset.tab)));
 
       // Zoom
       let zoom = 100;
@@ -1221,23 +1074,23 @@
 
       // Grid / safe zone toggles
       $('toggleGrid').addEventListener('click', () => {
-        const on = el.gridOverlay.style.display !== 'block';
-        el.gridOverlay.style.display = on ? 'block' : 'none';
-        $('toggleGrid').classList.toggle('on', on);
+        const on = el.gridOverlay.classList.contains('hidden');
+        el.gridOverlay.classList.toggle('hidden', !on);
+        $('toggleGrid').dataset.active = String(on);
       });
       $('toggleSafeZone').addEventListener('click', () => {
-        const on = el.safeZoneOverlay.style.display !== 'block';
-        el.safeZoneOverlay.style.display = on ? 'block' : 'none';
-        $('toggleSafeZone').classList.toggle('on', on);
+        const on = el.safeZoneOverlay.classList.contains('hidden');
+        el.safeZoneOverlay.classList.toggle('hidden', !on);
+        $('toggleSafeZone').dataset.active = String(on);
       });
 
       // Preview desktop/mobile (simulate viewport width)
       $('previewDesktop').addEventListener('click', () => {
-        $('previewDesktop').classList.add('on'); $('previewMobile').classList.remove('on');
+        $('previewDesktop').dataset.active = 'true'; $('previewMobile').dataset.active = 'false';
         el.bannerViewport.style.maxWidth = (900 * zoom / 100) + 'px';
       });
       $('previewMobile').addEventListener('click', () => {
-        $('previewMobile').classList.add('on'); $('previewDesktop').classList.remove('on');
+        $('previewMobile').dataset.active = 'true'; $('previewDesktop').dataset.active = 'false';
         el.bannerViewport.style.maxWidth = '360px';
       });
 
@@ -1529,11 +1382,11 @@
         $('perspective').value = state.perspective;
         $('deviceScale').value = state.deviceScale;
 
-        document.querySelectorAll('.canvas-btn').forEach(b => b.classList.toggle('active', parseInt(b.dataset.w) === state.canvas.width && parseInt(b.dataset.h) === state.canvas.height));
-        document.querySelectorAll('.pos-btn[data-target="content"]').forEach(b => b.classList.toggle('active', b.dataset.pos === state.contentPos));
-        document.querySelectorAll('.pos-btn[data-target="device"]').forEach(b => b.classList.toggle('active', b.dataset.pos === state.devicePos));
-        document.querySelectorAll('.valign-btn').forEach(b => b.classList.toggle('active', b.dataset.align === state.verticalAlign));
-        swatchGrid.querySelectorAll('.style-swatch').forEach(b => b.classList.toggle('active', b.dataset.style === state.style));
+        document.querySelectorAll('[data-group="canvas"]').forEach(b => b.dataset.active = String(parseInt(b.dataset.w) === state.canvas.width && parseInt(b.dataset.h) === state.canvas.height));
+        document.querySelectorAll('[data-group="pos"][data-target="content"]').forEach(b => b.dataset.active = String(b.dataset.pos === state.contentPos));
+        document.querySelectorAll('[data-group="pos"][data-target="device"]').forEach(b => b.dataset.active = String(b.dataset.pos === state.devicePos));
+        document.querySelectorAll('[data-group="valign"]').forEach(b => b.dataset.active = String(b.dataset.align === state.verticalAlign));
+        swatchGrid.querySelectorAll('[data-group="style"]').forEach(b => b.dataset.active = String(b.dataset.style === state.style));
       }
 
       // ============================================================
