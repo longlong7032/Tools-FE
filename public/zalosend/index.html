@@ -8,13 +8,6 @@
   <link rel="icon" href="/assets/index.svg" type="image/x-icon" />
 </head>
 <body>
-  <header class="topbar">
-    <div class="brand">💬 ZaloSend <span>CRM</span></div>
-    <div id="connPill" class="pill pill--off">
-      <span class="dot"></span><span id="connText">Chưa đăng nhập</span>
-    </div>
-  </header>
-
   <!-- ============ LOGIN VIEW ============ -->
   <section id="loginView" class="view">
     <div class="card center">
@@ -34,35 +27,57 @@
     </div>
   </section>
 
-  <!-- ============ DASHBOARD VIEW ============ -->
-  <section id="dashView" class="view" hidden>
-    <div class="grid">
-      <!-- Cột trái: khách hàng -->
-      <div class="card">
-        <div class="card-head">
-          <h3>Khách hàng</h3>
-          <button id="btnImport" class="btn btn--ghost btn--sm">⬇ Import từ Zalo</button>
-        </div>
-        <form id="customerForm" class="stack">
-          <input id="cName" placeholder="Tên khách hàng" />
-          <input id="cThread" placeholder="SĐT / UserId (threadId)" required />
-          <input id="cTag" placeholder="Nhãn (tuỳ chọn, vd: vip)" />
-          <button class="btn btn--primary" type="submit">+ Thêm</button>
-        </form>
-        <div class="list-head">
-          <label class="chk"><input type="checkbox" id="selectAll" /> Chọn tất cả</label>
-          <span id="custCount" class="muted"></span>
-        </div>
-        <ul id="customerList" class="clist"></ul>
+  <!-- ============ DASHBOARD (layout kiểu Zalo: rail + sidebar + main) ============ -->
+  <div id="dashView" class="app" hidden>
+    <!-- Rail điều hướng bên trái -->
+    <nav class="rail">
+      <div class="rail__logo">Z</div>
+      <button class="rail__btn rail__btn--active" title="Khách hàng &amp; hội thoại">💬</button>
+      <div class="rail__spacer"></div>
+      <div id="connPill" class="pill pill--off" title="Trạng thái đăng nhập">
+        <span class="dot"></span>
+        <span id="connText" class="sr-only">Chưa đăng nhập</span>
+      </div>
+    </nav>
+
+    <!-- Sidebar: danh sách khách hàng (giống danh sách hội thoại Zalo) -->
+    <aside class="sidebar">
+      <div class="sidebar__head">
+        <h3>Khách hàng</h3>
+        <button id="btnImport" class="btn btn--ghost btn--sm">⬇ Import</button>
       </div>
 
-      <!-- Cột phải: gửi tin -->
-      <div class="card">
-        <div class="tabs">
+      <form id="customerForm" class="stack sidebar__form">
+        <input id="cName" placeholder="Tên khách hàng" />
+        <input id="cThread" placeholder="SĐT / UserId (threadId)" required />
+        <input id="cTag" placeholder="Nhãn (tuỳ chọn, vd: vip)" />
+        <button class="btn btn--primary" type="submit">+ Thêm</button>
+      </form>
+
+      <div class="list-head">
+        <label class="chk"><input type="checkbox" id="selectAll" /> Chọn tất cả</label>
+        <span id="custCount" class="muted"></span>
+      </div>
+      <ul id="customerList" class="clist sidebar__list"></ul>
+    </aside>
+
+    <!-- Main: khung soạn/gửi tin, giống khung chat Zalo -->
+    <main class="chat">
+      <header class="chat__head">
+        <div class="chat__title">
+          <div class="avatar avatar--brand">Z</div>
+          <div>
+            <div class="chat__name">ZaloSend</div>
+            <div class="chat__sub muted">Gửi tin nhắn tới khách hàng</div>
+          </div>
+        </div>
+        <div class="tabs chat__tabs">
           <button class="tab tab--active" data-tab="single">Gửi đơn lẻ</button>
           <button class="tab" data-tab="broadcast">Gửi hàng loạt</button>
         </div>
+      </header>
 
+      <div class="chat__body">
         <!-- Đơn lẻ -->
         <div id="tab-single" class="tabpane">
           <label class="lbl">Chọn khách hàng</label>
@@ -100,8 +115,8 @@
           <div id="bcLog" class="log"></div>
         </div>
       </div>
-    </div>
-  </section>
+    </main>
+  </div>
 
   <!-- ============ IMPORT MODAL ============ -->
   <div id="importModal" class="modal" hidden>

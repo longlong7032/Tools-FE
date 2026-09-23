@@ -1,7 +1,8 @@
 /* global io */
 'use strict';
 
-const socket = io('https://tool-8s0g.onrender.com');
+const BASE_URL = 'https://tool-8s0g.onrender.com';
+const socket = io(BASE_URL);
 
 // ---------- Helpers ----------
 const $ = (sel) => document.querySelector(sel);
@@ -16,7 +17,7 @@ function logLine(box, text, cls = 'info') {
 }
 
 async function api(url, opts) {
-  const res = await fetch(url, {
+  const res = await fetch(BASE_URL + url, {
     headers: { 'Content-Type': 'application/json' },
     ...opts,
   });
