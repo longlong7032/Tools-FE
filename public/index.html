@@ -7,6 +7,16 @@
 
     <title>Tool Hub</title>
     <link rel="icon" type="image/svg+xml" href="assets/index.svg" />
+
+    <!-- PWA -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="theme-color" content="#09090b" />
+    <link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Tool Hub" />
+
     <!-- Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -256,6 +266,26 @@
           px-4 py-3
           dark:border-zinc-800
         ">
+                <button type="button" id="install-app" class="
+            mt-2 hidden w-full
+            rounded-xl border border-emerald-200 bg-gradient-to-r from-emerald-50 to-teal-50
+            px-3 py-2.5
+            text-xs font-semibold
+            text-emerald-700 shadow-sm
+            transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md
+            dark:border-emerald-900/60 dark:from-emerald-950/60 dark:to-teal-950/60 dark:text-emerald-300
+          ">
+                    <span class="flex items-center justify-center gap-2">
+                        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.8"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14" />
+                        </svg>
+
+                        <span class="install-label">Cài đặt ứng dụng</span>
+                    </span>
+                </button>
+
                 <p class="text-[10px] text-zinc-400">
                     Internal use only
                 </p>
@@ -1196,6 +1226,7 @@
 
     <!-- Existing attendance logic -->
     <script src="/assets/attendance.js" defer></script>
+    <script src="/assets/pwa.js" defer></script>
 
 </body>
 

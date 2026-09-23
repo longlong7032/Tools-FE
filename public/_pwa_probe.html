@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>PWA_PROBE_PENDING</title>
+</head>
+
+<body>
+    <pre id="out">pending</pre>
+    <script>
+        (async () => {
+            const result = { errors: [] };
+            try {
+                await navigator.serviceWorker.register('/sw.js');
+                await navigator.serviceWorker.ready;
+                result.ready = true;
+
+                if (!navigator.serviceWorker.controller) {
+                    await new Promise((resolve) => {
+                        navigator.serviceWorker.addEventListener('controllerchange', resolve, { once: true });
+                        setTimeout(resolve, 5000);
+                    });
+                }
+                result.controlled = !!navigator.serviceWorker.controller;
+
+                result.cacheNames = await caches.keys();
+                const cache = await caches.open('toolhub-v1');
+                const keys = (await cache.keys()).map((req) => {
+                    const u = new URL(req.url);
+                    return u.pathname + u.search;
+                });
+                result.precacheCount = keys.length;
+                result.precachePaths = keys.sort();
+
+                const mf = await fetch('/manifest.webmanifest').then((r) => r.json());
+                result.manifest = { name: mf.name, start_url: mf.start_url, icons: (mf.icons || []).length };
+
+                result.icon512Ok = await fetch('/assets/icons/icon-512.png')
+                    .then((r) => r.ok).catch(() => false);
+
+                // /api/* must never be answered from cache:
+                // online (python server) => http_<status>; offline => network_error
+                result.apiStatus = await fetch('/api/v1/health')
+                    .then((r) => 'http_' + r.status)
+                    .catch(() => 'network_error');
+
+                result.title = document.title;
+            } catch (e) {
+                result.errors.push(String(e));
+            }
+            document.getElementById('out').textContent = 'RESULT:' + JSON.stringify(result);
+            document.title = 'PWA_PROBE_DONE';
+        })();
+    </script>
+</body>
+
+</html>
