@@ -41,11 +41,18 @@ function showView(logged) {
 }
 
 // ---------- Login flow ----------
+let qrReady = false;
+
+function setQrBox(html) {
+  $('#qrBox').innerHTML = html;
+}
+
 $('#btnLogin').onclick = () => {
+  qrReady = false;
   $('#btnLogin').disabled = true;
   $('#btnCancel').hidden = false;
   $('#loginLog').innerHTML = '';
-  $('#qrBox').innerHTML = '<div class="qr-placeholder">Đang tạo mã QR...</div>';
+  setQrBox('<div class="qr-placeholder"><span class="spinner"></span>Đang khởi tạo phiên đăng nhập...</div>');
   socket.emit('login:start');
 };
 
@@ -53,6 +60,7 @@ $('#btnCancel').onclick = () => {
   socket.emit('login:cancel');
   $('#btnLogin').disabled = false;
   $('#btnCancel').hidden = true;
+  setQrBox('<div class="qr-placeholder">Mã QR sẽ hiện ở đây</div>');
 };
 
 socket.on('login:status', (s) => {
@@ -61,11 +69,19 @@ socket.on('login:status', (s) => {
 });
 
 socket.on('login:qr', ({ qr }) => {
+  qrReady = true;
   setPill('wait');
-  $('#qrBox').innerHTML = `<img src="${qr}" alt="QR đăng nhập Zalo" />`;
+  setQrBox(`<img src="${qr}" alt="QR đăng nhập Zalo" />`);
 });
 
-socket.on('login:log', ({ message }) => logLine($('#loginLog'), message, 'info'));
+socket.on('login:log', ({ message }) => {
+  logLine($('#loginLog'), message, 'info');
+  // Trong lúc chưa có QR, phản chiếu trạng thái mới nhất ngay trong khung QR
+  // để người dùng thấy đang xử lý chứ không phải bị treo im lặng.
+  if (!qrReady) {
+    setQrBox(`<div class="qr-placeholder"><span class="spinner"></span>${escapeHtml(message)}</div>`);
+  }
+});
 
 socket.on('login:done', (status) => {
   $('#btnLogin').disabled = false;
@@ -76,6 +92,7 @@ socket.on('login:done', (status) => {
     showView(true);
   } else {
     setPill('off');
+    setQrBox('<div class="qr-placeholder qr-placeholder--fail">❌ Chưa đăng nhập được. Vui lòng thử lại.</div>');
     logLine($('#loginLog'), 'Chưa đăng nhập được.', 'fail');
   }
 });
@@ -84,6 +101,7 @@ socket.on('login:error', ({ message }) => {
   $('#btnLogin').disabled = false;
   $('#btnCancel').hidden = true;
   setPill('off');
+  setQrBox(`<div class="qr-placeholder qr-placeholder--fail">❌ Lỗi: ${escapeHtml(message)}<br />Vui lòng bấm "Đăng nhập Zalo" để thử lại.</div>`);
   logLine($('#loginLog'), 'Lỗi: ' + message, 'fail');
 });
 
