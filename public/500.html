@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="vi" class="h-full">
+
+<head>
+    <meta charset="UTF-8" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>500 — Lỗi máy chủ | Tool Hub</title>
+
+    <link rel="icon" type="image/svg+xml" href="/assets/index.svg" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="theme-color" content="#09090b" />
+    <link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Tool Hub" />
+
+    <!-- robots: không index trang lỗi -->
+    <meta name="robots" content="noindex" />
+
+    <!-- Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+        rel="stylesheet" />
+
+    <!-- Tailwind -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style type="text/tailwindcss">
+        @custom-variant dark (&:where(.dark, .dark *));
+    </style>
+
+    <script>
+        // Apply theme before page renders
+        (() => {
+            const savedTheme = localStorage.getItem("toolhub-theme");
+
+            if (
+                savedTheme === "dark" ||
+                (!savedTheme &&
+                    window.matchMedia("(prefers-color-scheme: dark)").matches)
+            ) {
+                document.documentElement.classList.add("dark");
+            }
+        })();
+    </script>
+</head>
+
+<body class="
+    h-full
+    bg-white text-zinc-900
+    dark:bg-zinc-950 dark:text-zinc-100
+    font-[Inter]
+  ">
+
+    <main class="flex min-h-screen flex-col items-center justify-center px-4 py-12">
+
+        <!-- Logo -->
+        <div class="mb-8 flex items-center gap-3">
+            <img src="/assets/index.svg" alt="Logo" class="h-9 w-9 rounded-lg" />
+
+            <span class="text-sm font-semibold tracking-tight">
+                Tool Hub
+            </span>
+        </div>
+
+        <!-- Card lỗi -->
+        <div class="
+            w-full max-w-md
+            rounded-2xl border border-zinc-200 bg-white
+            p-8 text-center shadow-sm
+            dark:border-zinc-800 dark:bg-zinc-900
+          ">
+
+            <!-- Icon cảnh báo -->
+            <div class="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-red-50 text-red-600 dark:bg-red-950/50 dark:text-red-400">
+                <svg class="h-7 w-7" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                </svg>
+            </div>
+
+            <!-- Mã lỗi -->
+            <p class="text-6xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
+                500
+            </p>
+
+            <h1 class="mt-3 text-lg font-semibold tracking-tight">
+                Đã xảy ra lỗi máy chủ
+            </h1>
+
+            <p class="mt-2 text-sm leading-6 text-zinc-500 dark:text-zinc-400">
+                Máy chủ gặp sự cố không mong muốn khi xử lý yêu cầu.
+                Vui lòng thử lại sau ít phút. Chúng tôi đã ghi nhận lỗi này.
+            </p>
+
+            <!-- Hành động -->
+            <div class="mt-7 flex flex-col gap-3">
+
+                <button type="button" onclick="window.location.reload()" class="
+                    flex w-full items-center justify-center gap-2
+                    rounded-xl bg-zinc-900 px-5 py-2.5
+                    text-sm font-medium text-white
+                    transition hover:bg-zinc-700
+                    active:scale-[0.98]
+                    dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300
+                  ">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+                    </svg>
+
+                    Thử lại
+                </button>
+
+                <div class="flex gap-3">
+
+                    <button type="button" onclick="window.history.length > 1 ? window.history.back() : window.location.href='/'" class="
+                        flex-1
+                        rounded-xl border border-zinc-200 px-5 py-2.5
+                        text-sm font-medium text-zinc-700
+                        transition hover:bg-zinc-50
+                        dark:border-zinc-700
+                        dark:text-zinc-300 dark:hover:bg-zinc-800
+                      ">
+                        Quay lại
+                    </button>
+
+                    <a href="/" class="
+                        flex-1
+                        rounded-xl border border-zinc-200 px-5 py-2.5
+                        text-sm font-medium text-zinc-700
+                        transition hover:bg-zinc-50
+                        dark:border-zinc-700
+                        dark:text-zinc-300 dark:hover:bg-zinc-800
+                      ">
+                        Về trang chủ
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Footer -->
+        <p class="mt-6 text-xs text-zinc-400 dark:text-zinc-500">
+            Tool Hub — Internal Workspace
+        </p>
+
+    </main>
+
+</body>
+
+</html>
