@@ -295,7 +295,8 @@ h1, h2, h3, h4, h5, h6 {
 /* Sticky panel that scrolls its own content instead of getting cut off
    when the panel is taller than the viewport (pair with .sticky-top). */
 .sticky-scroll {
-  max-height: calc(100vh - 2rem);
+  top: calc(64px + 1rem);
+  max-height: calc(100vh - 64px - 2rem);
   overflow-y: auto;
 }
 

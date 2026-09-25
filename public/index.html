@@ -313,23 +313,20 @@
             <!-- ======================================================= -->
 
             <header class="
-          flex h-16 shrink-0 items-center
-          border-b border-zinc-200
-          bg-white
+          flex h-16 shrink-0 items-center gap-3
+          border-b border-white/10
+          bg-[#0b0f17]/95 backdrop-blur-xl
           px-4 sm:px-6
-          dark:border-zinc-800
-          dark:bg-zinc-950
         ">
 
                 <!-- Mobile menu -->
                 <button id="mobile-menu" type="button" class="
-            mr-3 flex h-9 w-9
+            flex h-9 w-9 shrink-0
             items-center justify-center
             rounded-lg
-            text-zinc-600
-            hover:bg-zinc-100
-            dark:text-zinc-300
-            dark:hover:bg-zinc-900
+            text-zinc-400
+            hover:bg-white/10 hover:text-white
+            transition
             lg:hidden
           " aria-label="Mở menu">
                     <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
@@ -337,19 +334,17 @@
                     </svg>
                 </button>
 
+                <!-- Brand mark -->
+                <img src="assets/index.svg" alt="" class="hidden h-9 w-9 shrink-0 rounded-lg sm:block" />
 
                 <!-- Page title -->
                 <div class="min-w-0">
-                    <h1 class="truncate text-sm font-semibold">
+                    <p class="text-[10px] font-semibold uppercase tracking-[0.14em] text-indigo-300/80">
+                        Internal Workspace
+                    </p>
+                    <h1 class="truncate text-[15px] font-semibold text-white">
                         Dashboard
                     </h1>
-
-                    <p class="
-              hidden text-[11px] text-zinc-400
-              sm:block
-            ">
-                        Internal tools
-                    </p>
                 </div>
 
 
@@ -362,14 +357,13 @@
                     <!-- Clock -->
                     <div class="
               hidden items-center gap-2
-              border-r border-zinc-200
+              border-r border-white/10
               pr-3
               sm:flex
-              dark:border-zinc-800
             ">
                         <div class="text-right">
                             <div id="clock" class="
-                  text-sm font-semibold
+                  text-sm font-semibold text-zinc-100
                   tabular-nums tracking-tight
                 ">
                                 00:00:00
@@ -377,7 +371,7 @@
 
                             <div id="date" class="
                   text-[10px]
-                  text-zinc-400
+                  text-zinc-500
                 ">
                                 --/--/----
                             </div>
@@ -391,9 +385,8 @@
 
                     <div class="
               flex items-center gap-1
-              border-r border-zinc-200
+              border-r border-white/10
               pr-2
-              dark:border-zinc-800
             ">
 
                         <!-- Check In -->
@@ -401,19 +394,14 @@
                 inline-flex h-9
                 items-center gap-1.5
                 rounded-lg
-                border border-zinc-200
-                bg-white
+                border border-white/10
+                bg-white/5
                 px-2.5
                 text-xs font-medium
-                text-zinc-700
+                text-zinc-200
                 transition
-                hover:bg-zinc-100
-                active:bg-zinc-200
-                dark:border-zinc-700
-                dark:bg-zinc-950
-                dark:text-zinc-200
-                dark:hover:bg-zinc-900
-                dark:active:bg-zinc-800
+                hover:bg-white/10
+                active:bg-white/15
                 sm:px-3
                 disabled:cursor-not-allowed
               " title="Điểm danh đến">
@@ -430,8 +418,8 @@
                             </span>
 
                             <span id="btn-check-in-skeleton" class="hidden inline-flex animate-pulse items-center gap-1.5">
-                                <span class="h-4 w-4 rounded bg-zinc-300 dark:bg-zinc-700"></span>
-                                <span class="hidden h-3 w-6 rounded bg-zinc-300 sm:inline-block dark:bg-zinc-700"></span>
+                                <span class="h-4 w-4 rounded bg-white/15"></span>
+                                <span class="hidden h-3 w-6 rounded bg-white/15 sm:inline-block"></span>
                             </span>
                         </button>
 
@@ -441,19 +429,14 @@
                 inline-flex h-9
                 items-center gap-1.5
                 rounded-lg
-                border border-zinc-200
-                bg-white
+                border border-white/10
+                bg-white/5
                 px-2.5
                 text-xs font-medium
-                text-zinc-700
+                text-zinc-200
                 transition
-                hover:bg-zinc-100
-                active:bg-zinc-200
-                dark:border-zinc-700
-                dark:bg-zinc-950
-                dark:text-zinc-200
-                dark:hover:bg-zinc-900
-                dark:active:bg-zinc-800
+                hover:bg-white/10
+                active:bg-white/15
                 sm:px-3
                 disabled:cursor-not-allowed
               " title="Điểm danh về">
@@ -470,8 +453,8 @@
                             </span>
 
                             <span id="btn-check-out-skeleton" class="hidden inline-flex animate-pulse items-center gap-1.5">
-                                <span class="h-4 w-4 rounded bg-zinc-300 dark:bg-zinc-700"></span>
-                                <span class="hidden h-3 w-6 rounded bg-zinc-300 sm:inline-block dark:bg-zinc-700"></span>
+                                <span class="h-4 w-4 rounded bg-white/15"></span>
+                                <span class="hidden h-3 w-6 rounded bg-white/15 sm:inline-block"></span>
                             </span>
                         </button>
 
@@ -483,13 +466,10 @@
               flex h-9 w-9
               items-center justify-center
               rounded-lg
-              text-zinc-600
+              text-zinc-400
               transition
-              hover:bg-zinc-100
-              hover:text-zinc-900
-              dark:text-zinc-300
-              dark:hover:bg-zinc-900
-              dark:hover:text-white
+              hover:bg-white/10
+              hover:text-white
             " title="Đổi giao diện">
 
                         <!-- Sun -->

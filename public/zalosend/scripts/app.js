@@ -107,6 +107,7 @@ socket.on('login:error', ({ message }) => {
 
 // ---------- Customers ----------
 let customers = [];
+let activeTagFilter = null; // nhãn đang lọc trong sidebar (null = hiện tất cả)
 
 async function loadCustomers() {
   customers = await api('/api/v1/zalosend/customers');
@@ -118,6 +119,7 @@ function renderCustomers() {
   list.innerHTML = '';
   customers.forEach((c) => {
     const li = el('li');
+    li.dataset.tag = c.tag || '';
     const initial = escapeHtml((c.name || '?').trim().charAt(0).toUpperCase() || '?');
     li.innerHTML = `
       <input type="checkbox" class="pick" data-id="${c.id}" />
@@ -147,6 +149,69 @@ function renderCustomers() {
       loadCustomers();
     };
   });
+
+  renderTagFilters();
+  applyTagFilter();
+}
+
+// ---------- Tag nhóm: lọc sidebar + chọn nhanh khi gửi hàng loạt ----------
+function uniqueTagCounts() {
+  const map = new Map();
+  customers.forEach((c) => {
+    if (!c.tag) return;
+    map.set(c.tag, (map.get(c.tag) || 0) + 1);
+  });
+  return [...map.entries()]; // [[tag, count], ...]
+}
+
+function renderTagFilters() {
+  const tags = uniqueTagCounts();
+  const box = $('#tagFilters');
+  if (!tags.length) {
+    box.hidden = true;
+    box.innerHTML = '';
+  } else {
+    box.hidden = false;
+    box.innerHTML = tags.map(([tag, count]) => `
+      <button type="button" class="tag-chip${tag === activeTagFilter ? ' active' : ''}" data-tag="${escapeHtml(tag)}">
+        ${escapeHtml(tag)} <span class="cnt">${count}</span>
+      </button>`).join('');
+    box.querySelectorAll('.tag-chip').forEach((chip) => {
+      chip.onclick = () => {
+        activeTagFilter = activeTagFilter === chip.dataset.tag ? null : chip.dataset.tag;
+        renderTagFilters();
+        applyTagFilter();
+      };
+    });
+  }
+
+  // Chọn nhanh nhãn khi gửi hàng loạt (điền vào ô #bcTag)
+  const bcBox = $('#bcTagChips');
+  if (!tags.length) {
+    bcBox.hidden = true;
+    bcBox.innerHTML = '';
+  } else {
+    bcBox.hidden = false;
+    bcBox.innerHTML = tags.map(([tag, count]) => `
+      <button type="button" class="tag-chip${$('#bcTag').value === tag ? ' active' : ''}" data-tag="${escapeHtml(tag)}">
+        ${escapeHtml(tag)} <span class="cnt">${count}</span>
+      </button>`).join('');
+    bcBox.querySelectorAll('.tag-chip').forEach((chip) => {
+      chip.onclick = () => {
+        const isActive = chip.classList.contains('active');
+        $('#bcTag').value = isActive ? '' : chip.dataset.tag;
+        bcBox.querySelectorAll('.tag-chip').forEach((c) => c.classList.remove('active'));
+        if (!isActive) chip.classList.add('active');
+      };
+    });
+  }
+}
+
+function applyTagFilter() {
+  const rows = $('#customerList').querySelectorAll('li');
+  rows.forEach((li) => {
+    li.hidden = !!(activeTagFilter && li.dataset.tag !== activeTagFilter);
+  });
 }
 
 function escapeHtml(s) {
@@ -168,7 +233,8 @@ $('#customerForm').onsubmit = async (e) => {
 };
 
 $('#selectAll').onchange = (e) => {
-  document.querySelectorAll('.pick').forEach((c) => (c.checked = e.target.checked));
+  // Chỉ chọn các dòng đang hiển thị (tôn trọng bộ lọc nhãn đang bật)
+  document.querySelectorAll('#customerList li:not([hidden]) .pick').forEach((c) => (c.checked = e.target.checked));
 };
 
 function selectedIds() {
@@ -431,3 +497,21 @@ $('#importAdd').onclick = async () => {
   await loadCustomers();
   alert(`Đã thêm ${r.added} mục (bỏ qua ${r.skipped} trùng). Tổng: ${r.total}.`);
 };
+
+// ---------- Chèn biến vào nội dung tin nhắn ([Tên], Spintax {a|b}) ----------
+function insertAtCursor(textarea, text) {
+  const start = textarea.selectionStart ?? textarea.value.length;
+  const end = textarea.selectionEnd ?? textarea.value.length;
+  textarea.value = textarea.value.slice(0, start) + text + textarea.value.slice(end);
+  const caret = start + text.length;
+  textarea.focus();
+  textarea.setSelectionRange(caret, caret);
+}
+
+document.querySelectorAll('.var-chips').forEach((box) => {
+  const textarea = document.getElementById(box.dataset.target);
+  if (!textarea) return;
+  box.querySelectorAll('.chip-var').forEach((chip) => {
+    chip.onclick = () => insertAtCursor(textarea, chip.dataset.insert);
+  });
+});

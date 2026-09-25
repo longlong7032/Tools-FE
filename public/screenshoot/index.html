@@ -21,6 +21,27 @@
     href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Poppins:wght@400;700;800&family=Montserrat:wght@400;700;800&family=Bebas+Neue&family=Playfair+Display:wght@700;800&display=swap"
     rel="stylesheet">
   <link href="/screenshoot/styles/design-system.css" rel="stylesheet">
+  <style>
+    .th-bar {
+      position: sticky; top: 0; z-index: 1030; height: 64px;
+      display: flex; align-items: center; gap: 12px; padding: 0 16px;
+      background: rgba(11, 15, 23, .95); backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255, 255, 255, .1);
+    }
+    .th-bar__back {
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+      width: 36px; height: 36px; border-radius: 8px; color: #a1a1aa; text-decoration: none;
+      transition: background .15s ease, color .15s ease;
+    }
+    .th-bar__back:hover { background: rgba(255, 255, 255, .1); color: #fff; }
+    .th-bar__logo { width: 36px; height: 36px; border-radius: 8px; flex-shrink: 0; }
+    .th-bar__eyebrow {
+      margin: 0; font-size: 10px; font-weight: 600; text-transform: uppercase;
+      letter-spacing: .14em; color: rgba(165, 180, 252, .8);
+    }
+    .th-bar__title { margin: 0; font-size: 15px; font-weight: 600; color: #fff; }
+    @media (max-width: 575.98px) { .th-bar__logo { display: none; } }
+  </style>
   <script>
     // Áp dụng theme đã lưu (hoặc theo hệ thống) ngay từ đầu để tránh bị nháy sáng/tối khi tải trang
     (function () {
@@ -39,6 +60,16 @@
 </head>
 
 <body class="bg-body-tertiary">
+  <header class="th-bar">
+    <a href="/" class="th-bar__back" title="Về Tool Hub">
+      <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m11 18-6-6 6-6"/></svg>
+    </a>
+    <img src="/assets/index.svg" alt="" class="th-bar__logo" />
+    <div class="min-w-0">
+      <p class="th-bar__eyebrow">Tool Hub</p>
+      <h1 class="th-bar__title">Screenshot Generator</h1>
+    </div>
+  </header>
   <div class="container-fluid py-4">
     <div class="row g-4">
       <!-- Panel điều khiển -->
@@ -46,12 +77,7 @@
         <div class="card border-0 rounded-4 shadow-sm sticky-top sticky-scroll">
           <div class="card-body p-4">
             <div class="d-flex justify-content-between align-items-start pb-3 mb-4 border-bottom border-monochrome">
-              <div>
-                <a href="/" class="text-decoration-none text-body-secondary small fw-semibold d-inline-flex align-items-center gap-1 mb-1">
-                  <span aria-hidden="true">&larr;</span> Tool Hub
-                </a>
-                <h4 class="fw-bold mb-0">Screenshot Generator</h4>
-              </div>
+              <h4 class="fw-bold mb-0">Cấu hình</h4>
               <button id="themeToggleBtn" type="button" class="btn btn-sm btn-outline-dark"
                 title="Chuyển chế độ Sáng / Tối">🌙</button>
             </div>
@@ -194,7 +220,7 @@
   </div>
 
   <!-- TOAST: Thông báo thành công/thất bại (vd: Import JSON) -->
-  <div class="toast-container position-fixed top-0 end-0 p-3">
+  <div class="toast-container position-fixed end-0 p-3" style="top: 64px;">
     <div id="appToast" class="toast align-items-center border-0" role="alert" aria-live="assertive" aria-atomic="true">
       <div class="d-flex">
         <div id="appToastBody" class="toast-body fw-semibold"></div>

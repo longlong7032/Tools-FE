@@ -17,31 +17,22 @@
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 
-<body class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 p-4 font-sans">
+<body class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 font-sans">
 
-    <main class="mx-auto w-full max-w-2xl overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl">
+    <!-- Header -->
+    <header class="sticky top-0 z-40 flex h-16 items-center gap-3 border-b border-white/10 bg-[#0b0f17]/95 px-4 backdrop-blur-xl sm:px-6">
+        <a href="/" title="Về Tool Hub"
+            class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-zinc-400 transition hover:bg-white/10 hover:text-white">
+            <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m11 18-6-6 6-6"/></svg>
+        </a>
+        <img src="/assets/index.svg" alt="" class="hidden h-9 w-9 shrink-0 rounded-lg sm:block" />
+        <div class="min-w-0">
+            <p class="text-[10px] font-semibold uppercase tracking-[0.14em] text-indigo-300/80">Tool Hub</p>
+            <h1 class="truncate text-[15px] font-semibold text-white">VietQR Generator</h1>
+        </div>
+    </header>
 
-        <!-- Header -->
-        <header class="flex items-center gap-3 bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-5 text-white">
-            <a href="/" title="Về Tool Hub"
-                class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-blue-100 transition hover:bg-white/15 hover:text-white">
-                <i class="fa-solid fa-arrow-left"></i>
-            </a>
-
-            <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-white/20 text-xl backdrop-blur">
-                <i class="fa-solid fa-qrcode"></i>
-            </div>
-
-            <div>
-                <p class="text-[10px] font-semibold uppercase tracking-wider text-blue-200">Tool Hub</p>
-                <h1 class="text-xl font-bold">
-                    VietQR Generator
-                </h1>
-                <p class="mt-0.5 text-sm text-blue-100">
-                    Tạo mã QR thanh toán nhanh chóng
-                </p>
-            </div>
-        </header>
+    <main class="mx-auto my-4 w-[calc(100%-2rem)] max-w-2xl overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl">
 
         <!-- Body -->
         <section class="p-5 sm:p-6">

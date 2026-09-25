@@ -93,25 +93,26 @@
 <body class="min-h-screen bg-zinc-50 font-[Inter] text-zinc-950 antialiased">
     <div class="min-h-screen">
         <!-- Top bar -->
-        <header class="sticky top-0 z-30 border-b border-zinc-200 bg-white/95 backdrop-blur">
-            <div class="mx-auto flex max-w-[1440px] items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
-                <a href="/" aria-label="Quay về trang chính" title="Quay về trang chính"
-                    class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-900 dark:hover:text-white">
-                    <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"
+        <header class="sticky top-0 z-30 border-b border-white/10 bg-[#0b0f17]/95 backdrop-blur-xl">
+            <div class="mx-auto flex h-16 max-w-[1440px] items-center gap-3 px-4 sm:px-6 lg:px-8">
+                <a href="/" aria-label="Về Tool Hub" title="Về Tool Hub"
+                    class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-zinc-400 transition hover:bg-white/10 hover:text-white">
+                    <svg class="h-[17px] w-[17px]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
                         aria-hidden="true">
                         <path d="M19 12H5" />
                         <path d="m11 18-6-6 6-6" />
                     </svg>
                 </a>
+                <img src="/assets/index.svg" alt="" class="hidden h-9 w-9 shrink-0 rounded-lg sm:block" />
                 <div class="min-w-0">
-                    <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-500">Document Workspace
+                    <p class="text-[10px] font-semibold uppercase tracking-[0.14em] text-indigo-300/80">Tool Hub
                     </p>
-                    <h1 class="truncate text-lg font-semibold tracking-tight sm:text-xl">Hợp đồng & Báo giá</h1>
+                    <h1 class="truncate text-[15px] font-semibold text-white">Hợp đồng & Báo giá</h1>
                 </div>
 
-                <div class="flex shrink-0 items-center gap-2">
+                <div class="ml-auto flex shrink-0 items-center gap-2">
                     <button id="theme-toggle" type="button"
-                        class="flex h-9 w-9 items-center justify-center rounded-lg text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-900 dark:hover:text-white"
+                        class="flex h-9 w-9 items-center justify-center rounded-lg text-zinc-400 transition hover:bg-white/10 hover:text-white"
                         title="Đổi giao diện" aria-label="Đổi giao diện">
                         <svg id="sun-icon" class="hidden h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8"
                             viewBox="0 0 24 24" aria-hidden="true">
@@ -126,14 +127,14 @@
                     </button>
 
                     <button id="importJsonBtn" type="button"
-                        class="inline-flex items-center gap-2 rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm font-medium text-zinc-800 transition hover:border-zinc-400 hover:bg-zinc-50 focus:outline-none focus:ring-2 focus:ring-zinc-300"
+                        class="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs font-medium text-zinc-200 transition hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
                         title="Import snapshot JSON">
                         <span aria-hidden="true">↑</span>
                         <span class="hidden sm:inline">Import JSON</span>
                     </button>
 
                     <button id="exportJsonBtn" type="button"
-                        class="inline-flex items-center gap-2 rounded-lg bg-zinc-950 px-3 py-2 text-sm font-medium text-white transition hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-300"
+                        class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-3 py-2 text-xs font-medium text-white transition hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-400/40"
                         title="Export snapshot JSON">
                         <span aria-hidden="true">↓</span>
                         <span class="hidden sm:inline">Export JSON</span>
