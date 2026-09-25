@@ -17,8 +17,15 @@
 <body>
   <!-- ============ LOGIN VIEW ============ -->
   <section id="loginView" class="view">
-    <a href="/" class="btn-back" title="Về trang chủ">← Về trang chủ</a>
+    <a href="/" class="btn-back" title="Về trang chủ">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m11 18-6-6 6-6"/></svg>
+      Về Tool Hub
+    </a>
     <div class="card center">
+      <span class="eyebrow">
+        <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5 8.4 8.4 0 0 1-4.2-1.1L4 20l1.1-4.3A8.4 8.4 0 0 1 3 11.5 8.5 8.5 0 1 1 21 11.5Z"/></svg>
+        ZaloSend CRM
+      </span>
       <h2>Đăng nhập Zalo</h2>
       <p class="muted">Bấm nút bên dưới để tạo mã QR và quét bằng ứng dụng Zalo trên điện thoại.</p>
 
@@ -39,9 +46,13 @@
   <div id="dashView" class="app" hidden>
     <!-- Rail điều hướng bên trái -->
     <nav class="rail">
-      <a href="/" class="rail__btn rail__back" title="Về trang chủ">←</a>
+      <a href="/" class="rail__btn rail__back" title="Về Tool Hub">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m11 18-6-6 6-6"/></svg>
+      </a>
       <div class="rail__logo">Z</div>
-      <button class="rail__btn rail__btn--active" title="Khách hàng &amp; hội thoại">💬</button>
+      <button class="rail__btn rail__btn--active" title="Khách hàng &amp; hội thoại">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5 8.4 8.4 0 0 1-4.2-1.1L4 20l1.1-4.3A8.4 8.4 0 0 1 3 11.5 8.5 8.5 0 1 1 21 11.5Z"/></svg>
+      </button>
       <div class="rail__spacer"></div>
       <div id="connPill" class="pill pill--off" title="Trạng thái đăng nhập">
         <span class="dot"></span>
@@ -53,7 +64,10 @@
     <aside class="sidebar">
       <div class="sidebar__head">
         <h3>Khách hàng</h3>
-        <button id="btnImport" class="btn btn--ghost btn--sm">⬇ Import</button>
+        <button id="btnImport" class="btn btn--ghost btn--sm">
+          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M5 21h14"/></svg>
+          Import
+        </button>
       </div>
 
       <form id="customerForm" class="stack sidebar__form">
@@ -132,17 +146,27 @@
     <div class="modal__box">
       <div class="modal__head">
         <h3>Import từ Zalo</h3>
-        <button id="importClose" class="modal__x">✕</button>
+        <button id="importClose" class="modal__x">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
       </div>
 
       <div class="tabs">
-        <button class="tab tab--active" data-src="friends">👤 Bạn bè</button>
-        <button class="tab" data-src="groups">👥 Nhóm</button>
+        <button class="tab tab--active" data-src="friends">
+          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:5px"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+          Bạn bè
+        </button>
+        <button class="tab" data-src="groups">
+          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:5px"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Nhóm
+        </button>
       </div>
 
       <div class="import-tools">
         <input id="importSearch" placeholder="Tìm theo tên..." />
-        <button id="importRefresh" class="btn btn--ghost btn--sm" title="Tải lại từ Zalo">⟳</button>
+        <button id="importRefresh" class="btn btn--ghost btn--sm" title="Tải lại từ Zalo">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
+        </button>
       </div>
 
       <div class="import-bar">

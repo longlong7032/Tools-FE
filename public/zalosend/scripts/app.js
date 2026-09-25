@@ -118,15 +118,19 @@ function renderCustomers() {
   list.innerHTML = '';
   customers.forEach((c) => {
     const li = el('li');
+    const initial = escapeHtml((c.name || '?').trim().charAt(0).toUpperCase() || '?');
     li.innerHTML = `
       <input type="checkbox" class="pick" data-id="${c.id}" />
+      <div class="ci-avatar">${initial}</div>
       <div class="ci-main">
         <div class="ci-name">${escapeHtml(c.name)}</div>
         <div class="ci-sub">${escapeHtml(c.threadId)}</div>
       </div>
       ${c.isGroup ? '<span class="ci-badge">Nhóm</span>' : ''}
       ${c.tag ? `<span class="ci-tag">${escapeHtml(c.tag)}</span>` : ''}
-      <button class="del" data-id="${c.id}" title="Xoá">✕</button>`;
+      <button class="del" data-id="${c.id}" title="Xoá">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+      </button>`;
     list.appendChild(li);
   });
   $('#custCount').textContent = `${customers.length} khách`;
@@ -382,8 +386,9 @@ function renderImport() {
       const id = r.userId || r.groupId;
       const sub = isGroup ? `${r.members || 0} thành viên` : (r.phone || id);
       const sel = importPicked.has(id) ? 'sel' : '';
+      const initial = escapeHtml((r.name || '?').trim().charAt(0).toUpperCase() || '?');
       return `<li class="irow ${sel}" data-id="${id}">
-        ${r.avatar ? `<img class="avatar" src="${r.avatar}" alt="" />` : '<div class="avatar"></div>'}
+        ${r.avatar ? `<img class="avatar" src="${r.avatar}" alt="" />` : `<div class="avatar ci-avatar">${initial}</div>`}
         <div class="ci-main">
           <div class="ci-name">${escapeHtml(r.name)}</div>
           <div class="ci-sub">${escapeHtml(String(sub))}</div>
