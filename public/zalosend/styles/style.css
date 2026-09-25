@@ -448,3 +448,18 @@ input:focus, textarea:focus, select:focus {
 }
 .cp-icon-btn:hover { color: var(--text); border-color: #3a4353; }
 .cp-empty { text-align: center; padding: 40px 20px; color: var(--muted); font-size: 13px; }
+
+/* ---------- Template manager ---------- */
+.tpl-row {
+  border: 1px solid var(--line); background: var(--panel-2); border-radius: 12px;
+  padding: 10px 12px; display: flex; align-items: flex-start; justify-content: space-between; gap: 10px;
+}
+.tpl-row__name { font-weight: 700; font-size: 13px; display: flex; align-items: center; gap: 7px; }
+.tpl-row__content { font-size: 11.5px; color: var(--muted); margin-top: 3px; line-height: 1.5; }
+.tpl-row__actions { display: flex; gap: 6px; flex-shrink: 0; }
+.tpl-tag {
+  font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
+  padding: 1px 7px; border-radius: 999px;
+}
+.tpl-tag--builtin { background: rgba(113, 113, 122, .18); color: var(--muted); }
+.tpl-tag--custom { background: var(--primary-soft); color: #a5b4fc; }

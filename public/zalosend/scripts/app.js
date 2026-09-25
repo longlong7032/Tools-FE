@@ -570,15 +570,25 @@ const MESSAGE_TEMPLATES = [
   },
 ];
 
+// Mẫu tuỳ chỉnh do người dùng tự thêm — lưu trên trình duyệt (localStorage)
+const CUSTOM_TPL_KEY = 'zs:customTemplates';
+function getCustomTemplates() {
+  try { return JSON.parse(localStorage.getItem(CUSTOM_TPL_KEY) || '[]'); } catch (e) { return []; }
+}
+function saveCustomTemplates(list) { localStorage.setItem(CUSTOM_TPL_KEY, JSON.stringify(list)); }
+function allTemplates() { return [...MESSAGE_TEMPLATES, ...getCustomTemplates()]; }
+
 function populateTemplateSelect(select, withPlaceholder) {
+  const current = select.value;
   select.innerHTML =
     (withPlaceholder ? '<option value="">— Chọn mẫu có sẵn (tuỳ chọn) —</option>' : '') +
-    MESSAGE_TEMPLATES.map((t) => `<option value="${t.id}">${escapeHtml(t.label)}</option>`).join('');
+    allTemplates().map((t) => `<option value="${t.id}">${escapeHtml(t.label)}</option>`).join('');
+  if ([...select.options].some((o) => o.value === current)) select.value = current;
 }
 populateTemplateSelect($('#templatePicker'), true);
 
 $('#templatePicker').onchange = (e) => {
-  const tpl = MESSAGE_TEMPLATES.find((t) => t.id === e.target.value);
+  const tpl = allTemplates().find((t) => t.id === e.target.value);
   if (!tpl) return;
   const box = $('#singleContent');
   if (box.value.trim() && !confirm('Nội dung hiện tại sẽ bị thay bằng mẫu đã chọn. Tiếp tục?')) {
@@ -587,6 +597,105 @@ $('#templatePicker').onchange = (e) => {
   }
   box.value = tpl.content;
   e.target.value = '';
+};
+
+// ============================================================
+// QUẢN LÝ MẪU TIN NHẮN (thêm / sửa / xoá / sao chép)
+// ============================================================
+const templateModal = $('#templateModal');
+let editingTplId = null;
+
+function renderTemplateManagerList() {
+  const box = $('#templateManagerList');
+  const rows = allTemplates().map((t) => {
+    const isCustom = t.id.startsWith('custom_');
+    return `
+      <div class="tpl-row" data-id="${t.id}">
+        <div style="min-width:0">
+          <div class="tpl-row__name">
+            ${escapeHtml(t.label)}
+            <span class="tpl-tag ${isCustom ? 'tpl-tag--custom' : 'tpl-tag--builtin'}">${isCustom ? 'Tuỳ chỉnh' : 'Có sẵn'}</span>
+          </div>
+          <div class="tpl-row__content">${escapeHtml(t.content)}</div>
+        </div>
+        <div class="tpl-row__actions">
+          ${isCustom
+            ? `<button class="cp-icon-btn tpl-edit" title="Sửa">✎</button>
+               <button class="cp-icon-btn tpl-del" title="Xoá" style="color:var(--fail)">🗑</button>`
+            : `<button class="cp-icon-btn tpl-copy" title="Sao chép thành mẫu của bạn">⧉</button>`}
+        </div>
+      </div>`;
+  }).join('');
+  box.innerHTML = rows || '<div class="cp-empty">Chưa có mẫu nào.</div>';
+
+  box.querySelectorAll('.tpl-edit').forEach((b) => {
+    b.onclick = () => {
+      const t = allTemplates().find((x) => x.id === b.closest('.tpl-row').dataset.id);
+      startEditTemplate(t);
+    };
+  });
+  box.querySelectorAll('.tpl-del').forEach((b) => {
+    b.onclick = () => {
+      const id = b.closest('.tpl-row').dataset.id;
+      if (!confirm('Xoá mẫu này?')) return;
+      saveCustomTemplates(getCustomTemplates().filter((t) => t.id !== id));
+      refreshAllTemplateSelects();
+      renderTemplateManagerList();
+    };
+  });
+  box.querySelectorAll('.tpl-copy').forEach((b) => {
+    b.onclick = () => {
+      const t = allTemplates().find((x) => x.id === b.closest('.tpl-row').dataset.id);
+      startEditTemplate(null, { label: t.label + ' (bản sao)', content: t.content });
+    };
+  });
+}
+
+function startEditTemplate(existing, prefill) {
+  editingTplId = existing?.id || null;
+  $('#tplFormTitle').textContent = existing ? 'Sửa mẫu' : 'Thêm mẫu mới';
+  $('#tplName').value = existing?.label || prefill?.label || '';
+  $('#tplContent').value = existing?.content || prefill?.content || '';
+  $('#tplCancelEdit').hidden = !existing;
+  $('#tplName').focus();
+}
+
+function refreshAllTemplateSelects() {
+  populateTemplateSelect($('#templatePicker'), true);
+  populateTemplateSelect($('#cpTemplate'), false);
+}
+
+$('#btnManageTemplates').onclick = () => {
+  startEditTemplate(null);
+  renderTemplateManagerList();
+  templateModal.hidden = false;
+};
+$('#templateModalClose').onclick = () => { templateModal.hidden = true; };
+templateModal.addEventListener('click', (e) => { if (e.target === templateModal) templateModal.hidden = true; });
+
+$('#tplCancelEdit').onclick = () => startEditTemplate(null);
+
+$('#tplSave').onclick = () => {
+  const label = $('#tplName').value.trim();
+  const content = $('#tplContent').value.trim();
+  if (!label || !content) return alert('Nhập đủ tên mẫu và nội dung.');
+
+  const list = getCustomTemplates();
+  if (editingTplId) {
+    const i = list.findIndex((t) => t.id === editingTplId);
+    if (i !== -1) list[i] = { ...list[i], label, content };
+  } else {
+    list.push({ id: 'custom_' + Date.now().toString(36), label, content });
+  }
+  const wasNew = !editingTplId;
+  saveCustomTemplates(list);
+  refreshAllTemplateSelects();
+  renderTemplateManagerList();
+  startEditTemplate(null);
+  if (wasNew) {
+    const scroller = $('#templateManagerScroll');
+    scroller.scrollTop = scroller.scrollHeight;
+  }
 };
 
 // ============================================================
@@ -709,7 +818,7 @@ function renderCampaigns() {
     box.innerHTML = '<div class="cp-empty">Chưa có chiến dịch nào. Bấm "+ Tạo chiến dịch" để bắt đầu.</div>';
     return;
   }
-  const tpl = (id) => MESSAGE_TEMPLATES.find((t) => t.id === id)?.label || '(mẫu đã xoá)';
+  const tpl = (id) => allTemplates().find((t) => t.id === id)?.label || '(mẫu đã xoá)';
   box.innerHTML = list.map((cp) => `
     <div class="cp-card" data-id="${cp.id}">
       <div class="cp-card__main">
@@ -833,7 +942,7 @@ function campaignTargets(cp) {
 async function runCampaignNow(id) {
   const cp = getCampaigns().find((c) => c.id === id);
   if (!cp) return;
-  const tpl = MESSAGE_TEMPLATES.find((t) => t.id === cp.templateId);
+  const tpl = allTemplates().find((t) => t.id === cp.templateId);
   if (!tpl) { alert('Mẫu tin nhắn của chiến dịch này không còn tồn tại.'); return; }
 
   const now = Date.now();
