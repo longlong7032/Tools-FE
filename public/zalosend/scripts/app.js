@@ -37,7 +37,10 @@ function setPill(state) {
 function showView(logged) {
   $('#loginView').hidden = logged;
   $('#dashView').hidden = !logged;
-  if (logged) loadCustomers();
+  if (logged) {
+    loadCustomers();
+    if (typeof checkCampaigns === 'function') checkCampaigns();
+  }
 }
 
 // ---------- Login flow ----------
@@ -130,6 +133,7 @@ function renderCustomers() {
       </div>
       ${c.isGroup ? '<span class="ci-badge">Nhóm</span>' : ''}
       ${c.tag ? `<span class="ci-tag">${escapeHtml(c.tag)}</span>` : ''}
+      ${renewBtnHtml(c)}
       <button class="del" data-id="${c.id}" title="Xoá">
         <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
       </button>`;
@@ -150,8 +154,27 @@ function renderCustomers() {
     };
   });
 
+  list.querySelectorAll('.renew-btn').forEach((b) => {
+    b.onclick = () => openRenew(b.dataset.id);
+  });
+
   renderTagFilters();
   applyTagFilter();
+}
+
+function renewBtnHtml(c) {
+  const r = getRenewal(c.id);
+  const dl = r ? daysLeftFrom(r.date) : null;
+  let cls = '';
+  let title = 'Thiết lập gia hạn (domain/hosting...)';
+  if (dl !== null) {
+    if (dl <= 7) cls = ' due-urgent';
+    else if (dl <= 30) cls = ' due-soon';
+    title = `${r.item} — còn ${dl} ngày (${new Date(r.date + 'T00:00:00').toLocaleDateString('vi-VN')})`;
+  }
+  return `<button class="renew-btn${cls}" data-id="${c.id}" title="${escapeHtml(title)}">
+    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+  </button>`;
 }
 
 // ---------- Tag nhóm: lọc sidebar + chọn nhanh khi gửi hàng loạt ----------
@@ -242,12 +265,14 @@ function selectedIds() {
 }
 
 // ---------- Tabs ----------
-document.querySelectorAll('.tab').forEach((t) => {
+document.querySelectorAll('.chat__tabs > .tab').forEach((t) => {
   t.onclick = () => {
-    document.querySelectorAll('.tab').forEach((x) => x.classList.remove('tab--active'));
+    document.querySelectorAll('.chat__tabs > .tab').forEach((x) => x.classList.remove('tab--active'));
     t.classList.add('tab--active');
     $('#tab-single').hidden = t.dataset.tab !== 'single';
     $('#tab-broadcast').hidden = t.dataset.tab !== 'broadcast';
+    $('#tab-campaign').hidden = t.dataset.tab !== 'campaign';
+    if (t.dataset.tab === 'campaign') renderCampaigns();
   };
 });
 
@@ -256,8 +281,9 @@ $('#btnSendSingle').onclick = async () => {
   const id = $('#singleTarget').value;
   const cust = customers.find((c) => c.id === id);
   if (!cust) return alert('Chọn khách hàng trước.');
-  const content = $('#singleContent').value.trim();
-  if (!content) return alert('Nhập nội dung.');
+  const raw = $('#singleContent').value.trim();
+  if (!raw) return alert('Nhập nội dung.');
+  const content = applyClientVars(raw, cust);
 
   const box = $('#singleResult');
   logLine(box, `Đang gửi tới ${cust.name}...`, 'info');
@@ -382,6 +408,7 @@ function openImport() {
   importModal.hidden = false;
   importPicked.clear();
   $('#importSearch').value = '';
+  $('#importTagOverride').value = '';
   loadImport(importSource, false);
 }
 function closeImport() { importModal.hidden = true; }
@@ -479,13 +506,14 @@ $('#importAdd').onclick = async () => {
   if (!importPicked.size) return alert('Chưa chọn mục nào.');
   const isGroup = importSource === 'groups';
   const src = importData[importSource] || [];
+  const tagOverride = $('#importTagOverride').value.trim();
   const items = src
     .filter((r) => importPicked.has(r.userId || r.groupId))
     .map((r) => ({
       name: r.name,
       threadId: r.userId || r.groupId,
       isGroup,
-      tag: isGroup ? 'nhóm' : 'bạn bè',
+      tag: tagOverride || (isGroup ? 'nhóm' : 'bạn bè'),
     }));
 
   const r = await api('/api/v1/zalosend/customers/bulk', {
@@ -515,3 +543,341 @@ document.querySelectorAll('.var-chips').forEach((box) => {
     chip.onclick = () => insertAtCursor(textarea, chip.dataset.insert);
   });
 });
+
+// ============================================================
+// MẪU TIN NHẮN (templates)
+// ============================================================
+const MESSAGE_TEMPLATES = [
+  {
+    id: 'track',
+    label: '👋 Chăm sóc / Track khách',
+    content: '{Chào|Xin chào} [Tên], bên em đang trong quá trình hỗ trợ và muốn hỏi thăm tình hình sử dụng dịch vụ của mình. {Anh/Chị} có cần hỗ trợ gì thêm không ạ?',
+  },
+  {
+    id: 'renew-domain',
+    label: '🌐 Nhắc gia hạn domain',
+    content: '{Chào|Xin chào} [Tên], domain [SảnPhẩm] của {anh/chị} sẽ hết hạn vào [NgàyHếtHạn] (còn [SốNgàyCònLại] ngày). Bên em nhắc {anh/chị} gia hạn sớm để tránh gián đoạn dịch vụ ạ!',
+  },
+  {
+    id: 'renew-hosting',
+    label: '🖥️ Nhắc gia hạn hosting',
+    content: '{Chào|Xin chào} [Tên], gói hosting [SảnPhẩm] của {anh/chị} sắp hết hạn vào [NgàyHếtHạn] (còn [SốNgàyCònLại] ngày). {Anh/Chị} vui lòng gia hạn trước hạn để website hoạt động liên tục nhé!',
+  },
+  {
+    id: 'promo',
+    label: '🎁 Ưu đãi / khuyến mãi',
+    content: '{Chào|Hi} [Tên]! {Bên em|Shop} đang có ưu đãi {hấp dẫn|cực tốt} dành riêng cho {anh/chị}, {anh/chị} quan tâm để em tư vấn thêm nhé!',
+  },
+];
+
+function populateTemplateSelect(select, withPlaceholder) {
+  select.innerHTML =
+    (withPlaceholder ? '<option value="">— Chọn mẫu có sẵn (tuỳ chọn) —</option>' : '') +
+    MESSAGE_TEMPLATES.map((t) => `<option value="${t.id}">${escapeHtml(t.label)}</option>`).join('');
+}
+populateTemplateSelect($('#templatePicker'), true);
+
+$('#templatePicker').onchange = (e) => {
+  const tpl = MESSAGE_TEMPLATES.find((t) => t.id === e.target.value);
+  if (!tpl) return;
+  const box = $('#singleContent');
+  if (box.value.trim() && !confirm('Nội dung hiện tại sẽ bị thay bằng mẫu đã chọn. Tiếp tục?')) {
+    e.target.value = '';
+    return;
+  }
+  box.value = tpl.content;
+  e.target.value = '';
+};
+
+// ============================================================
+// GIA HẠN (domain/hosting...) — lưu cục bộ trên trình duyệt
+// Lưu ý: Zalo API hiện chưa trả về nhãn (label) đã gắn sẵn trong app Zalo,
+// nên phần "đồng bộ tag/gia hạn" này chạy hoàn toàn phía FE (localStorage),
+// chưa đồng bộ với server chung — cần backend hỗ trợ nếu muốn dùng thật.
+// ============================================================
+const RENEW_KEY = 'zs:renew';
+
+function getAllRenewals() {
+  try { return JSON.parse(localStorage.getItem(RENEW_KEY) || '{}'); } catch (e) { return {}; }
+}
+function getRenewal(customerId) {
+  return getAllRenewals()[customerId] || null;
+}
+function setRenewal(customerId, data) {
+  const all = getAllRenewals();
+  all[customerId] = data;
+  localStorage.setItem(RENEW_KEY, JSON.stringify(all));
+}
+function deleteRenewal(customerId) {
+  const all = getAllRenewals();
+  delete all[customerId];
+  localStorage.setItem(RENEW_KEY, JSON.stringify(all));
+}
+function daysLeftFrom(dateStr) {
+  if (!dateStr) return null;
+  const target = new Date(dateStr + 'T00:00:00');
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  return Math.round((target - today) / 86400000);
+}
+
+let renewTargetId = null;
+const renewModal = $('#renewModal');
+
+function openRenew(customerId) {
+  const cust = customers.find((c) => c.id === customerId);
+  if (!cust) return;
+  renewTargetId = customerId;
+  const r = getRenewal(customerId);
+  $('#renewFor').textContent = `Khách hàng: ${cust.name}`;
+  $('#renewItem').value = r?.item || '';
+  $('#renewDate').value = r?.date || '';
+  renewModal.hidden = false;
+}
+function closeRenew() { renewModal.hidden = true; renewTargetId = null; }
+
+$('#renewClose').onclick = closeRenew;
+$('#renewCancel').onclick = closeRenew;
+renewModal.addEventListener('click', (e) => { if (e.target === renewModal) closeRenew(); });
+
+$('#renewSave').onclick = () => {
+  if (!renewTargetId) return;
+  const item = $('#renewItem').value.trim();
+  const date = $('#renewDate').value;
+  if (!item || !date) return alert('Nhập đủ sản phẩm và ngày hết hạn.');
+  setRenewal(renewTargetId, { item, date });
+  closeRenew();
+  renderCustomers();
+};
+$('#renewDelete').onclick = () => {
+  if (!renewTargetId) return;
+  deleteRenewal(renewTargetId);
+  closeRenew();
+  renderCustomers();
+};
+
+// Thay các biến gắn với dữ liệu gia hạn cục bộ (không đụng tới [Tên] — cái đó do server thay dựa trên field `name`)
+function applyClientVars(content, customer) {
+  const r = getRenewal(customer.id);
+  const dl = r ? daysLeftFrom(r.date) : null;
+  const vars = {
+    '[SĐT]': customer.threadId || '',
+    '[SảnPhẩm]': r?.item || '(chưa thiết lập gia hạn)',
+    '[NgàyHếtHạn]': r?.date ? new Date(r.date + 'T00:00:00').toLocaleDateString('vi-VN') : '(chưa thiết lập)',
+    '[SốNgàyCònLại]': dl === null ? '(chưa thiết lập)' : String(dl),
+  };
+  let out = content;
+  Object.entries(vars).forEach(([k, v]) => { out = out.split(k).join(v); });
+  return out;
+}
+
+// ============================================================
+// CHIẾN DỊCH TỰ ĐỘNG (campaign) — chạy phía trình duyệt (localStorage)
+// Giới hạn thật: chỉ hoạt động khi tab này đang mở + đã đăng nhập Zalo.
+// Muốn chạy nền thật sự (kể cả tắt trình duyệt) cần thêm scheduler ở backend.
+// ============================================================
+const CAMPAIGN_KEY = 'zs:campaigns';
+const campaignModal = $('#campaignModal');
+let editingCampaignId = null;
+
+function getCampaigns() {
+  try { return JSON.parse(localStorage.getItem(CAMPAIGN_KEY) || '[]'); } catch (e) { return []; }
+}
+function saveCampaigns(list) { localStorage.setItem(CAMPAIGN_KEY, JSON.stringify(list)); }
+function upsertCampaign(cp) {
+  const list = getCampaigns();
+  const i = list.findIndex((c) => c.id === cp.id);
+  if (i === -1) list.push(cp); else list[i] = cp;
+  saveCampaigns(list);
+}
+function deleteCampaign(id) {
+  saveCampaigns(getCampaigns().filter((c) => c.id !== id));
+}
+function todayStr() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+function triggerSummary(cp) {
+  if (cp.triggerType === 'tag') return `Khách có nhãn "${cp.tag}"`;
+  return `Khách sắp hết hạn trong ${cp.days} ngày`;
+}
+
+function renderCampaigns() {
+  const box = $('#campaignList');
+  const list = getCampaigns();
+  if (!list.length) {
+    box.innerHTML = '<div class="cp-empty">Chưa có chiến dịch nào. Bấm "+ Tạo chiến dịch" để bắt đầu.</div>';
+    return;
+  }
+  const tpl = (id) => MESSAGE_TEMPLATES.find((t) => t.id === id)?.label || '(mẫu đã xoá)';
+  box.innerHTML = list.map((cp) => `
+    <div class="cp-card" data-id="${cp.id}">
+      <div class="cp-card__main">
+        <div class="cp-card__name">
+          ${escapeHtml(cp.name)}
+          <span class="cp-badge ${cp.active ? 'cp-badge--on' : 'cp-badge--off'}">${cp.active ? 'Đang bật' : 'Đã tắt'}</span>
+        </div>
+        <div class="cp-card__desc">${triggerSummary(cp)} · Mẫu: ${escapeHtml(tpl(cp.templateId))} · Kiểm tra lúc ${cp.hour} mỗi ngày</div>
+        <div class="cp-card__meta">${cp.lastRunSummary ? escapeHtml(cp.lastRunSummary) : 'Chưa chạy lần nào'}</div>
+      </div>
+      <div class="cp-card__actions">
+        <button class="cp-icon-btn cp-toggle" title="${cp.active ? 'Tắt' : 'Bật'}">${cp.active ? '⏸' : '▶'}</button>
+        <button class="cp-icon-btn cp-run" title="Chạy thử ngay">⚡</button>
+        <button class="cp-icon-btn cp-edit" title="Sửa">✎</button>
+        <button class="cp-icon-btn cp-del" title="Xoá" style="color:var(--fail)">🗑</button>
+      </div>
+    </div>`).join('');
+
+  box.querySelectorAll('.cp-card').forEach((card) => {
+    const id = card.dataset.id;
+    card.querySelector('.cp-toggle').onclick = () => {
+      const cp = getCampaigns().find((c) => c.id === id);
+      cp.active = !cp.active;
+      upsertCampaign(cp);
+      renderCampaigns();
+    };
+    card.querySelector('.cp-run').onclick = () => runCampaignNow(id);
+    card.querySelector('.cp-edit').onclick = () => openCampaignModal(getCampaigns().find((c) => c.id === id));
+    card.querySelector('.cp-del').onclick = () => {
+      if (confirm('Xoá chiến dịch này?')) { deleteCampaign(id); renderCampaigns(); }
+    };
+  });
+}
+
+// ---- Modal tạo/sửa chiến dịch ----
+populateTemplateSelect($('#cpTemplate'), false);
+
+$('#cpTriggerType').onchange = (e) => {
+  $('#cpTagWrap').hidden = e.target.value !== 'tag';
+  $('#cpRenewWrap').hidden = e.target.value !== 'renew';
+};
+
+function openCampaignModal(cp) {
+  editingCampaignId = cp?.id || null;
+  $('#campaignModalTitle').textContent = cp ? 'Sửa chiến dịch' : 'Tạo chiến dịch';
+  $('#campaignDelete').hidden = !cp;
+
+  const tags = uniqueTagCounts();
+  $('#cpTag').innerHTML = tags.length
+    ? tags.map(([tag]) => `<option value="${escapeHtml(tag)}">${escapeHtml(tag)}</option>`).join('')
+    : '<option value="">(chưa có nhãn nào — thêm nhãn cho khách trước)</option>';
+
+  $('#cpName').value = cp?.name || '';
+  $('#cpTemplate').value = cp?.templateId || MESSAGE_TEMPLATES[0].id;
+  $('#cpTriggerType').value = cp?.triggerType || 'tag';
+  $('#cpTag').value = cp?.tag || (tags[0]?.[0] || '');
+  $('#cpDays').value = cp?.days ?? 7;
+  $('#cpCooldown').value = cp?.cooldownDays ?? 14;
+  $('#cpHour').value = cp?.hour || '09:00';
+  $('#cpTagWrap').hidden = $('#cpTriggerType').value !== 'tag';
+  $('#cpRenewWrap').hidden = $('#cpTriggerType').value !== 'renew';
+
+  campaignModal.hidden = false;
+}
+function closeCampaignModal() { campaignModal.hidden = true; editingCampaignId = null; }
+
+$('#btnNewCampaign').onclick = () => openCampaignModal(null);
+$('#campaignClose').onclick = closeCampaignModal;
+$('#campaignCancel').onclick = closeCampaignModal;
+campaignModal.addEventListener('click', (e) => { if (e.target === campaignModal) closeCampaignModal(); });
+
+$('#campaignSave').onclick = () => {
+  const name = $('#cpName').value.trim();
+  if (!name) return alert('Đặt tên cho chiến dịch.');
+  const triggerType = $('#cpTriggerType').value;
+  if (triggerType === 'tag' && !$('#cpTag').value) return alert('Chưa có nhãn để chọn — hãy gắn nhãn cho khách hàng trước.');
+
+  const existing = editingCampaignId ? getCampaigns().find((c) => c.id === editingCampaignId) : null;
+  const cp = {
+    id: editingCampaignId || ('cp_' + Date.now().toString(36)),
+    name,
+    templateId: $('#cpTemplate').value,
+    triggerType,
+    tag: $('#cpTag').value,
+    days: Number($('#cpDays').value) || 7,
+    cooldownDays: Number($('#cpCooldown').value) || 14,
+    hour: $('#cpHour').value || '09:00',
+    active: existing ? existing.active : true,
+    lastRunDate: existing?.lastRunDate || null,
+    lastRunSummary: existing?.lastRunSummary || '',
+    sentLog: existing?.sentLog || {},
+  };
+  upsertCampaign(cp);
+  closeCampaignModal();
+  renderCampaigns();
+};
+
+$('#campaignDelete').onclick = () => {
+  if (!editingCampaignId) return;
+  if (confirm('Xoá chiến dịch này?')) {
+    deleteCampaign(editingCampaignId);
+    closeCampaignModal();
+    renderCampaigns();
+  }
+};
+
+// ---- Engine: xác định đối tượng + gửi tuần tự ----
+function campaignTargets(cp) {
+  if (cp.triggerType === 'tag') {
+    return customers.filter((c) => c.tag === cp.tag);
+  }
+  // renew: khách có dữ liệu gia hạn cục bộ, còn <= N ngày (kể cả đã cận/quá hạn)
+  return customers.filter((c) => {
+    const r = getRenewal(c.id);
+    if (!r) return false;
+    const dl = daysLeftFrom(r.date);
+    return dl !== null && dl <= cp.days;
+  });
+}
+
+async function runCampaignNow(id) {
+  const cp = getCampaigns().find((c) => c.id === id);
+  if (!cp) return;
+  const tpl = MESSAGE_TEMPLATES.find((t) => t.id === cp.templateId);
+  if (!tpl) { alert('Mẫu tin nhắn của chiến dịch này không còn tồn tại.'); return; }
+
+  const now = Date.now();
+  const cooldownMs = cp.cooldownDays * 86400000;
+  const targets = campaignTargets(cp).filter((c) => {
+    const last = cp.sentLog[c.id];
+    return !last || (now - last) > cooldownMs;
+  });
+
+  if (!targets.length) {
+    cp.lastRunDate = todayStr();
+    cp.lastRunSummary = `Chạy lúc ${new Date().toLocaleString('vi-VN')} — không có khách phù hợp (hoặc đang trong thời gian chờ).`;
+    upsertCampaign(cp);
+    renderCampaigns();
+    return;
+  }
+
+  let ok = 0, fail = 0;
+  for (const cust of targets) {
+    const content = applyClientVars(tpl.content, cust);
+    try {
+      const r = await api('/api/v1/zalosend/send', {
+        method: 'POST',
+        body: JSON.stringify({ threadId: cust.threadId, content, name: cust.name, group: !!cust.isGroup }),
+      });
+      if (r.ok) { ok++; cp.sentLog[cust.id] = Date.now(); } else fail++;
+    } catch (e) { fail++; }
+    await new Promise((res) => setTimeout(res, 1200)); // giãn cách chống spam
+  }
+
+  cp.lastRunDate = todayStr();
+  cp.lastRunSummary = `Chạy lúc ${new Date().toLocaleString('vi-VN')} — đã gửi ${ok}/${targets.length}${fail ? `, lỗi ${fail}` : ''}.`;
+  upsertCampaign(cp);
+  renderCampaigns();
+}
+
+function checkCampaigns() {
+  if ($('#dashView').hidden) return; // chưa đăng nhập thì không chạy
+  const now = new Date();
+  const hh = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+  getCampaigns().forEach((cp) => {
+    if (!cp.active) return;
+    if (cp.lastRunDate === todayStr()) return; // đã chạy hôm nay rồi
+    if (hh >= cp.hour) runCampaignNow(cp.id);
+  });
+}
+setInterval(checkCampaigns, 60 * 1000);

@@ -190,8 +190,14 @@ input:focus, textarea:focus, select:focus {
 }
 .clist li:hover { background: var(--panel-2); }
 .clist .ci-main { flex: 1; min-width: 0; }
-.clist .ci-name { font-weight: 600; font-size: 13.5px; }
-.clist .ci-sub { font-size: 11.5px; color: var(--muted); margin-top: 1px; }
+.clist .ci-name {
+  font-weight: 600; font-size: 13.5px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.clist .ci-sub {
+  font-size: 11.5px; color: var(--muted); margin-top: 1px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
 .clist .ci-tag {
   font-size: 10.5px; background: rgba(245, 158, 11, .12); border: 1px solid rgba(245, 158, 11, .3);
   padding: 2px 8px; border-radius: 999px; color: #fcd34d; font-weight: 600;
@@ -202,6 +208,19 @@ input:focus, textarea:focus, select:focus {
   flex-shrink: 0; transition: all .12s ease;
 }
 .clist .del:hover { color: var(--fail); background: rgba(244, 63, 94, .12); }
+
+/* Nút xoá + gia hạn chỉ hiện khi hover dòng, để tên/SĐT không bị ép quá hẹp */
+.clist li .del,
+.clist li .renew-btn {
+  width: 0; padding: 0; margin: 0; opacity: 0; overflow: hidden;
+  transition: width .12s ease, opacity .12s ease;
+}
+.clist li:hover .del,
+.clist li:hover .renew-btn,
+.clist li .renew-btn.due-soon,
+.clist li .renew-btn.due-urgent {
+  width: 24px; opacity: 1;
+}
 
 .ci-avatar,
 .avatar.ci-avatar {
@@ -393,3 +412,39 @@ input:focus, textarea:focus, select:focus {
 }
 .modal__foot .btn { white-space: nowrap; }
 .import-empty { padding: 28px 16px; text-align: center; color: var(--muted); font-size: 13px; }
+
+.import-hint { font-size: 11.5px; color: var(--muted-2); line-height: 1.5; margin: 6px 0 0; }
+
+/* ---------- Gia hạn (badge trên danh sách khách) ---------- */
+.renew-btn {
+  background: none; border: none; cursor: pointer; flex-shrink: 0;
+  width: 24px; height: 24px; border-radius: 7px; display: flex; align-items: center; justify-content: center;
+  color: var(--muted-2); transition: all .12s ease;
+}
+.renew-btn:hover { color: #a5b4fc; background: var(--primary-soft); }
+.renew-btn.due-soon { color: var(--wait); }
+.renew-btn.due-urgent { color: var(--fail); }
+
+/* ---------- Campaign cards ---------- */
+.cp-card {
+  border: 1px solid var(--line); background: var(--panel-2); border-radius: 14px;
+  padding: 14px 16px; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+}
+.cp-card__main { min-width: 0; }
+.cp-card__name { font-weight: 700; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+.cp-card__desc { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.6; }
+.cp-card__meta { font-size: 11px; color: var(--muted-2); margin-top: 6px; }
+.cp-card__actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.cp-badge {
+  font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 999px;
+  text-transform: uppercase; letter-spacing: .04em;
+}
+.cp-badge--on { background: rgba(34, 197, 94, .14); color: #86efac; border: 1px solid rgba(34, 197, 94, .3); }
+.cp-badge--off { background: rgba(113, 113, 122, .18); color: var(--muted); border: 1px solid var(--line); }
+.cp-icon-btn {
+  width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel-3);
+  color: var(--muted); cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: all .12s ease;
+}
+.cp-icon-btn:hover { color: var(--text); border-color: #3a4353; }
+.cp-empty { text-align: center; padding: 40px 20px; color: var(--muted); font-size: 13px; }

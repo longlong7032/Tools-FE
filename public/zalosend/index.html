@@ -99,6 +99,7 @@
         <div class="tabs chat__tabs">
           <button class="tab tab--active" data-tab="single">Gửi đơn lẻ</button>
           <button class="tab" data-tab="broadcast">Gửi hàng loạt</button>
+          <button class="tab" data-tab="campaign">Chiến dịch tự động</button>
         </div>
       </header>
 
@@ -107,10 +108,20 @@
         <div id="tab-single" class="tabpane">
           <label class="lbl">Chọn khách hàng</label>
           <select id="singleTarget"></select>
+
+          <label class="lbl">Mẫu tin nhắn</label>
+          <select id="templatePicker">
+            <option value="">— Chọn mẫu có sẵn (tuỳ chọn) —</option>
+          </select>
+
           <label class="lbl">Nội dung</label>
           <div class="var-chips" data-target="singleContent">
             <span class="var-chips__lbl">Chèn biến:</span>
             <button type="button" class="chip-var" data-insert="[Tên]">[Tên]</button>
+            <button type="button" class="chip-var" data-insert="[SĐT]">[SĐT]</button>
+            <button type="button" class="chip-var" data-insert="[SảnPhẩm]" title="Nội dung gia hạn — cần thiết lập ở nút 📅 trên từng khách">[SảnPhẩm]</button>
+            <button type="button" class="chip-var" data-insert="[NgàyHếtHạn]" title="Cần thiết lập ở nút 📅 trên từng khách">[NgàyHếtHạn]</button>
+            <button type="button" class="chip-var" data-insert="[SốNgàyCònLại]" title="Cần thiết lập ở nút 📅 trên từng khách">[SốNgàyCònLại]</button>
             <button type="button" class="chip-var" data-insert="{lựa chọn 1|lựa chọn 2}" title="Spintax: ngẫu nhiên một trong các lựa chọn">{Spintax}</button>
           </div>
           <textarea id="singleContent" rows="4" placeholder="{Chào|Hi} [Tên], bên em có ưu đãi..."></textarea>
@@ -150,6 +161,18 @@
 
           <div id="bcLog" class="log"></div>
         </div>
+
+        <!-- Chiến dịch tự động -->
+        <div id="tab-campaign" class="tabpane" hidden>
+          <p class="muted">
+            Tự động gửi tin theo lịch (chăm sóc/track khách, nhắc gia hạn domain–hosting...) tới khách theo nhãn hoặc khách sắp hết hạn.
+            <strong>Chỉ chạy khi tab trình duyệt này đang mở</strong> và bạn vẫn đang đăng nhập Zalo — đây là giới hạn của bản chạy phía trình duyệt (chưa có server lịch riêng).
+          </p>
+
+          <button id="btnNewCampaign" class="btn btn--primary" style="margin-bottom:16px">+ Tạo chiến dịch</button>
+
+          <div id="campaignList" class="stack"></div>
+        </div>
       </div>
     </main>
   </div>
@@ -182,6 +205,13 @@
         </button>
       </div>
 
+      <div class="import-tools" style="padding-top:0">
+        <input id="importTagOverride" placeholder="Gắn nhãn cho các mục sắp thêm (vd: tên nhóm Zalo)..." />
+      </div>
+      <p class="import-hint">
+        Zalo chưa cho phép đọc nhãn (label) có sẵn trong app Zalo qua API — gõ nhãn ở đây để tự gắn nhóm theo ý bạn khi import (vd: import từng nhóm Zalo một, đặt tên nhóm làm nhãn).
+      </p>
+
       <div class="import-bar">
         <label class="chk"><input type="checkbox" id="importSelectAll" /> Chọn tất cả (đang lọc)</label>
         <span id="importInfo" class="muted"></span>
@@ -194,6 +224,85 @@
         <div class="row" style="margin:0">
           <button id="importCancel" class="btn btn--ghost">Đóng</button>
           <button id="importAdd" class="btn btn--primary">Thêm đã chọn</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ MODAL: GIA HẠN (domain/hosting...) — dữ liệu lưu cục bộ trên trình duyệt ============ -->
+  <div id="renewModal" class="modal" hidden>
+    <div class="modal__box" style="max-width:380px">
+      <div class="modal__head">
+        <h3>Thiết lập gia hạn</h3>
+        <button id="renewClose" class="modal__x">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+      </div>
+      <div style="padding:18px 20px">
+        <p id="renewFor" class="muted" style="margin-top:0"></p>
+        <label class="lbl">Sản phẩm / Domain / Gói hosting</label>
+        <input id="renewItem" placeholder="VD: domain abc.com hoặc gói Hosting SSD 5GB" />
+        <label class="lbl">Ngày hết hạn</label>
+        <input id="renewDate" type="date" />
+        <p class="import-hint" style="margin-top:10px">
+          Dữ liệu này chỉ lưu trên trình duyệt (localStorage) — dùng để tự tính [SảnPhẩm], [NgàyHếtHạn], [SốNgàyCònLại] khi gửi tin/chạy chiến dịch, chưa đồng bộ lên hệ thống chung.
+        </p>
+      </div>
+      <div class="modal__foot">
+        <button id="renewDelete" class="btn btn--ghost" style="color:var(--fail)">Xoá thiết lập</button>
+        <div class="row" style="margin:0">
+          <button id="renewCancel" class="btn btn--ghost">Đóng</button>
+          <button id="renewSave" class="btn btn--primary">Lưu</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ MODAL: TẠO / SỬA CHIẾN DỊCH ============ -->
+  <div id="campaignModal" class="modal" hidden>
+    <div class="modal__box" style="max-width:440px">
+      <div class="modal__head">
+        <h3 id="campaignModalTitle">Tạo chiến dịch</h3>
+        <button id="campaignClose" class="modal__x">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+      </div>
+      <div style="padding:18px 20px; max-height:64vh; overflow-y:auto">
+        <label class="lbl">Tên chiến dịch</label>
+        <input id="cpName" placeholder="VD: Nhắc gia hạn hosting" />
+
+        <label class="lbl">Mẫu tin nhắn</label>
+        <select id="cpTemplate"></select>
+
+        <label class="lbl">Đối tượng</label>
+        <select id="cpTriggerType">
+          <option value="tag">Khách theo nhãn</option>
+          <option value="renew">Khách sắp hết hạn (theo dữ liệu gia hạn đã thiết lập)</option>
+        </select>
+
+        <div id="cpTagWrap">
+          <label class="lbl">Nhãn</label>
+          <select id="cpTag"></select>
+        </div>
+
+        <div id="cpRenewWrap" hidden>
+          <label class="lbl">Nhắc trước khi hết hạn (số ngày)</label>
+          <input id="cpDays" type="number" min="1" value="7" />
+        </div>
+
+        <label class="lbl">Không gửi lại cho cùng 1 khách trong vòng (ngày)</label>
+        <input id="cpCooldown" type="number" min="1" value="14" />
+
+        <label class="lbl">Giờ kiểm tra &amp; gửi mỗi ngày</label>
+        <input id="cpHour" type="time" value="09:00" />
+
+        <p class="import-hint">Hệ thống sẽ kiểm tra mỗi phút khi tab này đang mở; đến giờ đã đặt (và chưa chạy hôm nay) sẽ tự gửi cho các khách phù hợp.</p>
+      </div>
+      <div class="modal__foot">
+        <button id="campaignDelete" class="btn btn--ghost" style="color:var(--fail)" hidden>Xoá</button>
+        <div class="row" style="margin:0">
+          <button id="campaignCancel" class="btn btn--ghost">Huỷ</button>
+          <button id="campaignSave" class="btn btn--primary">Lưu chiến dịch</button>
         </div>
       </div>
     </div>
