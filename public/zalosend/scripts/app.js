@@ -147,6 +147,12 @@ function renderCustomers() {
     .map((c) => `<option value="${c.id}">${escapeHtml(c.name)} — ${escapeHtml(c.threadId)}</option>`)
     .join('');
 
+  // dropdown xuất hội thoại
+  const expSel = $('#exportTarget');
+  expSel.innerHTML = '<option value="">— Nhập threadId thủ công bên dưới —</option>' + customers
+    .map((c) => `<option value="${c.id}">${escapeHtml(c.name)} — ${escapeHtml(c.threadId)}${c.isGroup ? ' (nhóm)' : ''}</option>`)
+    .join('');
+
   list.querySelectorAll('.del').forEach((b) => {
     b.onclick = async () => {
       await api('/api/v1/zalosend/customers/' + b.dataset.id, { method: 'DELETE' });
@@ -272,6 +278,7 @@ document.querySelectorAll('.chat__tabs > .tab').forEach((t) => {
     $('#tab-single').hidden = t.dataset.tab !== 'single';
     $('#tab-broadcast').hidden = t.dataset.tab !== 'broadcast';
     $('#tab-campaign').hidden = t.dataset.tab !== 'campaign';
+    $('#tab-export').hidden = t.dataset.tab !== 'export';
     if (t.dataset.tab === 'campaign') renderCampaigns();
   };
 });
@@ -302,6 +309,51 @@ $('#btnSendSingle').onclick = async () => {
 
   if (r.ok) logLine(box, `✅ Đã gửi: "${r.text}"`, 'ok');
   else logLine(box, `❌ Lỗi: ${r.error}`, 'fail');
+};
+
+// ---------- Xuất hội thoại (JSON, N ngày gần nhất) ----------
+$('#btnExportHistory').onclick = async () => {
+  const box = $('#exportResult');
+  box.innerHTML = '';
+
+  const custId = $('#exportTarget').value;
+  const cust = custId ? customers.find((c) => c.id === custId) : null;
+  const threadId = cust ? cust.threadId : $('#exportThreadManual').value.trim();
+  const isGroup = cust ? !!cust.isGroup : $('#exportIsGroup').checked;
+  const days = Number($('#exportDays').value);
+
+  if (!threadId) return alert('Chọn khách hàng hoặc nhập threadId.');
+  if (!Number.isFinite(days) || days <= 0) return alert('Số ngày phải là số dương.');
+
+  logLine(box, `Đang lấy dữ liệu hội thoại "${threadId}" trong ${days} ngày gần nhất...`, 'info');
+  $('#btnExportHistory').disabled = true;
+
+  try {
+    const url = new URL(BASE_URL + '/api/v1/zalosend/zalo/history');
+    url.searchParams.set('threadId', threadId);
+    url.searchParams.set('days', String(days));
+    if (isGroup) url.searchParams.set('group', '1');
+
+    const res = await fetch(url);
+    const data = await res.json();
+    if (!res.ok || data.error) throw new Error(data.error || 'Không lấy được dữ liệu hội thoại.');
+
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const blobUrl = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = blobUrl;
+    a.download = `zalo-history-${threadId}-${days}d.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(blobUrl);
+
+    logLine(box, `✅ Đã tải về ${data.count} tin nhắn.`, 'ok');
+  } catch (err) {
+    logLine(box, `❌ Lỗi: ${err.message}`, 'fail');
+  } finally {
+    $('#btnExportHistory').disabled = false;
+  }
 };
 
 // ---------- Gửi hàng loạt ----------

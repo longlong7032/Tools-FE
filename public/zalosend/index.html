@@ -100,6 +100,7 @@
           <button class="tab tab--active" data-tab="single">Gửi đơn lẻ</button>
           <button class="tab" data-tab="broadcast">Gửi hàng loạt</button>
           <button class="tab" data-tab="campaign">Chiến dịch tự động</button>
+          <button class="tab" data-tab="export">Xuất hội thoại</button>
         </div>
       </header>
 
@@ -178,6 +179,26 @@
           <button id="btnNewCampaign" class="btn btn--primary" style="margin-bottom:16px">+ Tạo chiến dịch</button>
 
           <div id="campaignList" class="stack"></div>
+        </div>
+
+        <!-- Xuất hội thoại -->
+        <div id="tab-export" class="tabpane" hidden>
+          <p class="muted">Lấy toàn bộ tin nhắn của một hội thoại (khách hàng/nhóm) trong N ngày gần nhất, tải về dưới dạng file JSON.</p>
+
+          <label class="lbl">Chọn khách hàng</label>
+          <select id="exportTarget"></select>
+
+          <label class="lbl">Hoặc nhập threadId thủ công (bỏ trống nếu đã chọn ở trên)</label>
+          <input id="exportThreadManual" placeholder="SĐT / UserId / GroupId" />
+          <label class="chk" style="margin-top:8px">
+            <input type="checkbox" id="exportIsGroup" /> Đây là nhóm
+          </label>
+
+          <label class="lbl">Số ngày gần nhất (N)</label>
+          <input id="exportDays" type="number" min="1" value="7" style="max-width:140px" />
+
+          <button id="btnExportHistory" class="btn btn--primary" style="margin-top:14px">⬇ Tải file JSON</button>
+          <div id="exportResult" class="log log--sm"></div>
         </div>
       </div>
     </main>
