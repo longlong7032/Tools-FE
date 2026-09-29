@@ -195,9 +195,12 @@
           </label>
 
           <label class="lbl">Số ngày gần nhất (N)</label>
-          <input id="exportDays" type="number" min="1" value="7" style="max-width:140px" />
+          <input id="exportDays" type="number" min="1" max="5" value="2" style="max-width:140px" />
 
-          <button id="btnExportHistory" class="btn btn--primary" style="margin-top:14px">⬇ Tải file JSON</button>
+          <div class="row" style="margin-top:14px">
+            <button id="btnExportHistory" class="btn btn--primary">⬇ Tải file JSON</button>
+            <button id="btnExportHistoryTxt" class="btn btn--ghost" disabled title="Lấy dữ liệu (nút JSON) trước để bật nút này">⬇ Tải file .txt (chỉ text)</button>
+          </div>
           <div id="exportResult" class="log log--sm"></div>
         </div>
       </div>

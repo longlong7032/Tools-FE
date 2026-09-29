@@ -315,9 +315,29 @@ $('#btnSendSingle').onclick = async () => {
 };
 
 // ---------- Xuất hội thoại (JSON, N ngày gần nhất) ----------
+let lastExportData = null; // dữ liệu lần fetch gần nhất — dùng để xuất .txt mà không phải gọi API lại
+
+// Chuyển mảng messages (schema thô từ openzca: msg_type, content_text, sender_name,
+// timestamp_ms...) thành text dễ đọc, chỉ giữ tin nhắn dạng text (bỏ ảnh/video/sticker...).
+function messagesToPlainText(data) {
+  const lines = (data.messages || [])
+    .filter((m) => !m.msg_type || m.msg_type === 'text')
+    .map((m) => {
+      const ts = m.timestamp_ms ? new Date(Number(m.timestamp_ms)) : null;
+      const time = ts ? ts.toLocaleString('vi-VN') : '(không rõ thời gian)';
+      const sender = m.sender_name || m.sender_id || '(ẩn danh)';
+      const content = (m.content_text || '').replace(/\s+/g, ' ').trim();
+      return `[${time}] ${sender}: ${content}`;
+    });
+  const header = `Hội thoại: ${data.threadId}${data.group ? ' (nhóm)' : ''} — ${data.days} ngày gần nhất — ${lines.length}/${data.count} tin nhắn dạng text\n`;
+  return header + '\n' + (lines.join('\n') || '(không có tin nhắn dạng text)');
+}
+
 $('#btnExportHistory').onclick = async () => {
   const box = $('#exportResult');
   box.innerHTML = '';
+  lastExportData = null;
+  $('#btnExportHistoryTxt').disabled = true;
 
   const custId = $('#exportTarget').value;
   const cust = custId ? customers.find((c) => c.id === custId) : null;
@@ -362,6 +382,9 @@ $('#btnExportHistory').onclick = async () => {
       if (data.count === 0 && data.sync) {
         logLine(box, 'ℹ️ 0 tin nhắn — xem field "sync" trong file JSON vừa tải để biết lý do (Zalo thường chỉ cho đọc lịch sử từ lúc tài khoản này tham gia nhóm/hội thoại, hoặc trong khoảng ngày này chưa có tin mới).', 'wait');
       }
+      lastExportData = data;
+      $('#btnExportHistoryTxt').disabled = false;
+      $('#btnExportHistoryTxt').title = '';
       break; // thành công — dừng vòng lặp retry
     } catch (err) {
       const isRateLimit = /429|rate limit|giới hạn tần suất/i.test(err.message || '');
@@ -375,6 +398,20 @@ $('#btnExportHistory').onclick = async () => {
   }
 
   $('#btnExportHistory').disabled = false;
+};
+
+$('#btnExportHistoryTxt').onclick = () => {
+  if (!lastExportData) return;
+  const text = messagesToPlainText(lastExportData);
+  const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+  const blobUrl = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = blobUrl;
+  a.download = `zalo-history-${lastExportData.threadId}-${lastExportData.days}d.txt`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(blobUrl);
 };
 
 // ---------- Gửi hàng loạt ----------
