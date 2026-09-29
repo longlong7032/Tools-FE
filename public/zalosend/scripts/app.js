@@ -172,7 +172,7 @@ function renderCustomers() {
   const list = $('#customerList');
   list.innerHTML = '';
   customers.forEach((c) => {
-    const li = el('li', 'flex items-center gap-2.5 px-2 py-2.5 rounded-[10px] hover:bg-panel2 transition');
+    const li = el('li', 'group flex items-center gap-2.5 px-2 py-2.5 rounded-[10px] hover:bg-panel2 transition');
     li.dataset.tag = c.tag || '';
     const initial = escapeHtml((c.name || '?').trim().charAt(0).toUpperCase() || '?');
     li.innerHTML = `
@@ -185,7 +185,7 @@ function renderCustomers() {
       ${c.isGroup ? '<span class="text-[10.5px] bg-indigo-500/[.14] border border-indigo-500/30 text-indigo-300 px-2 py-0.5 rounded-full font-semibold">Nhóm</span>' : ''}
       ${c.tag ? `<span class="text-[10.5px] bg-amber-500/[.12] border border-amber-500/30 text-amber-300 px-2 py-0.5 rounded-full font-semibold">${escapeHtml(c.tag)}</span>` : ''}
       ${renewBtnHtml(c)}
-      <button class="row-action del bg-transparent border-none text-muted2 cursor-pointer h-6 rounded-[7px] flex items-center justify-center shrink-0 hover:text-rose-400 hover:bg-rose-500/[.12] transition" data-id="${c.id}" title="Xoá">
+      <button class="row-action del h-6 w-0 shrink-0 overflow-hidden rounded-[7px] border-none bg-transparent text-muted2 opacity-0 transition group-hover:w-6 group-hover:opacity-100 hover:bg-rose-500/[.12] hover:text-rose-400" data-id="${c.id}" title="Xoá">
         <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
       </button>`;
     list.appendChild(li);
@@ -222,15 +222,15 @@ function renderCustomers() {
 function renewBtnHtml(c) {
   const r = getRenewal(c.id);
   const dl = r ? daysLeftFrom(r.date) : null;
-  let dueCls = '';
+  let visibilityCls = 'w-0 opacity-0 group-hover:w-6 group-hover:opacity-100';
   let colorCls = 'text-muted2 hover:text-indigo-300 hover:bg-indigo-500/[.14]';
   let title = 'Thiết lập gia hạn (domain/hosting...)';
   if (dl !== null) {
-    if (dl <= 7) { dueCls = ' due-urgent'; colorCls = 'text-rose-400 hover:text-indigo-300 hover:bg-indigo-500/[.14]'; }
-    else if (dl <= 30) { dueCls = ' due-soon'; colorCls = 'text-amber-400 hover:text-indigo-300 hover:bg-indigo-500/[.14]'; }
+    if (dl <= 7) { visibilityCls = 'w-6 opacity-100'; colorCls = 'text-rose-400 hover:text-indigo-300 hover:bg-indigo-500/[.14]'; }
+    else if (dl <= 30) { visibilityCls = 'w-6 opacity-100'; colorCls = 'text-amber-400 hover:text-indigo-300 hover:bg-indigo-500/[.14]'; }
     title = `${r.item} — còn ${dl} ngày (${new Date(r.date + 'T00:00:00').toLocaleDateString('vi-VN')})`;
   }
-  return `<button class="row-action renew-btn${dueCls} bg-transparent border-none cursor-pointer h-6 rounded-[7px] flex items-center justify-center shrink-0 transition ${colorCls}" data-id="${c.id}" title="${escapeHtml(title)}">
+  return `<button class="row-action renew-btn h-6 shrink-0 overflow-hidden rounded-[7px] border-none bg-transparent transition ${visibilityCls} ${colorCls}" data-id="${c.id}" title="${escapeHtml(title)}">
     <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
   </button>`;
 }

@@ -20,7 +20,7 @@ document.getElementById('printBtn').addEventListener('click', () => {
 
 document.getElementById('copyBtn').addEventListener('click', () => {
     const container = document.getElementById('document');
-    const htmlContent = '<!DOCTYPE html>\n<html lang="vi">\n<head>\n<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width, initial-scale=1.0">\n<title>Hợp Đồng</title>\n<script src="https://cdn.tailwindcss.com"></script>\n<style>body { font-family: "Times New Roman", serif; margin: 20px; line-height: 1.5; }</style>\n</head>\n<body>\n' + container.innerHTML + '\n</body>\n</html>';
+    const htmlContent = '<!DOCTYPE html>\n<html lang="vi">\n<head>\n<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width, initial-scale=1.0">\n<title>Hợp Đồng</title>\n<script src="https://cdn.tailwindcss.com"></script>\n</head>\n<body class="m-5 font-serif leading-6">\n' + container.innerHTML + '\n</body>\n</html>';
     const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');

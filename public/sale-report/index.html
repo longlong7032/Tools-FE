@@ -17,68 +17,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style type="text/tailwindcss">
-        @custom-variant dark (&:where(.dark, .dark *));
-    </style>
-    <style>
-        html.dark body {
-            background-color: #09090b;
-            color: #f4f4f5;
-        }
-
-        html.dark header,
-        html.dark section,
-        html.dark aside>div {
-            border-color: #27272a;
-            background-color: #09090b;
-        }
-
-        html.dark section>details>summary:hover,
-        html.dark aside a:hover {
-            background-color: #18181b;
-        }
-
-        html.dark input,
-        html.dark select,
-        html.dark textarea {
-            border-color: #3f3f46;
-            background-color: #18181b;
-            color: #f4f4f5;
-        }
-
-        html.dark input::placeholder,
-        html.dark textarea::placeholder {
-            color: #71717a;
-        }
-
-        html.dark [class*="bg-zinc-50"],
-        html.dark [class*="bg-white"] {
-            background-color: #18181b;
-        }
-
-        html.dark [class*="border-zinc-200"],
-        html.dark [class*="border-zinc-300"] {
-            border-color: #3f3f46;
-        }
-
-        html.dark [class*="text-zinc-500"],
-        html.dark [class*="text-zinc-600"] {
-            color: #a1a1aa;
-        }
-
-        html.dark [class*="text-zinc-700"] {
-            color: #d4d4d8;
-        }
-
-        .field-invalid {
-            border-color: #dc2626 !important;
-            box-shadow: 0 0 0 2px rgb(220 38 38 / 0.12);
-        }
-
-        .section-invalid {
-            border-color: #f87171 !important;
-        }
-    </style>
+    <script>
+        tailwind.config = { darkMode: 'class' };
+    </script>
     <script>
         (() => {
             const savedTheme = localStorage.getItem('toolhub-theme');
@@ -90,7 +31,7 @@
     </script>
 </head>
 
-<body class="min-h-screen bg-zinc-50 font-[Inter] text-zinc-950 antialiased">
+<body class="min-h-screen bg-zinc-50 font-[Inter] text-zinc-950 antialiased dark:bg-zinc-950 dark:text-zinc-100">
     <div class="min-h-screen">
         <!-- Top bar -->
         <header class="sticky top-0 z-30 border-b border-white/10 bg-[#0b0f17]/95 backdrop-blur-xl">

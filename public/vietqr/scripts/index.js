@@ -1,9 +1,22 @@
 const Notification = {
     el: document.getElementById('liveToast'),
+    timeoutId: null,
     show(msg, type = 'danger') {
-        this.el.className = `toast align-items-center text-white bg-${type} border-0 shadow`;
+        const colors = {
+            success: 'bg-emerald-600',
+            warning: 'bg-amber-500',
+            danger: 'bg-rose-600'
+        };
+
+        this.el.className = `pointer-events-none fixed right-4 top-4 z-50 w-[calc(100%-2rem)] max-w-sm translate-y-0 opacity-100 transition duration-300 ${colors[type] || colors.danger}`;
         this.el.querySelector('.toast-body').textContent = msg;
-        bootstrap.Toast.getOrCreateInstance(this.el).show();
+        this.el.querySelector('button').onclick = () => this.hide();
+        window.clearTimeout(this.timeoutId);
+        this.timeoutId = window.setTimeout(() => this.hide(), 3200);
+    },
+    hide() {
+        this.el.classList.remove('translate-y-0', 'opacity-100');
+        this.el.classList.add('-translate-y-5', 'opacity-0');
     }
 };
 
@@ -40,6 +53,7 @@ const App = {
         desc: document.getElementById('input-desc'),
         btn: document.getElementById('btn-generate'),
         img: document.getElementById('qr-image'),
+        wrapper: document.getElementById('qr-wrapper'),
         actions: document.getElementById('qr-actions'),
         status: document.getElementById('qr-status'),
         copyBtn: document.getElementById('btn-copy'),
@@ -58,7 +72,7 @@ const App = {
     },
 
     generate() {
-        const { bank, acc, name, amount, desc, img, status, actions, dlBtn } = this.elements;
+        const { bank, acc, name, amount, desc, img, status, wrapper, actions, dlBtn } = this.elements;
 
         if (!bank.value || !acc.value) {
             return Notification.show("Thiếu ngân hàng hoặc số tài khoản!", "warning");
@@ -66,10 +80,10 @@ const App = {
 
         const qrUrl = `https://img.vietqr.io/image/${bank.value}-${acc.value.trim()}-print.png?amount=${amount.value}&addInfo=${encodeURIComponent(desc.value.trim())}&accountName=${name.value}`
        
-        status.classList.add('d-none');
+        status.classList.add('hidden');
         img.src = qrUrl;
-        img.classList.add('qr-card__image--active');
-        actions.classList.add('qr-card__actions--visible');
+        wrapper.classList.remove('hidden');
+        actions.classList.remove('hidden');
         dlBtn.href = qrUrl; // Link download
 
         Notification.show("Mã QR đã được tạo!", "success");

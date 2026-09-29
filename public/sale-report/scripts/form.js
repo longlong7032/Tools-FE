@@ -46,18 +46,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function clearValidation() {
-        document.querySelectorAll('.field-invalid').forEach((input) => {
-            input.classList.remove('field-invalid');
+        document.querySelectorAll('[aria-invalid="true"]').forEach((input) => {
+            input.classList.remove('border-red-600', 'ring-2', 'ring-red-600/10');
             input.removeAttribute('aria-invalid');
         });
-        document.querySelectorAll('.section-invalid').forEach((section) => section.classList.remove('section-invalid'));
+        document.querySelectorAll('section.border-red-400').forEach((section) => section.classList.remove('border-red-400'));
         validationSummary?.classList.add('hidden');
     }
 
     function markInvalid(input) {
-        input.classList.add('field-invalid');
+        input.classList.add('border-red-600', 'ring-2', 'ring-red-600/10');
         input.setAttribute('aria-invalid', 'true');
-        input.closest('section')?.classList.add('section-invalid');
+        input.closest('section')?.classList.add('border-red-400');
     }
 
     function validateBeforePreview() {
@@ -385,9 +385,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (input.matches?.(formattedNumberSelector)) {
             input.setCustomValidity(input.value && parseMoney(input.value) < 0 ? 'Giá trị không được âm.' : '');
         }
-        input.classList?.remove('field-invalid');
+        input.classList?.remove('border-red-600', 'ring-2', 'ring-red-600/10');
         input.removeAttribute?.('aria-invalid');
-        input.closest?.('section')?.classList.remove('section-invalid');
+        input.closest?.('section')?.classList.remove('border-red-400');
         scheduleDraftSave();
     });
 
