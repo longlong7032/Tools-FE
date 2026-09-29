@@ -336,7 +336,7 @@ $('#btnExportHistory').onclick = async () => {
 
     const res = await fetch(url);
     const data = await res.json();
-    if (!res.ok || data.error) throw new Error(data.error || 'Không lấy được dữ liệu hội thoại.');
+    if (!res.ok || data.error) throw new Error(data.message || data.error || 'Không lấy được dữ liệu hội thoại.');
 
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const blobUrl = URL.createObjectURL(blob);
