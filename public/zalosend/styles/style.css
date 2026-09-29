@@ -330,6 +330,15 @@ input:focus, textarea:focus, select:focus {
   display: flex; flex-direction: column;
   min-height: 0;
 }
+.account-bar {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  padding: 12px 16px; border-bottom: 1px solid var(--line-soft);
+}
+.account-bar__info { min-width: 0; }
+#accountName {
+  font-size: 13px; font-weight: 600; color: var(--text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px;
+}
 .sidebar__head {
   display: flex; align-items: center; justify-content: space-between;
   padding: 18px 16px 12px;

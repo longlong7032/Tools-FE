@@ -37,6 +37,12 @@ function setPill(state) {
   else { pill.classList.add('pill--off'); txt.textContent = 'Chưa đăng nhập'; }
 }
 
+function setAccountInfo(status) {
+  const el = $('#accountName');
+  if (!el) return;
+  el.textContent = status?.loggedIn ? (status.displayName || status.userId || '(không rõ)') : '—';
+}
+
 function showView(logged) {
   $('#loginView').hidden = logged;
   $('#dashView').hidden = !logged;
@@ -62,6 +68,23 @@ $('#btnLogin').onclick = () => {
   socket.emit('login:start');
 };
 
+$('#btnLogout').onclick = async () => {
+  if (!confirm('Đăng xuất tài khoản Zalo đang dùng? Cần quét QR lại để dùng tiếp.')) return;
+  $('#btnLogout').disabled = true;
+  try {
+    const r = await api('/api/v1/zalosend/zalo/logout', { method: 'POST' });
+    if (r.success === false) throw new Error(r.message || r.error || 'Lỗi không xác định');
+    setPill('off');
+    setAccountInfo({ loggedIn: false });
+    setQrBox('<div class="qr-placeholder">Mã QR sẽ hiện ở đây</div>');
+    showView(false);
+  } catch (err) {
+    alert('Không đăng xuất được: ' + err.message);
+  } finally {
+    $('#btnLogout').disabled = false;
+  }
+};
+
 $('#btnCancel').onclick = () => {
   socket.emit('login:cancel');
   $('#btnLogin').disabled = false;
@@ -71,6 +94,7 @@ $('#btnCancel').onclick = () => {
 
 socket.on('login:status', (s) => {
   setPill(s.loggedIn ? 'on' : 'off');
+  setAccountInfo(s);
   showView(s.loggedIn);
 });
 
@@ -94,6 +118,7 @@ socket.on('login:done', (status) => {
   $('#btnCancel').hidden = true;
   if (status.loggedIn) {
     setPill('on');
+    setAccountInfo(status);
     logLine($('#loginLog'), 'Đăng nhập thành công!', 'ok');
     showView(true);
   } else {

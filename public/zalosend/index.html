@@ -62,6 +62,17 @@
 
     <!-- Sidebar: danh sách khách hàng (giống danh sách hội thoại Zalo) -->
     <aside class="sidebar">
+      <div id="accountBar" class="account-bar">
+        <div class="account-bar__info">
+          <span class="muted" style="font-size:11px">Đang đăng nhập</span>
+          <div id="accountName">—</div>
+        </div>
+        <button id="btnLogout" class="btn btn--ghost btn--sm" title="Đăng xuất tài khoản Zalo">
+          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+          Đăng xuất
+        </button>
+      </div>
+
       <div class="sidebar__head">
         <h3>Khách hàng</h3>
         <button id="btnImport" class="btn btn--ghost btn--sm">
