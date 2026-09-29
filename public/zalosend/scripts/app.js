@@ -1,7 +1,10 @@
 /* global io */
 'use strict';
 
-const BASE_URL = 'https://tool-8s0g.onrender.com';
+// Tự nhận diện môi trường: mở trang từ localhost/127.0.0.1 (test local, chạy `npm run dev`
+// ở BE) thì gọi thẳng BE local (mặc định cổng 8521) thay vì server production trên Render.
+const IS_LOCAL = ['localhost', '127.0.0.1'].includes(location.hostname);
+const BASE_URL = IS_LOCAL ? 'http://localhost:8521' : 'https://tool-8s0g.onrender.com';
 const socket = io(BASE_URL);
 
 // ---------- Helpers ----------
