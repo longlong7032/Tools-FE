@@ -377,9 +377,17 @@ let lastExportData = null; // dữ liệu lần fetch gần nhất — dùng đ�
 
 // Chuyển mảng messages (schema thô từ openzca: msg_type, content_text, sender_name,
 // timestamp_ms...) thành text dễ đọc, chỉ giữ tin nhắn dạng text (bỏ ảnh/video/sticker...).
+// msgType thô của Zalo cho tin nhắn media chứa các từ khoá này (tin nhắn text thường
+// đi kèm msgType "webchat", không phải "text" — đã kiểm chứng qua tài liệu openzca).
+const MEDIA_MSG_TYPE_RE = /photo|gif|sticker|video|voice|audio|share\.file|link|location/i;
+function isMediaMessage(m) {
+  if (typeof m.is_media === 'boolean') return m.is_media;
+  return MEDIA_MSG_TYPE_RE.test(m.msg_type || '');
+}
+
 function messagesToPlainText(data) {
   const lines = (data.messages || [])
-    .filter((m) => !m.msg_type || m.msg_type === 'text')
+    .filter((m) => !isMediaMessage(m))
     .map((m) => {
       const ts = m.timestamp_ms ? new Date(Number(m.timestamp_ms)) : null;
       const time = ts ? ts.toLocaleString('vi-VN') : '(không rõ thời gian)';
