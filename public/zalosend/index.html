@@ -36,6 +36,23 @@
     };
   </script>
   <link rel="icon" href="/assets/index.svg" type="image/x-icon" />
+  <style>
+    /* Bắt buộc: Tailwind utility (display:flex/grid) có độ ưu tiên ngang UA stylesheet
+       của [hidden], nên phần tử vừa có class Tailwind display vừa có attribute hidden
+       (dashboard, các modal) sẽ KHÔNG ẩn được nếu thiếu !important này. */
+    [hidden] {
+      display: none !important;
+    }
+
+    body {
+      -webkit-font-smoothing: antialiased;
+    }
+
+    input::placeholder,
+    textarea::placeholder {
+      color: #5f6a7d;
+    }
+  </style>
 </head>
 
 <body class="m-0 min-h-screen bg-bg text-ink font-sans antialiased">
