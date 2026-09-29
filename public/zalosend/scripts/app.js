@@ -331,35 +331,50 @@ $('#btnExportHistory').onclick = async () => {
   logLine(box, `Đang lấy dữ liệu hội thoại "${threadId}" trong ${days} ngày gần nhất...`, 'info');
   $('#btnExportHistory').disabled = true;
 
-  try {
-    const url = new URL(BASE_URL + '/api/v1/zalosend/zalo/history');
-    url.searchParams.set('threadId', threadId);
-    url.searchParams.set('days', String(days));
-    if (isGroup) url.searchParams.set('group', '1');
+  const url = new URL(BASE_URL + '/api/v1/zalosend/zalo/history');
+  url.searchParams.set('threadId', threadId);
+  url.searchParams.set('days', String(days));
+  if (isGroup) url.searchParams.set('group', '1');
 
-    const res = await fetch(url);
-    const data = await res.json();
-    if (!res.ok || data.error) throw new Error(data.message || data.error || 'Không lấy được dữ liệu hội thoại.');
+  // Chat 1-1 (DM) dùng cơ chế "best-effort" của openzca, thỉnh thoảng tự thất bại
+  // không rõ nguyên nhân dù server đã tự retry — tự động thử lại thêm vài lần ở đây
+  // cho đỡ phải bấm tay. Nhóm (group) đã ổn định sẵn nên chỉ thử 1 lần.
+  const MAX_ATTEMPTS = isGroup ? 1 : 4;
+  const RETRY_DELAY_MS = 6000;
 
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const blobUrl = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = blobUrl;
-    a.download = `zalo-history-${threadId}-${days}d.json`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(blobUrl);
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    try {
+      const res = await fetch(url);
+      const data = await res.json();
+      if (!res.ok || data.error) throw new Error(data.message || data.error || 'Không lấy được dữ liệu hội thoại.');
 
-    logLine(box, `✅ Đã tải về ${data.count} tin nhắn.`, data.count > 0 ? 'ok' : 'wait');
-    if (data.count === 0 && data.sync) {
-      logLine(box, 'ℹ️ 0 tin nhắn — xem field "sync" trong file JSON vừa tải để biết lý do (Zalo thường chỉ cho đọc lịch sử từ lúc tài khoản này tham gia nhóm/hội thoại, hoặc trong khoảng ngày này chưa có tin mới).', 'wait');
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = `zalo-history-${threadId}-${days}d.json`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(blobUrl);
+
+      logLine(box, `✅ Đã tải về ${data.count} tin nhắn.`, data.count > 0 ? 'ok' : 'wait');
+      if (data.count === 0 && data.sync) {
+        logLine(box, 'ℹ️ 0 tin nhắn — xem field "sync" trong file JSON vừa tải để biết lý do (Zalo thường chỉ cho đọc lịch sử từ lúc tài khoản này tham gia nhóm/hội thoại, hoặc trong khoảng ngày này chưa có tin mới).', 'wait');
+      }
+      break; // thành công — dừng vòng lặp retry
+    } catch (err) {
+      const isRateLimit = /429|rate limit|giới hạn tần suất/i.test(err.message || '');
+      if (isRateLimit || attempt >= MAX_ATTEMPTS) {
+        logLine(box, `❌ Lỗi: ${err.message}`, 'fail');
+        break;
+      }
+      logLine(box, `⚠️ Lỗi (lần ${attempt}/${MAX_ATTEMPTS}): ${err.message} — tự thử lại sau ${RETRY_DELAY_MS / 1000}s...`, 'wait');
+      await new Promise((r) => setTimeout(r, RETRY_DELAY_MS));
     }
-  } catch (err) {
-    logLine(box, `❌ Lỗi: ${err.message}`, 'fail');
-  } finally {
-    $('#btnExportHistory').disabled = false;
   }
+
+  $('#btnExportHistory').disabled = false;
 };
 
 // ---------- Gửi hàng loạt ----------
