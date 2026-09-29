@@ -11,8 +11,10 @@ const socket = io(BASE_URL);
 const $ = (sel) => document.querySelector(sel);
 const el = (tag, cls) => { const e = document.createElement(tag); if (cls) e.className = cls; return e; };
 
+const LOG_LINE_COLOR = { ok: 'text-green-400', fail: 'text-rose-400', info: 'text-muted', wait: 'text-amber-400' };
+
 function logLine(box, text, cls = 'info') {
-  const line = el('div', `l ${cls}`);
+  const line = el('div', `py-[3px] border-b border-[#12161c] last:border-b-0 ${LOG_LINE_COLOR[cls] || ''}`);
   const t = new Date().toLocaleTimeString('vi-VN');
   line.textContent = `[${t}] ${text}`;
   box.appendChild(line);
@@ -28,13 +30,27 @@ async function api(url, opts) {
 }
 
 // ---------- Connection pill ----------
+const PILL_BASE = 'pill inline-flex items-center gap-[7px] px-2.5 py-1.5 rounded-full text-xs font-semibold border';
+const PILL_VARIANT = {
+  on: `${PILL_BASE} bg-green-500/10 border-green-500/25 text-green-300`,
+  wait: `${PILL_BASE} bg-amber-500/10 border-amber-500/25 text-amber-300`,
+  off: `${PILL_BASE} bg-rose-500/10 border-rose-500/25 text-rose-300`,
+};
+const DOT_BASE = 'dot w-[7px] h-[7px] rounded-full shrink-0';
+const DOT_VARIANT = {
+  on: `${DOT_BASE} bg-green-500 shadow-[0_0_0_3px_rgba(34,197,94,.18)]`,
+  wait: `${DOT_BASE} bg-amber-500 animate-pulse`,
+  off: `${DOT_BASE} bg-rose-500`,
+};
+
 function setPill(state) {
   const pill = $('#connPill');
+  const dot = pill.querySelector('.dot');
   const txt = $('#connText');
-  pill.className = 'pill';
-  if (state === 'on') { pill.classList.add('pill--on'); txt.textContent = 'Đã đăng nhập'; }
-  else if (state === 'wait') { pill.classList.add('pill--wait'); txt.textContent = 'Đang chờ quét QR'; }
-  else { pill.classList.add('pill--off'); txt.textContent = 'Chưa đăng nhập'; }
+  const key = state === 'on' || state === 'wait' ? state : 'off';
+  pill.className = PILL_VARIANT[key];
+  dot.className = DOT_VARIANT[key];
+  txt.textContent = key === 'on' ? 'Đã đăng nhập' : key === 'wait' ? 'Đang chờ quét QR' : 'Chưa đăng nhập';
 }
 
 function setAccountInfo(status) {
@@ -59,12 +75,19 @@ function setQrBox(html) {
   $('#qrBox').innerHTML = html;
 }
 
+const QR_PLACEHOLDER_CLS = 'text-slate-500 text-[13px] px-4 text-center flex flex-col items-center gap-3';
+const QR_PLACEHOLDER_FAIL_CLS = 'text-rose-500 text-[13px] px-4 text-center flex flex-col items-center gap-3';
+const SPINNER_HTML = '<span class="w-6 h-6 rounded-full border-[3px] border-slate-300 border-t-indigo-500 animate-spin"></span>';
+function qrPlaceholder(html, fail = false) {
+  return `<div class="${fail ? QR_PLACEHOLDER_FAIL_CLS : QR_PLACEHOLDER_CLS}">${html}</div>`;
+}
+
 $('#btnLogin').onclick = () => {
   qrReady = false;
   $('#btnLogin').disabled = true;
   $('#btnCancel').hidden = false;
   $('#loginLog').innerHTML = '';
-  setQrBox('<div class="qr-placeholder"><span class="spinner"></span>Đang khởi tạo phiên đăng nhập...</div>');
+  setQrBox(qrPlaceholder(`${SPINNER_HTML}Đang khởi tạo phiên đăng nhập...`));
   socket.emit('login:start');
 };
 
@@ -76,7 +99,7 @@ $('#btnLogout').onclick = async () => {
     if (r.success === false) throw new Error(r.message || r.error || 'Lỗi không xác định');
     setPill('off');
     setAccountInfo({ loggedIn: false });
-    setQrBox('<div class="qr-placeholder">Mã QR sẽ hiện ở đây</div>');
+    setQrBox(qrPlaceholder('Mã QR sẽ hiện ở đây'));
     showView(false);
   } catch (err) {
     alert('Không đăng xuất được: ' + err.message);
@@ -89,7 +112,7 @@ $('#btnCancel').onclick = () => {
   socket.emit('login:cancel');
   $('#btnLogin').disabled = false;
   $('#btnCancel').hidden = true;
-  setQrBox('<div class="qr-placeholder">Mã QR sẽ hiện ở đây</div>');
+  setQrBox(qrPlaceholder('Mã QR sẽ hiện ở đây'));
 };
 
 socket.on('login:status', (s) => {
@@ -109,7 +132,7 @@ socket.on('login:log', ({ message }) => {
   // Trong lúc chưa có QR, phản chiếu trạng thái mới nhất ngay trong khung QR
   // để người dùng thấy đang xử lý chứ không phải bị treo im lặng.
   if (!qrReady) {
-    setQrBox(`<div class="qr-placeholder"><span class="spinner"></span>${escapeHtml(message)}</div>`);
+    setQrBox(qrPlaceholder(`${SPINNER_HTML}${escapeHtml(message)}`));
   }
 });
 
@@ -123,7 +146,7 @@ socket.on('login:done', (status) => {
     showView(true);
   } else {
     setPill('off');
-    setQrBox('<div class="qr-placeholder qr-placeholder--fail">❌ Chưa đăng nhập được. Vui lòng thử lại.</div>');
+    setQrBox(qrPlaceholder('❌ Chưa đăng nhập được. Vui lòng thử lại.', true));
     logLine($('#loginLog'), 'Chưa đăng nhập được.', 'fail');
   }
 });
@@ -132,7 +155,7 @@ socket.on('login:error', ({ message }) => {
   $('#btnLogin').disabled = false;
   $('#btnCancel').hidden = true;
   setPill('off');
-  setQrBox(`<div class="qr-placeholder qr-placeholder--fail">❌ Lỗi: ${escapeHtml(message)}<br />Vui lòng bấm "Đăng nhập Zalo" để thử lại.</div>`);
+  setQrBox(qrPlaceholder(`❌ Lỗi: ${escapeHtml(message)}<br />Vui lòng bấm "Đăng nhập Zalo" để thử lại.`, true));
   logLine($('#loginLog'), 'Lỗi: ' + message, 'fail');
 });
 
@@ -149,20 +172,20 @@ function renderCustomers() {
   const list = $('#customerList');
   list.innerHTML = '';
   customers.forEach((c) => {
-    const li = el('li');
+    const li = el('li', 'flex items-center gap-2.5 px-2 py-2.5 rounded-[10px] hover:bg-panel2 transition');
     li.dataset.tag = c.tag || '';
     const initial = escapeHtml((c.name || '?').trim().charAt(0).toUpperCase() || '?');
     li.innerHTML = `
-      <input type="checkbox" class="pick" data-id="${c.id}" />
-      <div class="ci-avatar">${initial}</div>
-      <div class="ci-main">
-        <div class="ci-name">${escapeHtml(c.name)}</div>
-        <div class="ci-sub">${escapeHtml(c.threadId)}</div>
+      <input type="checkbox" class="pick w-auto accent-indigo-500" data-id="${c.id}" />
+      <div class="w-[30px] h-[30px] rounded-full shrink-0 bg-gradient-to-br from-indigo-500 to-purple-500 text-white flex items-center justify-center text-[12.5px] font-bold">${initial}</div>
+      <div class="ci-main flex-1 min-w-0">
+        <div class="font-semibold text-[13.5px] whitespace-nowrap overflow-hidden text-ellipsis">${escapeHtml(c.name)}</div>
+        <div class="text-[11.5px] text-muted mt-px whitespace-nowrap overflow-hidden text-ellipsis">${escapeHtml(c.threadId)}</div>
       </div>
-      ${c.isGroup ? '<span class="ci-badge">Nhóm</span>' : ''}
-      ${c.tag ? `<span class="ci-tag">${escapeHtml(c.tag)}</span>` : ''}
+      ${c.isGroup ? '<span class="text-[10.5px] bg-indigo-500/[.14] border border-indigo-500/30 text-indigo-300 px-2 py-0.5 rounded-full font-semibold">Nhóm</span>' : ''}
+      ${c.tag ? `<span class="text-[10.5px] bg-amber-500/[.12] border border-amber-500/30 text-amber-300 px-2 py-0.5 rounded-full font-semibold">${escapeHtml(c.tag)}</span>` : ''}
       ${renewBtnHtml(c)}
-      <button class="del" data-id="${c.id}" title="Xoá">
+      <button class="row-action del bg-transparent border-none text-muted2 cursor-pointer h-6 rounded-[7px] flex items-center justify-center shrink-0 hover:text-rose-400 hover:bg-rose-500/[.12] transition" data-id="${c.id}" title="Xoá">
         <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
       </button>`;
     list.appendChild(li);
@@ -199,14 +222,15 @@ function renderCustomers() {
 function renewBtnHtml(c) {
   const r = getRenewal(c.id);
   const dl = r ? daysLeftFrom(r.date) : null;
-  let cls = '';
+  let dueCls = '';
+  let colorCls = 'text-muted2 hover:text-indigo-300 hover:bg-indigo-500/[.14]';
   let title = 'Thiết lập gia hạn (domain/hosting...)';
   if (dl !== null) {
-    if (dl <= 7) cls = ' due-urgent';
-    else if (dl <= 30) cls = ' due-soon';
+    if (dl <= 7) { dueCls = ' due-urgent'; colorCls = 'text-rose-400 hover:text-indigo-300 hover:bg-indigo-500/[.14]'; }
+    else if (dl <= 30) { dueCls = ' due-soon'; colorCls = 'text-amber-400 hover:text-indigo-300 hover:bg-indigo-500/[.14]'; }
     title = `${r.item} — còn ${dl} ngày (${new Date(r.date + 'T00:00:00').toLocaleDateString('vi-VN')})`;
   }
-  return `<button class="renew-btn${cls}" data-id="${c.id}" title="${escapeHtml(title)}">
+  return `<button class="row-action renew-btn${dueCls} bg-transparent border-none cursor-pointer h-6 rounded-[7px] flex items-center justify-center shrink-0 transition ${colorCls}" data-id="${c.id}" title="${escapeHtml(title)}">
     <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
   </button>`;
 }
@@ -221,6 +245,15 @@ function uniqueTagCounts() {
   return [...map.entries()]; // [[tag, count], ...]
 }
 
+const TAG_CHIP_BASE = 'tag-chip inline-flex items-center gap-1.5 cursor-pointer px-2.5 py-1 rounded-full text-[11.5px] font-semibold border transition';
+const TAG_CHIP_OFF = `${TAG_CHIP_BASE} bg-panel2 border-line text-muted hover:border-[#3a4353] hover:text-ink`;
+const TAG_CHIP_ON = `${TAG_CHIP_BASE} bg-indigo-500/[.14] border-indigo-500/35 text-indigo-300`;
+function tagChipHtml(tag, count, active) {
+  return `<button type="button" class="${active ? TAG_CHIP_ON : TAG_CHIP_OFF}" data-tag="${escapeHtml(tag)}">
+    ${escapeHtml(tag)} <span class="opacity-70 font-medium">${count}</span>
+  </button>`;
+}
+
 function renderTagFilters() {
   const tags = uniqueTagCounts();
   const box = $('#tagFilters');
@@ -229,10 +262,7 @@ function renderTagFilters() {
     box.innerHTML = '';
   } else {
     box.hidden = false;
-    box.innerHTML = tags.map(([tag, count]) => `
-      <button type="button" class="tag-chip${tag === activeTagFilter ? ' active' : ''}" data-tag="${escapeHtml(tag)}">
-        ${escapeHtml(tag)} <span class="cnt">${count}</span>
-      </button>`).join('');
+    box.innerHTML = tags.map(([tag, count]) => tagChipHtml(tag, count, tag === activeTagFilter)).join('');
     box.querySelectorAll('.tag-chip').forEach((chip) => {
       chip.onclick = () => {
         activeTagFilter = activeTagFilter === chip.dataset.tag ? null : chip.dataset.tag;
@@ -249,16 +279,13 @@ function renderTagFilters() {
     bcBox.innerHTML = '';
   } else {
     bcBox.hidden = false;
-    bcBox.innerHTML = tags.map(([tag, count]) => `
-      <button type="button" class="tag-chip${$('#bcTag').value === tag ? ' active' : ''}" data-tag="${escapeHtml(tag)}">
-        ${escapeHtml(tag)} <span class="cnt">${count}</span>
-      </button>`).join('');
+    bcBox.innerHTML = tags.map(([tag, count]) => tagChipHtml(tag, count, $('#bcTag').value === tag)).join('');
     bcBox.querySelectorAll('.tag-chip').forEach((chip) => {
       chip.onclick = () => {
-        const isActive = chip.classList.contains('active');
+        const isActive = chip.className === TAG_CHIP_ON;
         $('#bcTag').value = isActive ? '' : chip.dataset.tag;
-        bcBox.querySelectorAll('.tag-chip').forEach((c) => c.classList.remove('active'));
-        if (!isActive) chip.classList.add('active');
+        bcBox.querySelectorAll('.tag-chip').forEach((c) => { c.className = TAG_CHIP_OFF; });
+        if (!isActive) chip.className = TAG_CHIP_ON;
       };
     });
   }
@@ -299,10 +326,16 @@ function selectedIds() {
 }
 
 // ---------- Tabs ----------
+const TAB_BASE = 'tab px-3.5 py-[7px] text-[13px] font-semibold rounded-lg transition';
+const TAB_ACTIVE = `${TAB_BASE} text-white bg-indigo-500 shadow-sm`;
+const TAB_INACTIVE = `${TAB_BASE} text-muted hover:text-ink`;
+function setActiveTab(tabs, active) {
+  tabs.forEach((x) => { x.className = x === active ? TAB_ACTIVE : TAB_INACTIVE; });
+}
+
 document.querySelectorAll('.chat__tabs > .tab').forEach((t) => {
   t.onclick = () => {
-    document.querySelectorAll('.chat__tabs > .tab').forEach((x) => x.classList.remove('tab--active'));
-    t.classList.add('tab--active');
+    setActiveTab(document.querySelectorAll('.chat__tabs > .tab'), t);
     $('#tab-single').hidden = t.dataset.tab !== 'single';
     $('#tab-broadcast').hidden = t.dataset.tab !== 'broadcast';
     $('#tab-campaign').hidden = t.dataset.tab !== 'campaign';
@@ -555,8 +588,7 @@ importModal.addEventListener('click', (e) => { if (e.target === importModal) clo
 
 importModal.querySelectorAll('.tab').forEach((t) => {
   t.onclick = () => {
-    importModal.querySelectorAll('.tab').forEach((x) => x.classList.remove('tab--active'));
-    t.classList.add('tab--active');
+    setActiveTab(importModal.querySelectorAll('.tab'), t);
     importSource = t.dataset.src;
     loadImport(importSource, false);
   };
@@ -575,16 +607,18 @@ $('#importSelectAll').onchange = (e) => {
   renderImport();
 };
 
+const IMPORT_EMPTY_CLS = 'px-4 py-7 text-center text-muted text-[13px]';
+
 async function loadImport(source, refresh) {
   const list = $('#importList');
   if (refresh || !importData[source]) {
-    list.innerHTML = '<div class="import-empty">Đang tải từ Zalo...</div>';
+    list.innerHTML = `<div class="${IMPORT_EMPTY_CLS}">Đang tải từ Zalo...</div>`;
     $('#importInfo').textContent = '';
     try {
       importData[source] = await api(`/api/v1/zalosend/zalo/${source}${refresh ? '?refresh=1' : ''}`);
       if (importData[source].error) throw new Error(importData[source].error);
     } catch (err) {
-      list.innerHTML = `<div class="import-empty">Lỗi: ${escapeHtml(err.message || 'không tải được')}</div>`;
+      list.innerHTML = `<div class="${IMPORT_EMPTY_CLS}">Lỗi: ${escapeHtml(err.message || 'không tải được')}</div>`;
       return;
     }
   }
@@ -605,31 +639,44 @@ function renderImport() {
 
   $('#importInfo').textContent = `${rows.length} / ${(importData[importSource] || []).length}`;
 
+  const IROW_BASE = 'irow flex items-center gap-3 px-2.5 py-[9px] rounded-[11px] cursor-pointer transition hover:bg-panel2';
+  const IROW_SEL = `${IROW_BASE} bg-indigo-500/[.14]`;
+  const CHECK_BASE = 'check w-5 h-5 rounded-full border-2 border-[#3a4353] flex items-center justify-center shrink-0 text-transparent text-[11px] font-bold transition';
+  const CHECK_SEL = 'check w-5 h-5 rounded-full border-2 border-indigo-500 bg-indigo-500 flex items-center justify-center shrink-0 text-white text-[11px] font-bold transition';
+
   if (!rows.length) {
-    list.innerHTML = '<div class="import-empty">Không có mục nào.</div>';
+    list.innerHTML = `<div class="${IMPORT_EMPTY_CLS}">Không có mục nào.</div>`;
   } else {
     // Giới hạn render 500 dòng để mượt (danh sách nhóm có thể rất lớn).
     const shown = rows.slice(0, 500);
     list.innerHTML = shown.map((r) => {
       const id = r.userId || r.groupId;
       const sub = isGroup ? `${r.members || 0} thành viên` : (r.phone || id);
-      const sel = importPicked.has(id) ? 'sel' : '';
+      const sel = importPicked.has(id);
       const initial = escapeHtml((r.name || '?').trim().charAt(0).toUpperCase() || '?');
-      return `<li class="irow ${sel}" data-id="${id}">
-        ${r.avatar ? `<img class="avatar" src="${r.avatar}" alt="" />` : `<div class="avatar ci-avatar">${initial}</div>`}
-        <div class="ci-main">
-          <div class="ci-name">${escapeHtml(r.name)}</div>
-          <div class="ci-sub">${escapeHtml(String(sub))}</div>
+      return `<li class="${sel ? IROW_SEL : IROW_BASE}" data-id="${id}">
+        ${r.avatar ? `<img class="w-[34px] h-[34px] rounded-full object-cover bg-panel3 shrink-0" src="${r.avatar}" alt="" />` : `<div class="w-[34px] h-[34px] rounded-full shrink-0 bg-gradient-to-br from-indigo-500 to-purple-500 text-white flex items-center justify-center text-[12.5px] font-bold">${initial}</div>`}
+        <div class="ci-main flex-1 min-w-0">
+          <div class="whitespace-nowrap overflow-hidden text-ellipsis text-[13.5px] font-semibold">${escapeHtml(r.name)}</div>
+          <div class="text-[11.5px] text-muted mt-px whitespace-nowrap overflow-hidden text-ellipsis">${escapeHtml(String(sub))}</div>
         </div>
-        <span class="check">✓</span>
+        <span class="${sel ? CHECK_SEL : CHECK_BASE}">✓</span>
       </li>`;
-    }).join('') + (rows.length > 500 ? `<div class="import-empty">…và ${rows.length - 500} mục nữa — hãy tìm kiếm để thu hẹp.</div>` : '');
+    }).join('') + (rows.length > 500 ? `<div class="${IMPORT_EMPTY_CLS}">…và ${rows.length - 500} mục nữa — hãy tìm kiếm để thu hẹp.</div>` : '');
 
     list.querySelectorAll('.irow').forEach((row) => {
       row.onclick = () => {
         const id = row.dataset.id;
-        if (importPicked.has(id)) { importPicked.delete(id); row.classList.remove('sel'); }
-        else { importPicked.add(id); row.classList.add('sel'); }
+        const check = row.querySelector('.check');
+        if (importPicked.has(id)) {
+          importPicked.delete(id);
+          row.className = IROW_BASE;
+          check.className = CHECK_BASE;
+        } else {
+          importPicked.add(id);
+          row.className = IROW_SEL;
+          check.className = CHECK_SEL;
+        }
         $('#importCount').textContent = `Đã chọn ${importPicked.size}`;
       };
     });
@@ -740,28 +787,33 @@ $('#templatePicker').onchange = (e) => {
 const templateModal = $('#templateModal');
 let editingTplId = null;
 
+const CP_ICON_BTN = 'w-[30px] h-[30px] rounded-lg border border-line bg-panel3 text-muted cursor-pointer flex items-center justify-center hover:text-ink hover:border-[#3a4353] transition';
+const CP_EMPTY_CLS = 'text-center py-10 px-5 text-muted text-[13px]';
+const TPL_TAG_BUILTIN = 'text-[9.5px] font-bold uppercase tracking-[.04em] px-[7px] py-px rounded-full bg-zinc-500/[.18] text-muted';
+const TPL_TAG_CUSTOM = 'text-[9.5px] font-bold uppercase tracking-[.04em] px-[7px] py-px rounded-full bg-indigo-500/[.14] text-indigo-300';
+
 function renderTemplateManagerList() {
   const box = $('#templateManagerList');
   const rows = allTemplates().map((t) => {
     const isCustom = t.id.startsWith('custom_');
     return `
-      <div class="tpl-row" data-id="${t.id}">
-        <div style="min-width:0">
-          <div class="tpl-row__name">
+      <div class="tpl-row border border-line bg-panel2 rounded-xl px-3 py-2.5 flex items-start justify-between gap-2.5" data-id="${t.id}">
+        <div class="min-w-0">
+          <div class="font-bold text-[13px] flex items-center gap-[7px]">
             ${escapeHtml(t.label)}
-            <span class="tpl-tag ${isCustom ? 'tpl-tag--custom' : 'tpl-tag--builtin'}">${isCustom ? 'Tuỳ chỉnh' : 'Có sẵn'}</span>
+            <span class="${isCustom ? TPL_TAG_CUSTOM : TPL_TAG_BUILTIN}">${isCustom ? 'Tuỳ chỉnh' : 'Có sẵn'}</span>
           </div>
-          <div class="tpl-row__content">${escapeHtml(t.content)}</div>
+          <div class="text-[11.5px] text-muted mt-[3px] leading-relaxed">${escapeHtml(t.content)}</div>
         </div>
-        <div class="tpl-row__actions">
+        <div class="flex gap-1.5 shrink-0">
           ${isCustom
-            ? `<button class="cp-icon-btn tpl-edit" title="Sửa">✎</button>
-               <button class="cp-icon-btn tpl-del" title="Xoá" style="color:var(--fail)">🗑</button>`
-            : `<button class="cp-icon-btn tpl-copy" title="Sao chép thành mẫu của bạn">⧉</button>`}
+            ? `<button class="${CP_ICON_BTN} tpl-edit" title="Sửa">✎</button>
+               <button class="${CP_ICON_BTN} tpl-del text-rose-400" title="Xoá">🗑</button>`
+            : `<button class="${CP_ICON_BTN} tpl-copy" title="Sao chép thành mẫu của bạn">⧉</button>`}
         </div>
       </div>`;
   }).join('');
-  box.innerHTML = rows || '<div class="cp-empty">Chưa có mẫu nào.</div>';
+  box.innerHTML = rows || `<div class="${CP_EMPTY_CLS}">Chưa có mẫu nào.</div>`;
 
   box.querySelectorAll('.tpl-edit').forEach((b) => {
     b.onclick = () => {
@@ -946,29 +998,32 @@ function triggerSummary(cp) {
   return `Khách sắp hết hạn trong ${cp.days} ngày`;
 }
 
+const CP_BADGE_ON = 'text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-[.04em] bg-green-500/[.14] text-green-300 border border-green-500/30';
+const CP_BADGE_OFF = 'text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-[.04em] bg-zinc-500/[.18] text-muted border border-line';
+
 function renderCampaigns() {
   const box = $('#campaignList');
   const list = getCampaigns();
   if (!list.length) {
-    box.innerHTML = '<div class="cp-empty">Chưa có chiến dịch nào. Bấm "+ Tạo chiến dịch" để bắt đầu.</div>';
+    box.innerHTML = `<div class="${CP_EMPTY_CLS}">Chưa có chiến dịch nào. Bấm "+ Tạo chiến dịch" để bắt đầu.</div>`;
     return;
   }
   const tpl = (id) => allTemplates().find((t) => t.id === id)?.label || '(mẫu đã xoá)';
   box.innerHTML = list.map((cp) => `
-    <div class="cp-card" data-id="${cp.id}">
-      <div class="cp-card__main">
-        <div class="cp-card__name">
+    <div class="cp-card border border-line bg-panel2 rounded-2xl px-4 py-3.5 flex items-start justify-between gap-3" data-id="${cp.id}">
+      <div class="min-w-0">
+        <div class="font-bold text-sm flex items-center gap-2">
           ${escapeHtml(cp.name)}
-          <span class="cp-badge ${cp.active ? 'cp-badge--on' : 'cp-badge--off'}">${cp.active ? 'Đang bật' : 'Đã tắt'}</span>
+          <span class="${cp.active ? CP_BADGE_ON : CP_BADGE_OFF}">${cp.active ? 'Đang bật' : 'Đã tắt'}</span>
         </div>
-        <div class="cp-card__desc">${triggerSummary(cp)} · Mẫu: ${escapeHtml(tpl(cp.templateId))} · Kiểm tra lúc ${cp.hour} mỗi ngày</div>
-        <div class="cp-card__meta">${cp.lastRunSummary ? escapeHtml(cp.lastRunSummary) : 'Chưa chạy lần nào'}</div>
+        <div class="text-xs text-muted mt-1 leading-relaxed">${triggerSummary(cp)} · Mẫu: ${escapeHtml(tpl(cp.templateId))} · Kiểm tra lúc ${cp.hour} mỗi ngày</div>
+        <div class="text-[11px] text-muted2 mt-1.5">${cp.lastRunSummary ? escapeHtml(cp.lastRunSummary) : 'Chưa chạy lần nào'}</div>
       </div>
-      <div class="cp-card__actions">
-        <button class="cp-icon-btn cp-toggle" title="${cp.active ? 'Tắt' : 'Bật'}">${cp.active ? '⏸' : '▶'}</button>
-        <button class="cp-icon-btn cp-run" title="Chạy thử ngay">⚡</button>
-        <button class="cp-icon-btn cp-edit" title="Sửa">✎</button>
-        <button class="cp-icon-btn cp-del" title="Xoá" style="color:var(--fail)">🗑</button>
+      <div class="flex items-center gap-1.5 shrink-0">
+        <button class="${CP_ICON_BTN} cp-toggle" title="${cp.active ? 'Tắt' : 'Bật'}">${cp.active ? '⏸' : '▶'}</button>
+        <button class="${CP_ICON_BTN} cp-run" title="Chạy thử ngay">⚡</button>
+        <button class="${CP_ICON_BTN} cp-edit" title="Sửa">✎</button>
+        <button class="${CP_ICON_BTN} cp-del text-rose-400" title="Xoá">🗑</button>
       </div>
     </div>`).join('');
 

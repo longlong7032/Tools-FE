@@ -11,377 +11,408 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Tool Hub" />
-  <link rel="stylesheet" href="/zalosend/styles/style.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            bg: '#0a0d12',
+            panel: '#12161d',
+            panel2: '#191f29',
+            panel3: '#20272f',
+            line: '#242b36',
+            linesoft: '#1a2029',
+            ink: '#eef1f6',
+            muted: '#8a94a6',
+            muted2: '#5f6a7d',
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif'],
+          },
+        },
+      },
+    };
+  </script>
   <link rel="icon" href="/assets/index.svg" type="image/x-icon" />
+  <style>
+    [hidden] { display: none !important; }
+    body { -webkit-font-smoothing: antialiased; }
+    input::placeholder, textarea::placeholder { color: #5f6a7d; }
+    /* Ẩn nút xoá/gia hạn cho tới khi hover dòng — vẫn cần một chút CSS thật vì
+       Tailwind không có utility điều khiển "el khác hover thì el này hiện". */
+    .clist li .row-action { width: 0; padding: 0; margin: 0; opacity: 0; overflow: hidden; transition: width .12s ease, opacity .12s ease; }
+    .clist li:hover .row-action, .clist li .row-action.due-soon, .clist li .row-action.due-urgent { width: 24px; opacity: 1; }
+  </style>
 </head>
-<body>
+<body class="m-0 min-h-screen bg-bg text-ink font-sans">
   <!-- ============ TOOL HUB HEADER (chung style toàn workspace) ============ -->
-  <header class="th-bar">
-    <a href="/" class="th-bar__back" title="Về Tool Hub">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m11 18-6-6 6-6"/></svg>
+  <header class="sticky top-0 z-40 h-16 flex items-center gap-3 px-4 bg-black/95 backdrop-blur-xl border-b border-white/10">
+    <a href="/" class="flex items-center justify-center shrink-0 w-9 h-9 rounded-lg text-zinc-400 hover:bg-white/10 hover:text-white transition" title="Về Tool Hub">
+      <svg class="w-[17px] h-[17px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m11 18-6-6 6-6"/></svg>
     </a>
-    <img src="/assets/index.svg" alt="" class="th-bar__logo" />
-    <div class="th-bar__text">
-      <p class="th-bar__eyebrow">Tool Hub</p>
-      <h1 class="th-bar__title">ZaloSend CRM</h1>
+    <img src="/assets/index.svg" alt="" class="hidden sm:block w-9 h-9 rounded-lg shrink-0" />
+    <div class="min-w-0">
+      <p class="m-0 text-[10px] font-semibold uppercase tracking-[.14em] text-indigo-200/80">Tool Hub</p>
+      <h1 class="m-0 text-[15px] font-semibold text-white">ZaloSend CRM</h1>
     </div>
   </header>
 
   <!-- ============ LOGIN VIEW ============ -->
-  <section id="loginView" class="view">
-    <div class="card center">
-      <h2>Đăng nhập Zalo</h2>
-      <p class="muted">Bấm nút bên dưới để tạo mã QR và quét bằng ứng dụng Zalo trên điện thoại.</p>
+  <section id="loginView" class="px-6 py-8 max-w-[480px] mx-auto min-h-[calc(100vh-64px)] flex flex-col justify-center">
+    <div class="max-w-[420px] mx-auto mt-4 text-center bg-gradient-to-b from-panel to-bg border border-line rounded-[18px] p-7 shadow-[0_8px_24px_rgba(0,0,0,.35)]">
+      <h2 class="mt-0 text-[19px] font-bold tracking-tight">Đăng nhập Zalo</h2>
+      <p class="text-muted text-sm">Bấm nút bên dưới để tạo mã QR và quét bằng ứng dụng Zalo trên điện thoại.</p>
 
-      <div id="qrBox" class="qrbox">
-        <div class="qr-placeholder">Mã QR sẽ hiện ở đây</div>
+      <div id="qrBox" class="w-[220px] h-[220px] mx-auto my-5 border-[1.5px] border-dashed border-[#3a4353] rounded-2xl flex items-center justify-center bg-white overflow-hidden">
+        <div class="qr-placeholder text-slate-500 text-[13px] px-4 text-center flex flex-col items-center gap-3">Mã QR sẽ hiện ở đây</div>
       </div>
 
-      <div class="row">
-        <button id="btnLogin" class="btn btn--primary">Đăng nhập Zalo</button>
-        <button id="btnCancel" class="btn btn--ghost" hidden>Huỷ</button>
+      <div class="flex gap-2.5 mt-4">
+        <button id="btnLogin" class="flex-1 inline-flex items-center justify-center gap-[7px] px-4 py-2.5 rounded-[10px] text-[13.5px] font-semibold text-white bg-gradient-to-b from-indigo-500 to-indigo-600 shadow-[0_4px_14px_rgba(99,102,241,.3)] hover:from-indigo-400 hover:to-indigo-500 active:translate-y-px disabled:opacity-45 disabled:cursor-not-allowed transition">Đăng nhập Zalo</button>
+        <button id="btnCancel" class="flex-1 inline-flex items-center justify-center gap-[7px] px-4 py-2.5 rounded-[10px] text-[13.5px] font-semibold bg-panel2 border border-line text-ink hover:bg-panel3 hover:border-[#35404f] transition" hidden>Huỷ</button>
       </div>
 
-      <div id="loginLog" class="log log--sm"></div>
+      <div id="loginLog" class="mt-4 max-h-[130px] bg-[#060809] border border-line rounded-xl p-3 font-mono text-xs leading-relaxed overflow-y-auto text-left"></div>
     </div>
   </section>
 
   <!-- ============ DASHBOARD (layout kiểu Zalo: rail + sidebar + main) ============ -->
-  <div id="dashView" class="app" hidden>
+  <div id="dashView" class="grid grid-cols-[68px_300px_1fr] max-[900px]:grid-cols-[56px_260px_1fr] max-[680px]:grid-cols-[0_1fr] h-[calc(100vh-64px)] overflow-hidden" hidden>
     <!-- Rail điều hướng bên trái -->
-    <nav class="rail">
-      <button class="rail__btn rail__btn--active" title="Khách hàng &amp; hội thoại">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5 8.4 8.4 0 0 1-4.2-1.1L4 20l1.1-4.3A8.4 8.4 0 0 1 3 11.5 8.5 8.5 0 1 1 21 11.5Z"/></svg>
+    <nav class="max-[680px]:hidden bg-panel border-r border-linesoft flex flex-col items-center py-4 gap-2.5">
+      <button class="w-[42px] h-[42px] rounded-[11px] border-none flex items-center justify-center transition bg-indigo-500/[.14] text-indigo-300 border border-indigo-500/35" title="Khách hàng &amp; hội thoại">
+        <svg class="w-[19px] h-[19px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5 8.4 8.4 0 0 1-4.2-1.1L4 20l1.1-4.3A8.4 8.4 0 0 1 3 11.5 8.5 8.5 0 1 1 21 11.5Z"/></svg>
       </button>
-      <div class="rail__spacer"></div>
-      <div id="connPill" class="pill pill--off" title="Trạng thái đăng nhập">
-        <span class="dot"></span>
+      <div class="flex-1"></div>
+      <div id="connPill" class="pill inline-flex items-center gap-[7px] px-2.5 py-1.5 rounded-full text-xs font-semibold border" title="Trạng thái đăng nhập">
+        <span class="dot w-[7px] h-[7px] rounded-full shrink-0"></span>
         <span id="connText" class="sr-only">Chưa đăng nhập</span>
       </div>
     </nav>
 
     <!-- Sidebar: danh sách khách hàng (giống danh sách hội thoại Zalo) -->
-    <aside class="sidebar">
-      <div id="accountBar" class="account-bar">
-        <div class="account-bar__info">
-          <span class="muted" style="font-size:11px">Đang đăng nhập</span>
-          <div id="accountName">—</div>
+    <aside class="bg-panel border-r border-linesoft flex flex-col min-h-0">
+      <div id="accountBar" class="flex items-center justify-between gap-2 px-4 py-3 border-b border-linesoft">
+        <div class="min-w-0">
+          <span class="text-muted text-[11px]">Đang đăng nhập</span>
+          <div id="accountName" class="text-[13px] font-semibold text-ink whitespace-nowrap overflow-hidden text-ellipsis max-w-[150px]">—</div>
         </div>
-        <button id="btnLogout" class="btn btn--ghost btn--sm" title="Đăng xuất tài khoản Zalo">
-          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+        <button id="btnLogout" class="inline-flex items-center justify-center gap-[7px] px-[11px] py-[7px] rounded-[10px] text-xs font-semibold bg-panel2 border border-line text-ink hover:bg-panel3 hover:border-[#35404f] transition" title="Đăng xuất tài khoản Zalo">
+          <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
           Đăng xuất
         </button>
       </div>
 
-      <div class="sidebar__head">
-        <h3>Khách hàng</h3>
-        <button id="btnImport" class="btn btn--ghost btn--sm">
-          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M5 21h14"/></svg>
+      <div class="flex items-center justify-between px-4 pt-[18px] pb-3">
+        <h3 class="m-0 text-sm font-bold uppercase tracking-[.04em] text-muted">Khách hàng</h3>
+        <button id="btnImport" class="inline-flex items-center justify-center gap-[7px] px-[11px] py-[7px] rounded-[10px] text-xs font-semibold bg-panel2 border border-line text-ink hover:bg-panel3 hover:border-[#35404f] transition">
+          <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M5 21h14"/></svg>
           Import
         </button>
       </div>
 
-      <form id="customerForm" class="stack sidebar__form">
-        <input id="cName" placeholder="Tên khách hàng" />
-        <input id="cThread" placeholder="SĐT / UserId (threadId)" required />
-        <input id="cTag" placeholder="Nhãn (tuỳ chọn, vd: vip)" />
-        <button class="btn btn--primary" type="submit">+ Thêm</button>
+      <form id="customerForm" class="flex flex-col gap-2.5 px-4 pb-3.5 border-b border-linesoft mb-1.5">
+        <input id="cName" placeholder="Tên khách hàng" class="w-full px-3 py-2.5 rounded-[10px] border border-line bg-panel2 text-ink text-sm focus:outline-none focus:border-indigo-500 focus:bg-panel3 focus:ring-[3px] focus:ring-indigo-500/[.14]" />
+        <input id="cThread" placeholder="SĐT / UserId (threadId)" required class="w-full px-3 py-2.5 rounded-[10px] border border-line bg-panel2 text-ink text-sm focus:outline-none focus:border-indigo-500 focus:bg-panel3 focus:ring-[3px] focus:ring-indigo-500/[.14]" />
+        <input id="cTag" placeholder="Nhãn (tuỳ chọn, vd: vip)" class="w-full px-3 py-2.5 rounded-[10px] border border-line bg-panel2 text-ink text-sm focus:outline-none focus:border-indigo-500 focus:bg-panel3 focus:ring-[3px] focus:ring-indigo-500/[.14]" />
+        <button class="inline-flex items-center justify-center gap-[7px] px-4 py-2.5 rounded-[10px] text-[13.5px] font-semibold text-white bg-gradient-to-b from-indigo-500 to-indigo-600 shadow-[0_4px_14px_rgba(99,102,241,.3)] hover:from-indigo-400 hover:to-indigo-500 active:translate-y-px transition" type="submit">+ Thêm</button>
       </form>
 
-      <div id="tagFilters" class="tagfilters" hidden></div>
+      <div id="tagFilters" class="flex flex-wrap gap-1.5 px-4 pb-2.5" hidden></div>
 
-      <div class="list-head">
-        <label class="chk"><input type="checkbox" id="selectAll" /> Chọn tất cả</label>
-        <span id="custCount" class="muted"></span>
+      <div class="flex justify-between items-center mx-0 my-3 px-4">
+        <label class="text-[12.5px] text-muted flex gap-[7px] items-center font-medium"><input type="checkbox" id="selectAll" class="w-auto accent-indigo-500" /> Chọn tất cả</label>
+        <span id="custCount" class="text-muted text-sm"></span>
       </div>
-      <ul id="customerList" class="clist sidebar__list"></ul>
+      <ul id="customerList" class="list-none m-0 px-2 py-1 overflow-y-auto flex-1 min-h-0"></ul>
     </aside>
 
     <!-- Main: khung soạn/gửi tin, giống khung chat Zalo -->
-    <main class="chat">
-      <header class="chat__head">
-        <div class="chat__title">
-          <div class="avatar avatar--brand">Z</div>
+    <main class="flex flex-col min-h-0 bg-bg">
+      <header class="flex items-center justify-between gap-4 px-6 py-4 border-b border-linesoft bg-panel flex-wrap">
+        <div class="flex items-center gap-3">
+          <div class="flex items-center justify-center w-[34px] h-[34px] rounded-[10px] bg-gradient-to-br from-indigo-500 to-purple-500 text-white font-bold text-[15px]">Z</div>
           <div>
-            <div class="chat__name">ZaloSend</div>
-            <div class="chat__sub muted">Gửi tin nhắn tới khách hàng</div>
+            <div class="font-bold text-[14.5px]">ZaloSend</div>
+            <div class="text-[11.5px] mt-px text-muted">Gửi tin nhắn tới khách hàng</div>
           </div>
         </div>
-        <div class="tabs chat__tabs">
-          <button class="tab tab--active" data-tab="single">Gửi đơn lẻ</button>
-          <button class="tab" data-tab="broadcast">Gửi hàng loạt</button>
-          <button class="tab" data-tab="campaign">Chiến dịch tự động</button>
-          <button class="tab" data-tab="export">Xuất hội thoại</button>
+        <div class="tabs chat__tabs flex gap-1 bg-panel2 p-1 rounded-[11px] w-fit flex-wrap">
+          <button class="tab tab--active px-3.5 py-[7px] text-[13px] font-semibold rounded-lg transition text-white bg-indigo-500 shadow-sm" data-tab="single">Gửi đơn lẻ</button>
+          <button class="tab px-3.5 py-[7px] text-[13px] font-semibold rounded-lg transition text-muted hover:text-ink" data-tab="broadcast">Gửi hàng loạt</button>
+          <button class="tab px-3.5 py-[7px] text-[13px] font-semibold rounded-lg transition text-muted hover:text-ink" data-tab="campaign">Chiến dịch tự động</button>
+          <button class="tab px-3.5 py-[7px] text-[13px] font-semibold rounded-lg transition text-muted hover:text-ink" data-tab="export">Xuất hội thoại</button>
         </div>
       </header>
 
-      <div class="chat__body">
+      <div class="chat__body flex-1 min-h-0 overflow-y-auto p-7 max-w-[680px] w-full mx-auto">
         <!-- Đơn lẻ -->
         <div id="tab-single" class="tabpane">
-          <label class="lbl">Chọn khách hàng</label>
-          <select id="singleTarget"></select>
+          <label class="lbl block mt-3.5 mb-1.5 text-xs font-semibold text-muted uppercase tracking-[.04em]">Chọn khách hàng</label>
+          <select id="singleTarget" class="w-full px-3 py-2.5 rounded-[10px] border border-line bg-panel2 text-ink text-sm focus:outline-none focus:border-indigo-500 focus:bg-panel3"></select>
 
-          <label class="lbl">Mẫu tin nhắn</label>
-          <div class="row" style="margin-top:0">
-            <select id="templatePicker" style="flex:1">
+          <label class="lbl block mt-3.5 mb-1.5 text-xs font-semibold text-muted uppercase tracking-[.04em]">Mẫu tin nhắn</label>
+          <div class="flex gap-2.5 mt-0">
+            <select id="templatePicker" class="flex-1 px-3 py-2.5 rounded-[10px] border border-line bg-panel2 text-ink text-sm focus:outline-none focus:border-indigo-500 focus:bg-panel3">
               <option value="">— Chọn mẫu có sẵn (tuỳ chọn) —</option>
             </select>
-            <button type="button" id="btnManageTemplates" class="btn btn--ghost" style="flex:0 0 auto" title="Thêm / sửa / xoá mẫu tin nhắn">
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+            <button type="button" id="btnManageTemplates" class="flex-none inline-flex items-center justify-center gap-[7px] px-4 py-2.5 rounded-[10px] text-[13.5px] font-semibold bg-panel2 border border-line text-ink hover:bg-panel3 hover:border-[#35404f] transition" title="Thêm / sửa / xoá mẫu tin nhắn">
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
               Quản lý mẫu
             </button>
           </div>
 
-          <label class="lbl">Nội dung</label>
-          <div class="var-chips" data-target="singleContent">
-            <span class="var-chips__lbl">Chèn biến:</span>
-            <button type="button" class="chip-var" data-insert="[Tên]">[Tên]</button>
-            <button type="button" class="chip-var" data-insert="[SĐT]">[SĐT]</button>
-            <button type="button" class="chip-var" data-insert="[SảnPhẩm]" title="Nội dung gia hạn — cần thiết lập ở nút 📅 trên từng khách">[SảnPhẩm]</button>
-            <button type="button" class="chip-var" data-insert="[NgàyHếtHạn]" title="Cần thiết lập ở nút 📅 trên từng khách">[NgàyHếtHạn]</button>
-            <button type="button" class="chip-var" data-insert="[SốNgàyCònLại]" title="Cần thiết lập ở nút 📅 trên từng khách">[SốNgàyCònLại]</button>
-            <button type="button" class="chip-var" data-insert="{lựa chọn 1|lựa chọn 2}" title="Spintax: ngẫu nhiên một trong các lựa chọn">{Spintax}</button>
+          <label class="lbl block mt-3.5 mb-1.5 text-xs font-semibold text-muted uppercase tracking-[.04em]">Nội dung</label>
+          <div class="var-chips flex flex-wrap items-center gap-1.5 mb-2" data-target="singleContent">
+            <span class="text-[11px] text-muted2 mr-0.5">Chèn biến:</span>
+            <button type="button" class="chip-var cursor-pointer px-2.5 py-1 rounded-full text-[11.5px] font-semibold bg-green-500/10 border border-green-500/25 text-green-300 font-mono hover:bg-green-500/[.18] transition" data-insert="[Tên]">[Tên]</button>
+            <button type="button" class="chip-var cursor-pointer px-2.5 py-1 rounded-full text-[11.5px] font-semibold bg-green-500/10 border border-green-500/25 text-green-300 font-mono hover:bg-green-500/[.18] transition" data-insert="[SĐT]">[SĐT]</button>
+            <button type="button" class="chip-var cursor-pointer px-2.5 py-1 rounded-full text-[11.5px] font-semibold bg-green-500/10 border border-green-500/25 text-green-300 font-mono hover:bg-green-500/[.18] transition" data-insert="[SảnPhẩm]" title="Nội dung gia hạn — cần thiết lập ở nút 📅 trên từng khách">[SảnPhẩm]</button>
+            <button type="button" class="chip-var cursor-pointer px-2.5 py-1 rounded-full text-[11.5px] font-semibold bg-green-500/10 border border-green-500/25 text-green-300 font-mono hover:bg-green-500/[.18] transition" data-insert="[NgàyHếtHạn]" title="Cần thiết lập ở nút 📅 trên từng khách">[NgàyHếtHạn]</button>
+            <button type="button" class="chip-var cursor-pointer px-2.5 py-1 rounded-full text-[11.5px] font-semibold bg-green-500/10 border border-green-500/25 text-green-300 font-mono hover:bg-green-500/[.18] transition" data-insert="[SốNgàyCònLại]" title="Cần thiết lập ở nút 📅 trên từng khách">[SốNgàyCònLại]</button>
+            <button type="button" class="chip-var cursor-pointer px-2.5 py-1 rounded-full text-[11.5px] font-semibold bg-green-500/10 border border-green-500/25 text-green-300 font-mono hover:bg-green-500/[.18] transition" data-insert="{lựa chọn 1|lựa chọn 2}" title="Spintax: ngẫu nhiên một trong các lựa chọn">{Spintax}</button>
           </div>
-          <textarea id="singleContent" rows="4" placeholder="{Chào|Hi} [Tên], bên em có ưu đãi..."></textarea>
-          <button id="btnSendSingle" class="btn btn--primary">Gửi</button>
-          <div id="singleResult" class="log log--sm"></div>
+          <textarea id="singleContent" rows="4" placeholder="{Chào|Hi} [Tên], bên em có ưu đãi..." class="w-full px-3 py-2.5 rounded-[10px] border border-line bg-panel2 text-ink text-sm resize-y focus:outline-none focus:border-indigo-500 focus:bg-panel3"></textarea>
+          <button id="btnSendSingle" class="mt-4 inline-flex items-center justify-center gap-[7px] px-4 py-2.5 rounded-[10px] text-[13.5px] font-semibold text-white bg-gradient-to-b from-indigo-500 to-indigo-600 shadow-[0_4px_14px_rgba(99,102,241,.3)] hover:from-indigo-400 hover:to-indigo-500 active:translate-y-px disabled:opacity-45 disabled:cursor-not-allowed transition">Gửi</button>
+          <div id="singleResult" class="log mt-4 max-h-[130px] bg-[#060809] border border-line rounded-xl p-3 font-mono text-xs leading-relaxed overflow-y-auto"></div>
         </div>
 
         <!-- Hàng loạt -->
         <div id="tab-broadcast" class="tabpane" hidden>
-          <p class="muted">Gửi cho các khách đã tick ở danh sách. Nếu không tick ai, sẽ gửi theo nhãn (để trống = tất cả).</p>
-          <label class="lbl">Lọc theo nhãn (khi không tick ai)</label>
-          <div id="bcTagChips" class="tagfilters" hidden></div>
-          <input id="bcTag" placeholder="Để trống = tất cả khách hàng, hoặc gõ nhãn tuỳ ý" />
-          <label class="lbl">Nội dung (hỗ trợ Spintax + [Tên])</label>
-          <div class="var-chips" data-target="bcContent">
-            <span class="var-chips__lbl">Chèn biến:</span>
-            <button type="button" class="chip-var" data-insert="[Tên]">[Tên]</button>
-            <button type="button" class="chip-var" data-insert="{lựa chọn 1|lựa chọn 2}" title="Spintax: ngẫu nhiên một trong các lựa chọn">{Spintax}</button>
+          <p class="text-muted text-sm">Gửi cho các khách đã tick ở danh sách. Nếu không tick ai, sẽ gửi theo nhãn (để trống = tất cả).</p>
+          <label class="lbl block mt-3.5 mb-1.5 text-xs font-semibold text-muted uppercase tracking-[.04em]">Lọc theo nhãn (khi không tick ai)</label>
+          <div id="bcTagChips" class="flex flex-wrap gap-1.5 mb-2" hidden></div>
+          <input id="bcTag" placeholder="Để trống = tất cả khách hàng, hoặc gõ nhãn tuỳ ý" class="w-full px-3 py-2.5 rounded-[10px] border border-line bg-panel2 text-ink text-sm focus:outline-none focus:border-indigo-500 focus:bg-panel3" />
+          <label class="lbl block mt-3.5 mb-1.5 text-xs font-semibold text-muted uppercase tracking-[.04em]">Nội dung (hỗ trợ Spintax + [Tên])</label>
+          <div class="var-chips flex flex-wrap items-center gap-1.5 mb-2" data-target="bcContent">
+            <span class="text-[11px] text-muted2 mr-0.5">Chèn biến:</span>
+            <button type="button" class="chip-var cursor-pointer px-2.5 py-1 rounded-full text-[11.5px] font-semibold bg-green-500/10 border border-green-500/25 text-green-300 font-mono hover:bg-green-500/[.18] transition" data-insert="[Tên]">[Tên]</button>
+            <button type="button" class="chip-var cursor-pointer px-2.5 py-1 rounded-full text-[11.5px] font-semibold bg-green-500/10 border border-green-500/25 text-green-300 font-mono hover:bg-green-500/[.18] transition" data-insert="{lựa chọn 1|lựa chọn 2}" title="Spintax: ngẫu nhiên một trong các lựa chọn">{Spintax}</button>
           </div>
-          <textarea id="bcContent" rows="4" placeholder="{Chào|Hi|Xin chào} [Tên]! {Bên em|Shop} đang có ưu đãi {hấp dẫn|cực tốt}."></textarea>
+          <textarea id="bcContent" rows="4" placeholder="{Chào|Hi|Xin chào} [Tên]! {Bên em|Shop} đang có ưu đãi {hấp dẫn|cực tốt}." class="w-full px-3 py-2.5 rounded-[10px] border border-line bg-panel2 text-ink text-sm resize-y focus:outline-none focus:border-indigo-500 focus:bg-panel3"></textarea>
 
-          <div class="row">
-            <button id="btnBroadcast" class="btn btn--primary">Bắt đầu gửi</button>
-            <button id="btnStop" class="btn btn--danger" hidden>Dừng</button>
-          </div>
-
-          <div class="progress-wrap">
-            <div class="progress"><div id="progressBar" class="progress__bar"></div></div>
-            <div id="progressText" class="muted">Chưa gửi</div>
+          <div class="flex gap-2.5 mt-4">
+            <button id="btnBroadcast" class="flex-1 inline-flex items-center justify-center gap-[7px] px-4 py-2.5 rounded-[10px] text-[13.5px] font-semibold text-white bg-gradient-to-b from-indigo-500 to-indigo-600 shadow-[0_4px_14px_rgba(99,102,241,.3)] hover:from-indigo-400 hover:to-indigo-500 active:translate-y-px disabled:opacity-45 disabled:cursor-not-allowed transition">Bắt đầu gửi</button>
+            <button id="btnStop" class="flex-1 inline-flex items-center justify-center gap-[7px] px-4 py-2.5 rounded-[10px] text-[13.5px] font-semibold text-white bg-rose-500 shadow-[0_4px_14px_rgba(244,63,94,.25)] disabled:opacity-45 transition" hidden>Dừng</button>
           </div>
 
-          <div class="counters">
-            <span class="cnt cnt--ok">✅ Thành công: <b id="cOk">0</b></span>
-            <span class="cnt cnt--fail">❌ Thất bại: <b id="cFail">0</b></span>
-            <span class="cnt cnt--wait">⏳ Còn lại: <b id="cLeft">0</b></span>
+          <div class="mt-4">
+            <div class="h-2 bg-panel2 rounded-full overflow-hidden"><div id="progressBar" class="h-full w-0 bg-gradient-to-r from-indigo-500 to-green-500 transition-[width] duration-300 rounded-full"></div></div>
+            <div id="progressText" class="text-muted mt-2 text-[12.5px]">Chưa gửi</div>
           </div>
 
-          <div id="bcLog" class="log"></div>
+          <div class="flex gap-2.5 my-3.5 text-[12.5px] flex-wrap">
+            <span class="cnt inline-flex items-center gap-1.5 px-3 py-[7px] rounded-[10px] bg-panel2 border border-line font-medium text-green-300">✅ Thành công: <b id="cOk" class="text-[13px] font-bold">0</b></span>
+            <span class="cnt inline-flex items-center gap-1.5 px-3 py-[7px] rounded-[10px] bg-panel2 border border-line font-medium text-rose-300">❌ Thất bại: <b id="cFail" class="text-[13px] font-bold">0</b></span>
+            <span class="cnt inline-flex items-center gap-1.5 px-3 py-[7px] rounded-[10px] bg-panel2 border border-line font-medium text-amber-300">⏳ Còn lại: <b id="cLeft" class="text-[13px] font-bold">0</b></span>
+          </div>
+
+          <div id="bcLog" class="log mt-4 max-h-[260px] bg-[#060809] border border-line rounded-xl p-3 font-mono text-xs leading-relaxed overflow-y-auto"></div>
         </div>
 
         <!-- Chiến dịch tự động -->
         <div id="tab-campaign" class="tabpane" hidden>
-          <p class="muted">
+          <p class="text-muted text-sm">
             Tự động gửi tin theo lịch (chăm sóc/track khách, nhắc gia hạn domain–hosting...) tới khách theo nhãn hoặc khách sắp hết hạn.
             <strong>Chỉ chạy khi tab trình duyệt này đang mở</strong> và bạn vẫn đang đăng nhập Zalo — đây là giới hạn của bản chạy phía trình duyệt (chưa có server lịch riêng).
           </p>
 
-          <button id="btnNewCampaign" class="btn btn--primary" style="margin-bottom:16px">+ Tạo chiến dịch</button>
+          <button id="btnNewCampaign" class="mb-4 inline-flex items-center justify-center gap-[7px] px-4 py-2.5 rounded-[10px] text-[13.5px] font-semibold text-white bg-gradient-to-b from-indigo-500 to-indigo-600 shadow-[0_4px_14px_rgba(99,102,241,.3)] hover:from-indigo-400 hover:to-indigo-500 active:translate-y-px transition">+ Tạo chiến dịch</button>
 
-          <div id="campaignList" class="stack"></div>
+          <div id="campaignList" class="flex flex-col gap-2.5"></div>
         </div>
 
         <!-- Xuất hội thoại -->
         <div id="tab-export" class="tabpane" hidden>
-          <p class="muted">Lấy toàn bộ tin nhắn của một hội thoại (khách hàng/nhóm) trong N ngày gần nhất, tải về dưới dạng file JSON.</p>
+          <p class="text-muted text-sm">Lấy toàn bộ tin nhắn của một hội thoại (khách hàng/nhóm) trong N ngày gần nhất, tải về dưới dạng file JSON.</p>
 
-          <label class="lbl">Chọn khách hàng</label>
-          <select id="exportTarget"></select>
+          <label class="lbl block mt-3.5 mb-1.5 text-xs font-semibold text-muted uppercase tracking-[.04em]">Chọn khách hàng</label>
+          <select id="exportTarget" class="w-full px-3 py-2.5 rounded-[10px] border border-line bg-panel2 text-ink text-sm focus:outline-none focus:border-indigo-500 focus:bg-panel3"></select>
 
-          <label class="lbl">Hoặc nhập threadId thủ công (bỏ trống nếu đã chọn ở trên)</label>
-          <input id="exportThreadManual" placeholder="SĐT / UserId / GroupId" />
-          <label class="chk" style="margin-top:8px">
-            <input type="checkbox" id="exportIsGroup" /> Đây là nhóm
+          <label class="lbl block mt-3.5 mb-1.5 text-xs font-semibold text-muted uppercase tracking-[.04em]">Hoặc nhập threadId thủ công (bỏ trống nếu đã chọn ở trên)</label>
+          <input id="exportThreadManual" placeholder="SĐT / UserId / GroupId" class="w-full px-3 py-2.5 rounded-[10px] border border-line bg-panel2 text-ink text-sm focus:outline-none focus:border-indigo-500 focus:bg-panel3" />
+          <label class="text-[12.5px] text-muted flex gap-[7px] items-center font-medium mt-2">
+            <input type="checkbox" id="exportIsGroup" class="w-auto accent-indigo-500" /> Đây là nhóm
           </label>
 
-          <label class="lbl">Số ngày gần nhất (N)</label>
-          <input id="exportDays" type="number" min="1" max="5" value="2" style="max-width:140px" />
+          <label class="lbl block mt-3.5 mb-1.5 text-xs font-semibold text-muted uppercase tracking-[.04em]">Số ngày gần nhất (N)</label>
+          <input id="exportDays" type="number" min="1" max="5" value="2" class="max-w-[140px] px-3 py-2.5 rounded-[10px] border border-line bg-panel2 text-ink text-sm focus:outline-none focus:border-indigo-500 focus:bg-panel3" />
 
-          <div class="row" style="margin-top:14px">
-            <button id="btnExportHistory" class="btn btn--primary">⬇ Tải file JSON</button>
-            <button id="btnExportHistoryTxt" class="btn btn--ghost" disabled title="Lấy dữ liệu (nút JSON) trước để bật nút này">⬇ Tải file .txt (chỉ text)</button>
+          <div class="flex gap-2.5 mt-3.5">
+            <button id="btnExportHistory" class="inline-flex items-center justify-center gap-[7px] px-4 py-2.5 rounded-[10px] text-[13.5px] font-semibold text-white bg-gradient-to-b from-indigo-500 to-indigo-600 shadow-[0_4px_14px_rgba(99,102,241,.3)] hover:from-indigo-400 hover:to-indigo-500 active:translate-y-px disabled:opacity-45 disabled:cursor-not-allowed transition">⬇ Tải file JSON</button>
+            <button id="btnExportHistoryTxt" class="inline-flex items-center justify-center gap-[7px] px-4 py-2.5 rounded-[10px] text-[13.5px] font-semibold bg-panel2 border border-line text-ink hover:bg-panel3 hover:border-[#35404f] disabled:opacity-45 disabled:cursor-not-allowed transition" disabled title="Lấy dữ liệu (nút JSON) trước để bật nút này">⬇ Tải file .txt (chỉ text)</button>
           </div>
-          <div id="exportResult" class="log log--sm"></div>
+          <div id="exportResult" class="log mt-4 max-h-[130px] bg-[#060809] border border-line rounded-xl p-3 font-mono text-xs leading-relaxed overflow-y-auto"></div>
         </div>
       </div>
     </main>
   </div>
 
   <!-- ============ IMPORT MODAL ============ -->
-  <div id="importModal" class="modal" hidden>
-    <div class="modal__box">
-      <div class="modal__head">
-        <h3>Import từ Zalo</h3>
-        <button id="importClose" class="modal__x">
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+  <div id="importModal" class="fixed inset-0 bg-[#04060a]/[.78] backdrop-blur-[2px] flex items-center justify-center z-50 p-4" hidden>
+    <div class="bg-panel border border-line rounded-[18px] w-full max-w-[460px] max-h-[88vh] flex flex-col overflow-hidden shadow-[0_24px_60px_rgba(0,0,0,.55)]">
+      <div class="flex items-center justify-between px-5 py-4 bg-panel2 border-b border-linesoft">
+        <h3 class="m-0 text-[14.5px] font-bold">Import từ Zalo</h3>
+        <button id="importClose" class="w-[26px] h-[26px] rounded-lg flex items-center justify-center text-muted hover:text-ink hover:bg-panel3 transition">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
         </button>
       </div>
 
-      <div class="tabs">
-        <button class="tab tab--active" data-src="friends">
-          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:5px"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+      <div class="tabs flex gap-1 bg-panel2 p-1 rounded-[11px] w-fit mx-5 mt-3.5">
+        <button class="tab tab--active px-3.5 py-[7px] text-[13px] font-semibold rounded-lg transition text-white bg-indigo-500 shadow-sm" data-src="friends">
+          <svg class="inline -mt-0.5 mr-[5px]" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
           Bạn bè
         </button>
-        <button class="tab" data-src="groups">
-          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:5px"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <button class="tab px-3.5 py-[7px] text-[13px] font-semibold rounded-lg transition text-muted hover:text-ink" data-src="groups">
+          <svg class="inline -mt-0.5 mr-[5px]" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
           Nhóm
         </button>
       </div>
 
-      <div class="import-tools">
-        <input id="importSearch" placeholder="Tìm theo tên..." />
-        <button id="importRefresh" class="btn btn--ghost btn--sm" title="Tải lại từ Zalo">
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
+      <div class="flex gap-2 px-5 pt-3.5 pb-2">
+        <input id="importSearch" placeholder="Tìm theo tên..." class="flex-1 px-3.5 py-2.5 rounded-full border border-line bg-panel2 text-ink text-sm focus:outline-none focus:border-indigo-500 focus:bg-panel3" />
+        <button id="importRefresh" class="flex-none w-[38px] h-[38px] p-0 rounded-full flex items-center justify-center bg-panel2 border border-line text-ink hover:bg-panel3 hover:border-[#35404f] transition" title="Tải lại từ Zalo">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
         </button>
       </div>
 
-      <div class="import-tools" style="padding-top:0">
-        <input id="importTagOverride" placeholder="Gắn nhãn cho các mục sắp thêm (vd: tên nhóm Zalo)..." />
+      <div class="px-5 pb-2">
+        <input id="importTagOverride" placeholder="Gắn nhãn cho các mục sắp thêm (vd: tên nhóm Zalo)..." class="w-full px-3 py-2.5 rounded-[10px] border border-line bg-panel2 text-ink text-sm focus:outline-none focus:border-indigo-500 focus:bg-panel3" />
       </div>
-      <p class="import-hint">
+      <p class="text-[11.5px] text-muted2 leading-relaxed mx-5 mt-1.5">
         Zalo chưa cho phép đọc nhãn (label) có sẵn trong app Zalo qua API — gõ nhãn ở đây để tự gắn nhóm theo ý bạn khi import (vd: import từng nhóm Zalo một, đặt tên nhóm làm nhãn).
       </p>
 
-      <div class="import-bar">
-        <label class="chk"><input type="checkbox" id="importSelectAll" /> Chọn tất cả (đang lọc)</label>
-        <span id="importInfo" class="muted"></span>
+      <div class="flex justify-between items-center px-5 pb-2.5 pt-1 text-[12.5px]">
+        <label class="text-[12.5px] text-muted flex gap-[7px] items-center font-medium"><input type="checkbox" id="importSelectAll" class="w-auto accent-indigo-500" /> Chọn tất cả (đang lọc)</label>
+        <span id="importInfo" class="text-muted text-sm"></span>
       </div>
 
-      <ul id="importList" class="clist clist--tall"></ul>
+      <ul id="importList" class="list-none m-0 px-2.5 overflow-y-auto flex-1 min-h-[200px] max-h-[46vh]"></ul>
 
-      <div class="modal__foot">
-        <span id="importCount" class="muted">Đã chọn 0</span>
-        <div class="row" style="margin:0">
-          <button id="importCancel" class="btn btn--ghost">Đóng</button>
-          <button id="importAdd" class="btn btn--primary">Thêm đã chọn</button>
+      <div class="flex items-center justify-between gap-2.5 px-5 py-3.5 border-t border-linesoft bg-panel2">
+        <span id="importCount" class="text-muted text-sm">Đã chọn 0</span>
+        <div class="flex gap-2.5">
+          <button id="importCancel" class="whitespace-nowrap inline-flex items-center justify-center gap-[7px] px-4 py-2.5 rounded-[10px] text-[13.5px] font-semibold bg-panel2 border border-line text-ink hover:bg-panel3 hover:border-[#35404f] transition">Đóng</button>
+          <button id="importAdd" class="whitespace-nowrap inline-flex items-center justify-center gap-[7px] px-4 py-2.5 rounded-[10px] text-[13.5px] font-semibold text-white bg-gradient-to-b from-indigo-500 to-indigo-600 shadow-[0_4px_14px_rgba(99,102,241,.3)] hover:from-indigo-400 hover:to-indigo-500 active:translate-y-px transition">Thêm đã chọn</button>
         </div>
       </div>
     </div>
   </div>
 
   <!-- ============ MODAL: GIA HẠN (domain/hosting...) — dữ liệu lưu cục bộ trên trình duyệt ============ -->
-  <div id="renewModal" class="modal" hidden>
-    <div class="modal__box" style="max-width:380px">
-      <div class="modal__head">
-        <h3>Thiết lập gia hạn</h3>
-        <button id="renewClose" class="modal__x">
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+  <div id="renewModal" class="fixed inset-0 bg-[#04060a]/[.78] backdrop-blur-[2px] flex items-center justify-center z-50 p-4" hidden>
+    <div class="bg-panel border border-line rounded-[18px] w-full max-w-[380px] max-h-[88vh] flex flex-col overflow-hidden shadow-[0_24px_60px_rgba(0,0,0,.55)]">
+      <div class="flex items-center justify-between px-5 py-4 bg-panel2 border-b border-linesoft">
+        <h3 class="m-0 text-[14.5px] font-bold">Thiết lập gia hạn</h3>
+        <button id="renewClose" class="w-[26px] h-[26px] rounded-lg flex items-center justify-center text-muted hover:text-ink hover:bg-panel3 transition">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
         </button>
       </div>
-      <div style="padding:18px 20px">
-        <p id="renewFor" class="muted" style="margin-top:0"></p>
-        <label class="lbl">Sản phẩm / Domain / Gói hosting</label>
-        <input id="renewItem" placeholder="VD: domain abc.com hoặc gói Hosting SSD 5GB" />
-        <label class="lbl">Ngày hết hạn</label>
-        <input id="renewDate" type="date" />
-        <p class="import-hint" style="margin-top:10px">
+      <div class="px-5 py-4.5">
+        <p id="renewFor" class="text-muted text-sm mt-0"></p>
+        <label class="lbl block mt-3.5 mb-1.5 text-xs font-semibold text-muted uppercase tracking-[.04em]">Sản phẩm / Domain / Gói hosting</label>
+        <input id="renewItem" placeholder="VD: domain abc.com hoặc gói Hosting SSD 5GB" class="w-full px-3 py-2.5 rounded-[10px] border border-line bg-panel2 text-ink text-sm focus:outline-none focus:border-indigo-500 focus:bg-panel3" />
+        <label class="lbl block mt-3.5 mb-1.5 text-xs font-semibold text-muted uppercase tracking-[.04em]">Ngày hết hạn</label>
+        <input id="renewDate" type="date" class="w-full px-3 py-2.5 rounded-[10px] border border-line bg-panel2 text-ink text-sm focus:outline-none focus:border-indigo-500 focus:bg-panel3" />
+        <p class="text-[11.5px] text-muted2 leading-relaxed mt-2.5">
           Dữ liệu này chỉ lưu trên trình duyệt (localStorage) — dùng để tự tính [SảnPhẩm], [NgàyHếtHạn], [SốNgàyCònLại] khi gửi tin/chạy chiến dịch, chưa đồng bộ lên hệ thống chung.
         </p>
       </div>
-      <div class="modal__foot">
-        <button id="renewDelete" class="btn btn--ghost" style="color:var(--fail)">Xoá thiết lập</button>
-        <div class="row" style="margin:0">
-          <button id="renewCancel" class="btn btn--ghost">Đóng</button>
-          <button id="renewSave" class="btn btn--primary">Lưu</button>
+      <div class="flex items-center justify-between gap-2.5 px-5 py-3.5 border-t border-linesoft bg-panel2">
+        <button id="renewDelete" class="text-rose-400 inline-flex items-center justify-center gap-[7px] px-4 py-2.5 rounded-[10px] text-[13.5px] font-semibold bg-panel2 border border-line hover:bg-panel3 hover:border-[#35404f] transition">Xoá thiết lập</button>
+        <div class="flex gap-2.5">
+          <button id="renewCancel" class="inline-flex items-center justify-center gap-[7px] px-4 py-2.5 rounded-[10px] text-[13.5px] font-semibold bg-panel2 border border-line text-ink hover:bg-panel3 hover:border-[#35404f] transition">Đóng</button>
+          <button id="renewSave" class="inline-flex items-center justify-center gap-[7px] px-4 py-2.5 rounded-[10px] text-[13.5px] font-semibold text-white bg-gradient-to-b from-indigo-500 to-indigo-600 shadow-[0_4px_14px_rgba(99,102,241,.3)] hover:from-indigo-400 hover:to-indigo-500 active:translate-y-px transition">Lưu</button>
         </div>
       </div>
     </div>
   </div>
 
   <!-- ============ MODAL: QUẢN LÝ MẪU TIN NHẮN ============ -->
-  <div id="templateModal" class="modal" hidden>
-    <div class="modal__box" style="max-width:480px">
-      <div class="modal__head">
-        <h3>Quản lý mẫu tin nhắn</h3>
-        <button id="templateModalClose" class="modal__x">
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+  <div id="templateModal" class="fixed inset-0 bg-[#04060a]/[.78] backdrop-blur-[2px] flex items-center justify-center z-50 p-4" hidden>
+    <div class="bg-panel border border-line rounded-[18px] w-full max-w-[480px] max-h-[88vh] flex flex-col overflow-hidden shadow-[0_24px_60px_rgba(0,0,0,.55)]">
+      <div class="flex items-center justify-between px-5 py-4 bg-panel2 border-b border-linesoft">
+        <h3 class="m-0 text-[14.5px] font-bold">Quản lý mẫu tin nhắn</h3>
+        <button id="templateModalClose" class="w-[26px] h-[26px] rounded-lg flex items-center justify-center text-muted hover:text-ink hover:bg-panel3 transition">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
         </button>
       </div>
-      <div id="templateManagerScroll" style="padding:16px 20px; max-height:38vh; overflow-y:auto">
-        <div id="templateManagerList" class="stack"></div>
+      <div id="templateManagerScroll" class="px-5 py-4 max-h-[38vh] overflow-y-auto">
+        <div id="templateManagerList" class="flex flex-col gap-2.5"></div>
       </div>
-      <div style="padding:0 20px 4px">
-        <p class="import-hint" style="margin-bottom:0">Mẫu "có sẵn" là mẫu dựng sẵn của hệ thống — bấm "Sao chép" để tạo bản của riêng bạn rồi chỉnh sửa.</p>
+      <div class="px-5 pb-1">
+        <p class="text-[11.5px] text-muted2 leading-relaxed mb-0">Mẫu "có sẵn" là mẫu dựng sẵn của hệ thống — bấm "Sao chép" để tạo bản của riêng bạn rồi chỉnh sửa.</p>
       </div>
-      <div style="padding:16px 20px 20px; border-top: 1px solid var(--line-soft, var(--line)); margin-top:14px">
-        <p class="lbl" style="margin-top:0" id="tplFormTitle">Thêm mẫu mới</p>
-        <label class="lbl">Tên mẫu</label>
-        <input id="tplName" placeholder="VD: Nhắc gia hạn VPS" />
-        <label class="lbl">Nội dung</label>
-        <div class="var-chips" data-target="tplContent">
-          <span class="var-chips__lbl">Chèn biến:</span>
-          <button type="button" class="chip-var" data-insert="[Tên]">[Tên]</button>
-          <button type="button" class="chip-var" data-insert="[SĐT]">[SĐT]</button>
-          <button type="button" class="chip-var" data-insert="[SảnPhẩm]">[SảnPhẩm]</button>
-          <button type="button" class="chip-var" data-insert="[NgàyHếtHạn]">[NgàyHếtHạn]</button>
-          <button type="button" class="chip-var" data-insert="[SốNgàyCònLại]">[SốNgàyCònLại]</button>
-          <button type="button" class="chip-var" data-insert="{lựa chọn 1|lựa chọn 2}">{Spintax}</button>
+      <div class="px-5 pb-5 pt-4 border-t border-linesoft mt-3.5">
+        <p class="lbl mt-0 text-xs font-semibold text-muted uppercase tracking-[.04em]" id="tplFormTitle">Thêm mẫu mới</p>
+        <label class="lbl block mt-3.5 mb-1.5 text-xs font-semibold text-muted uppercase tracking-[.04em]">Tên mẫu</label>
+        <input id="tplName" placeholder="VD: Nhắc gia hạn VPS" class="w-full px-3 py-2.5 rounded-[10px] border border-line bg-panel2 text-ink text-sm focus:outline-none focus:border-indigo-500 focus:bg-panel3" />
+        <label class="lbl block mt-3.5 mb-1.5 text-xs font-semibold text-muted uppercase tracking-[.04em]">Nội dung</label>
+        <div class="var-chips flex flex-wrap items-center gap-1.5 mb-2" data-target="tplContent">
+          <span class="text-[11px] text-muted2 mr-0.5">Chèn biến:</span>
+          <button type="button" class="chip-var cursor-pointer px-2.5 py-1 rounded-full text-[11.5px] font-semibold bg-green-500/10 border border-green-500/25 text-green-300 font-mono hover:bg-green-500/[.18] transition" data-insert="[Tên]">[Tên]</button>
+          <button type="button" class="chip-var cursor-pointer px-2.5 py-1 rounded-full text-[11.5px] font-semibold bg-green-500/10 border border-green-500/25 text-green-300 font-mono hover:bg-green-500/[.18] transition" data-insert="[SĐT]">[SĐT]</button>
+          <button type="button" class="chip-var cursor-pointer px-2.5 py-1 rounded-full text-[11.5px] font-semibold bg-green-500/10 border border-green-500/25 text-green-300 font-mono hover:bg-green-500/[.18] transition" data-insert="[SảnPhẩm]">[SảnPhẩm]</button>
+          <button type="button" class="chip-var cursor-pointer px-2.5 py-1 rounded-full text-[11.5px] font-semibold bg-green-500/10 border border-green-500/25 text-green-300 font-mono hover:bg-green-500/[.18] transition" data-insert="[NgàyHếtHạn]">[NgàyHếtHạn]</button>
+          <button type="button" class="chip-var cursor-pointer px-2.5 py-1 rounded-full text-[11.5px] font-semibold bg-green-500/10 border border-green-500/25 text-green-300 font-mono hover:bg-green-500/[.18] transition" data-insert="[SốNgàyCònLại]">[SốNgàyCònLại]</button>
+          <button type="button" class="chip-var cursor-pointer px-2.5 py-1 rounded-full text-[11.5px] font-semibold bg-green-500/10 border border-green-500/25 text-green-300 font-mono hover:bg-green-500/[.18] transition" data-insert="{lựa chọn 1|lựa chọn 2}">{Spintax}</button>
         </div>
-        <textarea id="tplContent" rows="3" placeholder="{Chào|Xin chào} [Tên]..."></textarea>
-        <div class="row">
-          <button id="tplCancelEdit" class="btn btn--ghost" hidden>Huỷ sửa</button>
-          <button id="tplSave" class="btn btn--primary">Lưu mẫu</button>
+        <textarea id="tplContent" rows="3" placeholder="{Chào|Xin chào} [Tên]..." class="w-full px-3 py-2.5 rounded-[10px] border border-line bg-panel2 text-ink text-sm resize-y focus:outline-none focus:border-indigo-500 focus:bg-panel3"></textarea>
+        <div class="flex gap-2.5 mt-4">
+          <button id="tplCancelEdit" class="inline-flex items-center justify-center gap-[7px] px-4 py-2.5 rounded-[10px] text-[13.5px] font-semibold bg-panel2 border border-line text-ink hover:bg-panel3 hover:border-[#35404f] transition" hidden>Huỷ sửa</button>
+          <button id="tplSave" class="inline-flex items-center justify-center gap-[7px] px-4 py-2.5 rounded-[10px] text-[13.5px] font-semibold text-white bg-gradient-to-b from-indigo-500 to-indigo-600 shadow-[0_4px_14px_rgba(99,102,241,.3)] hover:from-indigo-400 hover:to-indigo-500 active:translate-y-px transition">Lưu mẫu</button>
         </div>
       </div>
     </div>
   </div>
 
   <!-- ============ MODAL: TẠO / SỬA CHIẾN DỊCH ============ -->
-  <div id="campaignModal" class="modal" hidden>
-    <div class="modal__box" style="max-width:440px">
-      <div class="modal__head">
-        <h3 id="campaignModalTitle">Tạo chiến dịch</h3>
-        <button id="campaignClose" class="modal__x">
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+  <div id="campaignModal" class="fixed inset-0 bg-[#04060a]/[.78] backdrop-blur-[2px] flex items-center justify-center z-50 p-4" hidden>
+    <div class="bg-panel border border-line rounded-[18px] w-full max-w-[440px] max-h-[88vh] flex flex-col overflow-hidden shadow-[0_24px_60px_rgba(0,0,0,.55)]">
+      <div class="flex items-center justify-between px-5 py-4 bg-panel2 border-b border-linesoft">
+        <h3 id="campaignModalTitle" class="m-0 text-[14.5px] font-bold">Tạo chiến dịch</h3>
+        <button id="campaignClose" class="w-[26px] h-[26px] rounded-lg flex items-center justify-center text-muted hover:text-ink hover:bg-panel3 transition">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
         </button>
       </div>
-      <div style="padding:18px 20px; max-height:64vh; overflow-y:auto">
-        <label class="lbl">Tên chiến dịch</label>
-        <input id="cpName" placeholder="VD: Nhắc gia hạn hosting" />
+      <div class="px-5 py-4.5 max-h-[64vh] overflow-y-auto">
+        <label class="lbl block mt-3.5 mb-1.5 text-xs font-semibold text-muted uppercase tracking-[.04em]">Tên chiến dịch</label>
+        <input id="cpName" placeholder="VD: Nhắc gia hạn hosting" class="w-full px-3 py-2.5 rounded-[10px] border border-line bg-panel2 text-ink text-sm focus:outline-none focus:border-indigo-500 focus:bg-panel3" />
 
-        <label class="lbl">Mẫu tin nhắn</label>
-        <select id="cpTemplate"></select>
+        <label class="lbl block mt-3.5 mb-1.5 text-xs font-semibold text-muted uppercase tracking-[.04em]">Mẫu tin nhắn</label>
+        <select id="cpTemplate" class="w-full px-3 py-2.5 rounded-[10px] border border-line bg-panel2 text-ink text-sm focus:outline-none focus:border-indigo-500 focus:bg-panel3"></select>
 
-        <label class="lbl">Đối tượng</label>
-        <select id="cpTriggerType">
+        <label class="lbl block mt-3.5 mb-1.5 text-xs font-semibold text-muted uppercase tracking-[.04em]">Đối tượng</label>
+        <select id="cpTriggerType" class="w-full px-3 py-2.5 rounded-[10px] border border-line bg-panel2 text-ink text-sm focus:outline-none focus:border-indigo-500 focus:bg-panel3">
           <option value="tag">Khách theo nhãn</option>
           <option value="renew">Khách sắp hết hạn (theo dữ liệu gia hạn đã thiết lập)</option>
         </select>
 
         <div id="cpTagWrap">
-          <label class="lbl">Nhãn</label>
-          <select id="cpTag"></select>
+          <label class="lbl block mt-3.5 mb-1.5 text-xs font-semibold text-muted uppercase tracking-[.04em]">Nhãn</label>
+          <select id="cpTag" class="w-full px-3 py-2.5 rounded-[10px] border border-line bg-panel2 text-ink text-sm focus:outline-none focus:border-indigo-500 focus:bg-panel3"></select>
         </div>
 
         <div id="cpRenewWrap" hidden>
-          <label class="lbl">Nhắc trước khi hết hạn (số ngày)</label>
-          <input id="cpDays" type="number" min="1" value="7" />
+          <label class="lbl block mt-3.5 mb-1.5 text-xs font-semibold text-muted uppercase tracking-[.04em]">Nhắc trước khi hết hạn (số ngày)</label>
+          <input id="cpDays" type="number" min="1" value="7" class="w-full px-3 py-2.5 rounded-[10px] border border-line bg-panel2 text-ink text-sm focus:outline-none focus:border-indigo-500 focus:bg-panel3" />
         </div>
 
-        <label class="lbl">Không gửi lại cho cùng 1 khách trong vòng (ngày)</label>
-        <input id="cpCooldown" type="number" min="1" value="14" />
+        <label class="lbl block mt-3.5 mb-1.5 text-xs font-semibold text-muted uppercase tracking-[.04em]">Không gửi lại cho cùng 1 khách trong vòng (ngày)</label>
+        <input id="cpCooldown" type="number" min="1" value="14" class="w-full px-3 py-2.5 rounded-[10px] border border-line bg-panel2 text-ink text-sm focus:outline-none focus:border-indigo-500 focus:bg-panel3" />
 
-        <label class="lbl">Giờ kiểm tra &amp; gửi mỗi ngày</label>
-        <input id="cpHour" type="time" value="09:00" />
+        <label class="lbl block mt-3.5 mb-1.5 text-xs font-semibold text-muted uppercase tracking-[.04em]">Giờ kiểm tra &amp; gửi mỗi ngày</label>
+        <input id="cpHour" type="time" value="09:00" class="w-full px-3 py-2.5 rounded-[10px] border border-line bg-panel2 text-ink text-sm focus:outline-none focus:border-indigo-500 focus:bg-panel3" />
 
-        <p class="import-hint">Hệ thống sẽ kiểm tra mỗi phút khi tab này đang mở; đến giờ đã đặt (và chưa chạy hôm nay) sẽ tự gửi cho các khách phù hợp.</p>
+        <p class="text-[11.5px] text-muted2 leading-relaxed mt-2.5">Hệ thống sẽ kiểm tra mỗi phút khi tab này đang mở; đến giờ đã đặt (và chưa chạy hôm nay) sẽ tự gửi cho các khách phù hợp.</p>
       </div>
-      <div class="modal__foot">
-        <button id="campaignDelete" class="btn btn--ghost" style="color:var(--fail)" hidden>Xoá</button>
-        <div class="row" style="margin:0">
-          <button id="campaignCancel" class="btn btn--ghost">Huỷ</button>
-          <button id="campaignSave" class="btn btn--primary">Lưu chiến dịch</button>
+      <div class="flex items-center justify-between gap-2.5 px-5 py-3.5 border-t border-linesoft bg-panel2">
+        <button id="campaignDelete" class="text-rose-400 inline-flex items-center justify-center gap-[7px] px-4 py-2.5 rounded-[10px] text-[13.5px] font-semibold bg-panel2 border border-line hover:bg-panel3 hover:border-[#35404f] transition" hidden>Xoá</button>
+        <div class="flex gap-2.5">
+          <button id="campaignCancel" class="inline-flex items-center justify-center gap-[7px] px-4 py-2.5 rounded-[10px] text-[13.5px] font-semibold bg-panel2 border border-line text-ink hover:bg-panel3 hover:border-[#35404f] transition">Huỷ</button>
+          <button id="campaignSave" class="inline-flex items-center justify-center gap-[7px] px-4 py-2.5 rounded-[10px] text-[13.5px] font-semibold text-white bg-gradient-to-b from-indigo-500 to-indigo-600 shadow-[0_4px_14px_rgba(99,102,241,.3)] hover:from-indigo-400 hover:to-indigo-500 active:translate-y-px transition">Lưu chiến dịch</button>
         </div>
       </div>
     </div>
