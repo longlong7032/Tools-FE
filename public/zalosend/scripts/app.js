@@ -348,7 +348,10 @@ $('#btnExportHistory').onclick = async () => {
     a.remove();
     URL.revokeObjectURL(blobUrl);
 
-    logLine(box, `✅ Đã tải về ${data.count} tin nhắn.`, 'ok');
+    logLine(box, `✅ Đã tải về ${data.count} tin nhắn.`, data.count > 0 ? 'ok' : 'wait');
+    if (data.count === 0 && data.sync) {
+      logLine(box, 'ℹ️ 0 tin nhắn — xem field "sync" trong file JSON vừa tải để biết lý do (Zalo thường chỉ cho đọc lịch sử từ lúc tài khoản này tham gia nhóm/hội thoại, hoặc trong khoảng ngày này chưa có tin mới).', 'wait');
+    }
   } catch (err) {
     logLine(box, `❌ Lỗi: ${err.message}`, 'fail');
   } finally {
