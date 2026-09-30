@@ -163,8 +163,9 @@ socket.on('login:error', ({ message }) => {
 let customers = [];
 let activeTagFilter = null; // nhãn đang lọc trong sidebar (null = hiện tất cả)
 
-async function loadCustomers() {
-  customers = await api('/api/v1/zalosend/customers');
+// Khách hàng nằm trong IndexedDB của trình duyệt — server không lưu.
+function loadCustomers() {
+  customers = ZsDb.customers.list();
   renderCustomers();
 }
 
@@ -184,6 +185,7 @@ function renderCustomers() {
       </div>
       ${c.isGroup ? '<span class="text-[10.5px] bg-indigo-500/[.14] border border-indigo-500/30 text-indigo-300 px-2 py-0.5 rounded-full font-semibold">Nhóm</span>' : ''}
       ${c.tag ? `<span class="text-[10.5px] bg-amber-500/[.12] border border-amber-500/30 text-amber-300 px-2 py-0.5 rounded-full font-semibold">${escapeHtml(c.tag)}</span>` : ''}
+      ${c.isGroup ? '' : genderBtnHtml(c)}
       ${renewBtnHtml(c)}
       <button class="row-action del h-6 w-0 shrink-0 overflow-hidden rounded-[7px] border-none bg-transparent text-muted2 opacity-0 transition group-hover:w-6 group-hover:opacity-100 hover:bg-rose-500/[.12] hover:text-rose-400" data-id="${c.id}" title="Xoá">
         <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
@@ -191,12 +193,6 @@ function renderCustomers() {
     list.appendChild(li);
   });
   $('#custCount').textContent = `${customers.length} khách`;
-
-  // dropdown gửi đơn lẻ
-  const sel = $('#singleTarget');
-  sel.innerHTML = customers
-    .map((c) => `<option value="${c.id}">${escapeHtml(c.name)} — ${escapeHtml(c.threadId)}</option>`)
-    .join('');
 
   // dropdown xuất hội thoại
   const expSel = $('#exportTarget');
@@ -206,7 +202,7 @@ function renderCustomers() {
 
   list.querySelectorAll('.del').forEach((b) => {
     b.onclick = async () => {
-      await api('/api/v1/zalosend/customers/' + b.dataset.id, { method: 'DELETE' });
+      await ZsDb.customers.remove(b.dataset.id);
       loadCustomers();
     };
   });
@@ -215,8 +211,43 @@ function renderCustomers() {
     b.onclick = () => openRenew(b.dataset.id);
   });
 
+  list.querySelectorAll('.gender-btn').forEach((b) => {
+    b.onclick = async () => {
+      const cur = customers.find((c) => c.id === b.dataset.id);
+      if (!cur) return;
+      const next = GENDER_ORDER[(GENDER_ORDER.indexOf(cur.gender || '') + 1) % GENDER_ORDER.length];
+      await ZsDb.customers.update(cur.id, { gender: next });
+      loadCustomers();
+    };
+  });
+
+  // Bấm vào tên khách => chọn làm người nhận ở tab "Gửi đơn lẻ"
+  list.querySelectorAll('.ci-main').forEach((m) => {
+    m.style.cursor = 'pointer';
+    m.onclick = () => {
+      const id = m.closest('li').querySelector('.pick').dataset.id;
+      showTab('single');
+      selectSingle(id);
+      $('#singleContent').focus();
+    };
+  });
+
+  syncSinglePicker();
+  updateBcPickedCount();
+  renderBcChooser();
+
   renderTagFilters();
   applyTagFilter();
+}
+
+const GENDER_ORDER = ['', 'male', 'female'];
+const GENDER_LABEL = { '': 'Anh/Chị', male: 'Anh', female: 'Chị' };
+function genderBtnHtml(c) {
+  const g = c.gender || '';
+  const cls = g === 'male' ? 'bg-sky-500/[.14] border-sky-500/30 text-sky-300'
+    : g === 'female' ? 'bg-pink-500/[.14] border-pink-500/30 text-pink-300'
+    : 'bg-panel3 border-line text-muted2';
+  return `<button type="button" class="gender-btn shrink-0 text-[10.5px] px-2 py-0.5 rounded-full font-semibold border transition ${cls}" data-id="${c.id}" title="Xưng hô khi gửi tin — bấm để đổi (Anh/Chị → Anh → Chị)">${GENDER_LABEL[g]}</button>`;
 }
 
 function renewBtnHtml(c) {
@@ -271,24 +302,6 @@ function renderTagFilters() {
       };
     });
   }
-
-  // Chọn nhanh nhãn khi gửi hàng loạt (điền vào ô #bcTag)
-  const bcBox = $('#bcTagChips');
-  if (!tags.length) {
-    bcBox.hidden = true;
-    bcBox.innerHTML = '';
-  } else {
-    bcBox.hidden = false;
-    bcBox.innerHTML = tags.map(([tag, count]) => tagChipHtml(tag, count, $('#bcTag').value === tag)).join('');
-    bcBox.querySelectorAll('.tag-chip').forEach((chip) => {
-      chip.onclick = () => {
-        const isActive = chip.className === TAG_CHIP_ON;
-        $('#bcTag').value = isActive ? '' : chip.dataset.tag;
-        bcBox.querySelectorAll('.tag-chip').forEach((c) => { c.className = TAG_CHIP_OFF; });
-        if (!isActive) chip.className = TAG_CHIP_ON;
-      };
-    });
-  }
 }
 
 function applyTagFilter() {
@@ -309,10 +322,15 @@ $('#customerForm').onsubmit = async (e) => {
     name: $('#cName').value,
     threadId: $('#cThread').value,
     tag: $('#cTag').value,
+    gender: $('#cGender').value,
   };
-  const r = await api('/api/v1/zalosend/customers', { method: 'POST', body: JSON.stringify(body) });
-  if (r.error) return alert(r.error);
+  try {
+    await ZsDb.customers.add(body);
+  } catch (err) {
+    return alert(err.message);
+  }
   $('#cName').value = $('#cThread').value = $('#cTag').value = '';
+  $('#cGender').value = '';
   loadCustomers();
 };
 
@@ -333,43 +351,251 @@ function setActiveTab(tabs, active) {
   tabs.forEach((x) => { x.className = x === active ? TAB_ACTIVE : TAB_INACTIVE; });
 }
 
+function showTab(name) {
+  const tabs = document.querySelectorAll('.chat__tabs > .tab');
+  setActiveTab(tabs, [...tabs].find((t) => t.dataset.tab === name));
+  ['single', 'broadcast', 'campaign', 'export'].forEach((n) => { $('#tab-' + n).hidden = n !== name; });
+  if (name === 'campaign') renderCampaigns();
+  if (name === 'broadcast') renderBcChooser();
+}
 document.querySelectorAll('.chat__tabs > .tab').forEach((t) => {
-  t.onclick = () => {
-    setActiveTab(document.querySelectorAll('.chat__tabs > .tab'), t);
-    $('#tab-single').hidden = t.dataset.tab !== 'single';
-    $('#tab-broadcast').hidden = t.dataset.tab !== 'broadcast';
-    $('#tab-campaign').hidden = t.dataset.tab !== 'campaign';
-    $('#tab-export').hidden = t.dataset.tab !== 'export';
-    if (t.dataset.tab === 'campaign') renderCampaigns();
-  };
+  t.onclick = () => showTab(t.dataset.tab);
 });
 
-// ---------- Gửi đơn lẻ ----------
+// ---------- Xem trước / Spintax phía client ----------
+function spinClient(text) {
+  const re = /\{([^{}|]*\|[^{}]*)\}/;
+  let out = text, guard = 0;
+  while (re.test(out) && guard++ < 500) {
+    out = out.replace(re, (_, body) => { const o = body.split('|'); return o[Math.floor(Math.random() * o.length)]; });
+  }
+  return out;
+}
+function renderMessagePreview(template, cust, perLine = false) {
+  const named = pickVariant(template, perLine).replace(/\[Tên\]|\{\{\s*name\s*\}\}/gi, cust.name);
+  return spinClient(applyClientVars(named, cust));
+}
+const fmtCount = (n) => `${n} ký tự`;
+
+// ---------- Gửi đơn lẻ: chọn người nhận (tìm kiếm + bàn phím) ----------
+let singleActive = 0;      // dòng đang được highlight trong dropdown
+let singleShown = [];      // danh sách đang hiển thị
+
+function singleMatches() {
+  const q = $('#singleSearch').value.trim().toLowerCase();
+  return customers
+    .filter((c) => !q || `${c.name} ${c.threadId} ${c.tag || ''}`.toLowerCase().includes(q))
+    .slice(0, 50);
+}
+
+function renderSingleOptions() {
+  const box = $('#singleOptions');
+  singleShown = singleMatches();
+  singleActive = Math.min(singleActive, Math.max(0, singleShown.length - 1));
+  if (!singleShown.length) {
+    box.innerHTML = `<li class="px-3 py-3 text-[13px] text-muted">${customers.length ? 'Không tìm thấy khách phù hợp.' : 'Chưa có khách hàng — thêm hoặc Import từ Zalo ở cột bên trái.'}</li>`;
+    return;
+  }
+  box.innerHTML = singleShown.map((c, i) => `
+    <li data-id="${c.id}" class="opt flex items-center gap-2.5 px-2.5 py-2 rounded-lg cursor-pointer ${i === singleActive ? 'bg-indigo-500/[.16]' : 'hover:bg-panel2'}">
+      <div class="w-[28px] h-[28px] rounded-full shrink-0 bg-gradient-to-br from-indigo-500 to-purple-500 text-white flex items-center justify-center text-[12px] font-bold">${escapeHtml((c.name || '?').trim().charAt(0).toUpperCase() || '?')}</div>
+      <div class="min-w-0 flex-1">
+        <div class="text-[13px] font-semibold whitespace-nowrap overflow-hidden text-ellipsis">${escapeHtml(c.name)}</div>
+        <div class="text-[11.5px] text-muted whitespace-nowrap overflow-hidden text-ellipsis">${escapeHtml(c.threadId)}</div>
+      </div>
+      ${c.isGroup ? '<span class="text-[10.5px] bg-indigo-500/[.14] border border-indigo-500/30 text-indigo-300 px-2 py-0.5 rounded-full font-semibold">Nhóm</span>' : ''}
+      ${c.tag ? `<span class="text-[10.5px] bg-amber-500/[.12] border border-amber-500/30 text-amber-300 px-2 py-0.5 rounded-full font-semibold">${escapeHtml(c.tag)}</span>` : ''}
+    </li>`).join('');
+  box.querySelectorAll('.opt').forEach((li) => {
+    // mousedown (không phải click) để chạy trước sự kiện blur của ô tìm kiếm
+    li.onmousedown = (e) => { e.preventDefault(); selectSingle(li.dataset.id); };
+  });
+  box.querySelector('.opt.bg-indigo-500\\/\\[\\.16\\]')?.scrollIntoView({ block: 'nearest' });
+}
+
+function openSingleOptions() { $('#singleOptions').hidden = false; renderSingleOptions(); }
+function closeSingleOptions() { $('#singleOptions').hidden = true; }
+
+function selectedSingleCustomer() {
+  return customers.find((c) => c.id === $('#singleTarget').value) || null;
+}
+
+function selectSingle(id) {
+  const c = customers.find((x) => x.id === id);
+  $('#singleTarget').value = c ? c.id : '';
+  const sel = $('#singleSelected');
+  if (!c) {
+    sel.hidden = true;
+    $('#singleSearchWrap').hidden = false;
+    $('#mentionRow').hidden = true;
+    updateSinglePreview();
+    return;
+  }
+  sel.hidden = false;
+  $('#singleSearchWrap').hidden = true;
+  closeSingleOptions();
+  sel.innerHTML = `
+    <div class="w-[34px] h-[34px] rounded-full shrink-0 bg-gradient-to-br from-indigo-500 to-purple-500 text-white flex items-center justify-center text-[13px] font-bold">${escapeHtml((c.name || '?').trim().charAt(0).toUpperCase() || '?')}</div>
+    <div class="min-w-0 flex-1">
+      <div class="text-[13.5px] font-semibold whitespace-nowrap overflow-hidden text-ellipsis">${escapeHtml(c.name)}</div>
+      <div class="text-[11.5px] text-muted">${escapeHtml(c.threadId)}${c.isGroup ? ' · Nhóm' : ''}${c.tag ? ' · ' + escapeHtml(c.tag) : ''}</div>
+    </div>
+    <button type="button" id="singleChange" class="text-[12px] font-semibold text-indigo-300 hover:text-indigo-200">Đổi người</button>`;
+  $('#singleChange').onclick = () => {
+    selectSingle('');
+    $('#singleSearch').value = '';
+    $('#singleSearch').focus();
+  };
+  $('#mentionRow').hidden = !c.isGroup;
+  updateSinglePreview();
+}
+
+// Giữ lựa chọn hợp lệ khi danh sách khách thay đổi (xoá/import...).
+function syncSinglePicker() {
+  const cur = $('#singleTarget').value;
+  if (cur && !customers.some((c) => c.id === cur)) selectSingle('');
+  if (!$('#singleOptions').hidden) renderSingleOptions();
+}
+
+$('#singleSearch').onfocus = () => { singleActive = 0; openSingleOptions(); };
+$('#singleSearch').onblur = closeSingleOptions;
+$('#singleSearch').oninput = () => { singleActive = 0; openSingleOptions(); };
+$('#singleSearch').onkeydown = (e) => {
+  if ($('#singleOptions').hidden && (e.key === 'ArrowDown' || e.key === 'ArrowUp')) openSingleOptions();
+  if (e.key === 'ArrowDown') { e.preventDefault(); singleActive = Math.min(singleShown.length - 1, singleActive + 1); renderSingleOptions(); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); singleActive = Math.max(0, singleActive - 1); renderSingleOptions(); }
+  else if (e.key === 'Enter') { e.preventDefault(); if (singleShown[singleActive]) { selectSingle(singleShown[singleActive].id); $('#singleContent').focus(); } }
+  else if (e.key === 'Escape') { closeSingleOptions(); }
+};
+
+function updateSinglePreview() {
+  const raw = $('#singleContent').value;
+  $('#singleCount').textContent = fmtCount(raw.length);
+  const cust = selectedSingleCustomer();
+  const box = $('#singlePreviewBox');
+  if (!cust || !raw.trim()) { box.hidden = true; return; }
+  box.hidden = false;
+  $('#singlePreview').textContent = renderMessagePreview(raw, cust, $('#singlePerLine').checked);
+}
+$('#singleContent').addEventListener('input', updateSinglePreview);
+$('#singlePerLine').addEventListener('change', updateSinglePreview);
+$('#singleReroll').onclick = updateSinglePreview;
+document.querySelectorAll('.var-chips .chip-var').forEach((c) => c.addEventListener('click', () => setTimeout(() => { updateSinglePreview(); updateBcPreview(); }, 0)));
+
+$('#singleContent').addEventListener('keydown', (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); $('#btnSendSingle').click(); }
+});
+
 $('#btnSendSingle').onclick = async () => {
-  const id = $('#singleTarget').value;
-  const cust = customers.find((c) => c.id === id);
-  if (!cust) return alert('Chọn khách hàng trước.');
+  const cust = selectedSingleCustomer();
+  if (!cust) { $('#singleSearch').focus(); return alert('Chọn người nhận trước.'); }
   const raw = $('#singleContent').value.trim();
-  if (!raw) return alert('Nhập nội dung.');
-  const content = applyClientVars(raw, cust);
+  if (!raw) { $('#singleContent').focus(); return alert('Nhập nội dung.'); }
+  const content = composeFor(raw, $('#singlePerLine').checked, cust);
 
   const box = $('#singleResult');
   logLine(box, `Đang gửi tới ${cust.name}...`, 'info');
   $('#btnSendSingle').disabled = true;
 
-  const r = await api('/api/v1/zalosend/send', {
-    method: 'POST',
-    body: JSON.stringify({
-      threadId: cust.threadId,
-      content,
-      name: cust.name,
-      group: !!cust.isGroup,
-    }),
-  });
-  $('#btnSendSingle').disabled = false;
+  try {
+    const r = await api('/api/v1/zalosend/send', {
+      method: 'POST',
+      body: JSON.stringify({ threadId: cust.threadId, content, name: cust.name, group: !!cust.isGroup }),
+    });
+    if (r.ok) {
+      logLine(box, `✅ Đã gửi tới ${cust.name}: "${r.text}"`, 'ok');
+      $('#singleContent').value = '';   // gửi xong xoá ô soạn để tránh gửi trùng
+      updateSinglePreview();
+    } else {
+      logLine(box, `❌ Lỗi: ${r.message || r.error}`, 'fail');   // giữ nội dung để thử lại
+    }
+  } catch (err) {
+    logLine(box, `❌ Lỗi: ${err.message}`, 'fail');
+  } finally {
+    $('#btnSendSingle').disabled = false;
+  }
+};
 
-  if (r.ok) logLine(box, `✅ Đã gửi: "${r.text}"`, 'ok');
-  else logLine(box, `❌ Lỗi: ${r.error}`, 'fail');
+// ---------- Tag (@mention) thành viên khi gửi vào nhóm ----------
+const mentionModal = $('#mentionModal');
+const groupMembersCache = new Map(); // groupId -> members[]
+let mentionMembers = [];
+const mentionPicked = new Set();
+
+async function openMention() {
+  const cust = selectedSingleCustomer();
+  if (!cust || !cust.isGroup) return;
+  mentionPicked.clear();
+  $('#mentionSearch').value = '';
+  $('#mentionSelectAll').checked = false;
+  $('#mentionTitle').textContent = `Tag thành viên — ${cust.name}`;
+  mentionModal.hidden = false;
+  const list = $('#mentionList');
+  if (!groupMembersCache.has(cust.threadId)) {
+    list.innerHTML = `<div class="${IMPORT_EMPTY_CLS}">Đang tải thành viên nhóm...</div>`;
+    try {
+      const data = await api(`/api/v1/zalosend/zalo/groups/${encodeURIComponent(cust.threadId)}/members`);
+      if (data.error || !Array.isArray(data)) throw new Error(data.message || data.error || 'không tải được');
+      groupMembersCache.set(cust.threadId, data);
+    } catch (err) {
+      list.innerHTML = `<div class="${IMPORT_EMPTY_CLS}">Lỗi: ${escapeHtml(err.message)}</div>`;
+      return;
+    }
+  }
+  mentionMembers = groupMembersCache.get(cust.threadId);
+  renderMention();
+  $('#mentionSearch').focus();
+}
+function closeMention() { mentionModal.hidden = true; }
+
+function filteredMembers() {
+  const q = $('#mentionSearch').value.trim().toLowerCase();
+  return q ? mentionMembers.filter((m) => m.name.toLowerCase().includes(q)) : mentionMembers;
+}
+
+function renderMention() {
+  const rows = filteredMembers();
+  $('#mentionInfo').textContent = `${rows.length} / ${mentionMembers.length}`;
+  $('#mentionCount').textContent = `Đã chọn ${mentionPicked.size}`;
+  const list = $('#mentionList');
+  if (!rows.length) { list.innerHTML = `<div class="${IMPORT_EMPTY_CLS}">Không có thành viên nào.</div>`; return; }
+  list.innerHTML = rows.slice(0, 500).map((m) => {
+    const on = mentionPicked.has(m.userId);
+    return `<li data-id="${m.userId}" class="flex items-center gap-3 px-2.5 py-[9px] rounded-[11px] cursor-pointer transition hover:bg-panel2 ${on ? 'bg-indigo-500/[.14]' : ''}">
+      ${m.avatar ? `<img class="w-[32px] h-[32px] rounded-full object-cover bg-panel3 shrink-0" src="${m.avatar}" alt="" />` : `<div class="w-[32px] h-[32px] rounded-full shrink-0 bg-gradient-to-br from-indigo-500 to-purple-500 text-white flex items-center justify-center text-[12px] font-bold">${escapeHtml((m.name || '?').trim().charAt(0).toUpperCase() || '?')}</div>`}
+      <div class="flex-1 min-w-0 text-[13.5px] font-semibold whitespace-nowrap overflow-hidden text-ellipsis">${escapeHtml(m.name)}</div>
+      <span class="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 text-[11px] font-bold ${on ? 'border-indigo-500 bg-indigo-500 text-white' : 'border-[#3a4353] text-transparent'}">✓</span>
+    </li>`;
+  }).join('') + (rows.length > 500 ? `<div class="${IMPORT_EMPTY_CLS}">…và ${rows.length - 500} thành viên nữa — hãy tìm kiếm để thu hẹp.</div>` : '');
+  list.querySelectorAll('li[data-id]').forEach((li) => {
+    li.onclick = () => {
+      const id = li.dataset.id;
+      if (mentionPicked.has(id)) mentionPicked.delete(id); else mentionPicked.add(id);
+      renderMention();
+    };
+  });
+}
+
+$('#btnMention').onclick = openMention;
+$('#mentionClose').onclick = closeMention;
+$('#mentionCancel').onclick = closeMention;
+mentionModal.addEventListener('click', (e) => { if (e.target === mentionModal) closeMention(); });
+$('#mentionSearch').oninput = renderMention;
+$('#mentionSelectAll').onchange = (e) => {
+  filteredMembers().forEach((m) => { if (e.target.checked) mentionPicked.add(m.userId); else mentionPicked.delete(m.userId); });
+  renderMention();
+};
+$('#mentionInsert').onclick = () => {
+  if (!mentionPicked.size) return alert('Chưa chọn thành viên nào.');
+  // openzca chỉ nhận @Tên khi tên là duy nhất trong nhóm — trùng tên thì dùng @userId.
+  const nameCount = new Map();
+  mentionMembers.forEach((m) => nameCount.set(m.name, (nameCount.get(m.name) || 0) + 1));
+  const tags = mentionMembers
+    .filter((m) => mentionPicked.has(m.userId))
+    .map((m) => (nameCount.get(m.name) > 1 ? `@${m.userId}` : `@${m.name}`));
+  insertAtCursor($('#singleContent'), tags.join(' ') + ' ');
+  updateSinglePreview();
+  closeMention();
 };
 
 // ---------- Xuất hội thoại (JSON, N ngày gần nhất) ----------
@@ -483,20 +709,162 @@ $('#btnExportHistoryTxt').onclick = () => {
 // ---------- Gửi hàng loạt ----------
 const bcLog = () => $('#bcLog');
 let bcState = { total: 0, ok: 0, fail: 0 };
+let bcFailed = [];            // threadId thất bại ở lần gửi gần nhất — để "Gửi lại tin thất bại"
+let bcMode = 'all';           // 'all' | 'tag' | 'picked'
+const bcTags = new Set();     // nhãn đang chọn ở chế độ 'tag'
+let bcConfig = null;          // cấu hình chống spam của server (để ước tính thời gian)
 
-$('#btnBroadcast').onclick = () => {
-  const content = $('#bcContent').value.trim();
-  if (!content) return alert('Nhập nội dung.');
+const BC_MODE_ON = 'bc-mode px-3.5 py-[7px] text-[13px] font-semibold rounded-lg transition text-white bg-indigo-500 shadow-sm';
+const BC_MODE_OFF = 'bc-mode px-3.5 py-[7px] text-[13px] font-semibold rounded-lg transition text-muted hover:text-ink';
 
-  const ids = selectedIds();
+api('/api/v1/zalosend/config').then((c) => { if (c && c.poolSize) { bcConfig = c; renderBcChooser(); } }).catch(() => {});
+
+function pickedIdSet() { return new Set(selectedIds()); }
+
+function bcRecipients() {
+  if (bcMode === 'picked') { const ids = pickedIdSet(); return customers.filter((c) => ids.has(c.id)); }
+  if (bcMode === 'tag') return customers.filter((c) => bcTags.has(c.tag));
+  return customers;
+}
+
+function fmtDuration(ms) {
+  const min = Math.round(ms / 60000);
+  if (min < 1) return 'dưới 1 phút';
+  if (min < 60) return `~${min} phút`;
+  return `~${Math.floor(min / 60)} giờ ${min % 60} phút`;
+}
+function estimateMs(n) {
+  if (!bcConfig || n < 2) return 0;
+  const avgDelay = (bcConfig.minDelayMs + bcConfig.maxDelayMs) / 2;
+  const avgRest = (bcConfig.poolRestMinMs + bcConfig.poolRestMaxMs) / 2;
+  const pools = Math.ceil(n / bcConfig.poolSize);
+  const inPoolGaps = n - pools;          // khoảng nghỉ giữa các khách trong cùng pool
+  return inPoolGaps * avgDelay + (pools - 1) * avgRest;
+}
+
+function updateBcPickedCount() {
+  const n = selectedIds().length;
+  $('#bcPickedCount').textContent = `(${n})`;
+}
+
+function renderBcChooser() {
+  document.querySelectorAll('#bcModes .bc-mode').forEach((b) => { b.className = b.dataset.mode === bcMode ? BC_MODE_ON : BC_MODE_OFF; });
+
+  // Chip nhãn (chọn nhiều) — chỉ ở chế độ theo nhãn
+  const tags = uniqueTagCounts();
+  [...bcTags].forEach((t) => { if (!tags.some(([tag]) => tag === t)) bcTags.delete(t); });
+  const chips = $('#bcTagChips');
+  chips.hidden = bcMode !== 'tag' || !tags.length;
+  $('#bcTagEmpty').hidden = !(bcMode === 'tag' && !tags.length);
+  chips.innerHTML = tags.map(([tag, count]) => tagChipHtml(tag, count, bcTags.has(tag))).join('');
+  chips.querySelectorAll('.tag-chip').forEach((chip) => {
+    chip.onclick = () => {
+      if (bcTags.has(chip.dataset.tag)) bcTags.delete(chip.dataset.tag); else bcTags.add(chip.dataset.tag);
+      renderBcChooser();
+    };
+  });
+
+  // Tóm tắt người nhận + ước tính thời gian
+  const rec = bcRecipients();
+  const groups = rec.filter((c) => c.isGroup).length;
+  const names = rec.slice(0, 5).map((c) => escapeHtml(c.name)).join(', ') + (rec.length > 5 ? `, … +${rec.length - 5}` : '');
+  let hint = '';
+  if (bcMode === 'tag' && !bcTags.size) hint = 'Chọn ít nhất một nhãn ở trên.';
+  else if (bcMode === 'picked' && !rec.length) hint = 'Chưa tick khách nào ở danh sách bên trái.';
+  else if (!rec.length) hint = 'Chưa có khách hàng nào.';
+  $('#bcSummary').innerHTML = rec.length
+    ? `<div><b>${rec.length}</b> người nhận${groups ? ` (${rec.length - groups} cá nhân · ${groups} nhóm)` : ''}${bcConfig ? ` · thời gian ước tính <b>${fmtDuration(estimateMs(rec.length))}</b>` : ''}</div>
+       <div class="text-muted mt-0.5">${names}</div>`
+    : `<span class="text-amber-300">${hint}</span>`;
+  updateBcPreview();
+}
+
+document.querySelectorAll('#bcModes .bc-mode').forEach((b) => {
+  b.onclick = () => { bcMode = b.dataset.mode; renderBcChooser(); };
+});
+
+// Tick ở danh sách bên trái: tự chuyển sang "Đã tick" khi bắt đầu tick, quay về "Tất cả" khi bỏ hết
+$('#customerList').addEventListener('change', (e) => {
+  if (!e.target.classList.contains('pick')) return;
+  const n = selectedIds().length;
+  if (n > 0 && bcMode !== 'picked') bcMode = 'picked';
+  else if (n === 0 && bcMode === 'picked') bcMode = 'all';
+  updateBcPickedCount();
+  renderBcChooser();
+});
+$('#selectAll').addEventListener('change', () => {
+  const n = selectedIds().length;
+  bcMode = n > 0 ? 'picked' : (bcMode === 'picked' ? 'all' : bcMode);
+  updateBcPickedCount();
+  renderBcChooser();
+});
+
+function updateBcPreview() {
+  const raw = $('#bcContent').value;
+  $('#bcCount').textContent = fmtCount(raw.length);
+  const first = bcRecipients()[0];
+  const box = $('#bcPreviewBox');
+  if (!first || !raw.trim()) { box.hidden = true; return; }
+  box.hidden = false;
+  $('#bcPreviewFor').textContent = `Xem trước — như gửi cho ${first.name}`;
+  $('#bcPreview').textContent = renderMessagePreview(raw, first, $('#bcPerLine').checked);
+}
+$('#bcContent').addEventListener('input', updateBcPreview);
+$('#bcPerLine').addEventListener('change', updateBcPreview);
+$('#bcReroll').onclick = updateBcPreview;
+$('#bcContent').addEventListener('keydown', (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); $('#btnBroadcast').click(); }
+});
+$('#bcTemplatePicker').onchange = (e) => {
+  const tpl = allTemplates().find((t) => t.id === e.target.value);
+  if (!tpl) return;
+  const box = $('#bcContent');
+  if (box.value.trim() && !confirm('Nội dung hiện tại sẽ bị thay bằng mẫu đã chọn. Tiếp tục?')) { e.target.value = ''; return; }
+  box.value = tpl.content;
+  $('#bcPerLine').checked = !!tpl.perLine;
+  e.target.value = '';
+  updateBcPreview();
+};
+
+function startBroadcast(recipients, content, perLine) {
   bcState = { total: 0, ok: 0, fail: 0 };
+  bcFailed = [];
   bcLog().innerHTML = '';
   $('#progressBar').style.width = '0%';
   $('#cOk').textContent = $('#cFail').textContent = $('#cLeft').textContent = '0';
+  $('#btnRetryFailed').hidden = true;
 
-  socket.emit('broadcast:start', { ids, content, tag: $('#bcTag').value.trim() });
+  // Server không giữ danh sách khách — gửi kèm người nhận lấy từ IndexedDB.
+  socket.emit('broadcast:start', {
+    content,
+    // `text` = nội dung đã chọn biến thể + thay biến riêng cho từng người (anh/chị, gia hạn...);
+    // server chỉ còn thay [Tên] và resolve Spintax.
+    recipients: recipients.map((c) => ({
+      name: c.name, threadId: c.threadId, tag: c.tag, isGroup: c.isGroup,
+      text: composeFor(content, perLine, c),
+    })),
+  });
   $('#btnBroadcast').disabled = true;
   $('#btnStop').hidden = false;
+}
+
+$('#btnBroadcast').onclick = () => {
+  const content = $('#bcContent').value.trim();
+  const rec = bcRecipients();
+  if (!rec.length) return alert(bcMode === 'tag' ? 'Chọn ít nhất một nhãn có khách hàng.' : bcMode === 'picked' ? 'Chưa tick khách nào ở danh sách.' : 'Chưa có khách hàng nào.');
+  if (!content) { $('#bcContent').focus(); return alert('Nhập nội dung.'); }
+  const est = bcConfig ? `\nThời gian ước tính: ${fmtDuration(estimateMs(rec.length))} (giãn cách ngẫu nhiên để chống spam).` : '';
+  if (!confirm(`Gửi tin tới ${rec.length} người nhận?${est}\n\nGiữ tab này mở trong suốt quá trình gửi.`)) return;
+  startBroadcast(rec, content, $('#bcPerLine').checked);
+};
+
+$('#btnRetryFailed').onclick = () => {
+  const content = $('#bcContent').value.trim();
+  const failed = new Set(bcFailed);
+  const rec = customers.filter((c) => failed.has(c.threadId));
+  if (!rec.length || !content) return;
+  if (!confirm(`Gửi lại cho ${rec.length} người bị lỗi ở lần trước?`)) return;
+  startBroadcast(rec, content, $('#bcPerLine').checked);
 };
 
 $('#btnStop').onclick = () => {
@@ -541,6 +909,7 @@ socket.on('broadcast:result', ({ index, total, customer, status, text, error }) 
     logLine(bcLog(), `✅ [${index}/${total}] ${customer.name}: "${text}"`, 'ok');
   } else {
     bcState.fail++;
+    bcFailed.push(customer.threadId);
     logLine(bcLog(), `❌ [${index}/${total}] ${customer.name}: ${error}`, 'fail');
   }
   $('#cOk').textContent = bcState.ok;
@@ -571,6 +940,7 @@ socket.on('broadcast:done', ({ total, success, failed, stopped }) => {
     ? `Đã dừng. Thành công ${success}, thất bại ${failed}.`
     : `Hoàn tất! Thành công ${success}/${total}, thất bại ${failed}.`;
   logLine(bcLog(), stopped ? 'Đã dừng theo yêu cầu.' : 'Hoàn tất gửi hàng loạt.', stopped ? 'wait' : 'ok');
+  $('#btnRetryFailed').hidden = !bcFailed.length;
   bcFinish();
 });
 
@@ -703,17 +1073,19 @@ $('#importAdd').onclick = async () => {
       name: r.name,
       threadId: r.userId || r.groupId,
       isGroup,
+      gender: isGroup ? '' : (r.gender === 'male' || r.gender === 'female' ? r.gender : ''),
       tag: tagOverride || (isGroup ? 'nhóm' : 'bạn bè'),
     }));
 
-  const r = await api('/api/v1/zalosend/customers/bulk', {
-    method: 'POST',
-    body: JSON.stringify({ items }),
-  });
-  if (r.error) return alert(r.error);
+  let r;
+  try {
+    r = await ZsDb.customers.addMany(items);
+  } catch (err) {
+    return alert(err.message);
+  }
   closeImport();
-  await loadCustomers();
-  alert(`Đã thêm ${r.added} mục (bỏ qua ${r.skipped} trùng). Tổng: ${r.total}.`);
+  loadCustomers();
+  alert(`Đã thêm ${r.added} mục${r.updated ? `, bổ sung giới tính cho ${r.updated} khách đã có` : ''} (bỏ qua ${r.skipped} trùng). Tổng: ${r.total}.`);
 };
 
 // ---------- Chèn biến vào nội dung tin nhắn ([Tên], Spintax {a|b}) ----------
@@ -739,6 +1111,33 @@ document.querySelectorAll('.var-chips').forEach((box) => {
 // ============================================================
 const MESSAGE_TEMPLATES = [
   {
+    id: 'renew-pay-check',
+    label: '💬 Hỏi thăm thanh toán gia hạn (20 biến thể)',
+    perLine: true, // mỗi dòng là một biến thể, chọn ngẫu nhiên cho từng người nhận
+    content: [
+      'Dạ [anh/chị] ơi, em hỏi thăm mình đã sắp xếp thanh toán phí gia hạn chưa ạ?',
+      'Dạ [anh/chị] ơi, phần chi phí gia hạn hôm trước mình đã chuyển khoản chưa ạ?',
+      'Dạ em hỏi thăm [anh/chị] chút ạ, không biết mình đã thanh toán phần gia hạn chưa ạ?',
+      'Dạ [anh/chị] ơi, em xin phép hỏi lại phần gia hạn website của mình, [anh/chị] đã sắp xếp thanh toán chưa ạ?',
+      'Dạ [anh/chị] ơi, phần gia hạn bên mình [anh/chị] đã xử lý giúp em chưa ạ?',
+      'Dạ em hỏi thăm chút nha [anh/chị], phí gia hạn mình đã chuyển khoản chưa ạ?',
+      'Dạ [anh/chị] ơi, không biết phần gia hạn website mình đã thanh toán được chưa ạ?',
+      'Dạ [anh/chị] ơi, em nhắn hỏi thăm lại phần gia hạn hôm trước, mình đã sắp xếp chuyển khoản chưa ạ?',
+      'Dạ [anh/chị] ơi, phần gia hạn hosting và tên miền mình đã thanh toán chưa ạ? Để em kiểm tra và xử lý gia hạn cho mình nha.',
+      'Dạ em hỏi thăm [anh/chị] xíu ạ, khoản gia hạn website mình đã chuyển chưa ạ?',
+      'Dạ [anh/chị] ơi, em xin phép nhắc nhẹ phần gia hạn website ạ, không biết mình đã sắp xếp thanh toán chưa?',
+      'Dạ [anh/chị] ơi, phần gia hạn của mình [anh/chị] đã sắp xếp thanh toán chưa ạ? Nếu mình chuyển rồi thì báo em kiểm tra nha.',
+      'Dạ [anh/chị] ơi, em hỏi lại chút về phí gia hạn ạ, mình đã thanh toán giúp em chưa ạ?',
+      'Dạ em nhắn hỏi thăm phần gia hạn website của mình ạ, [anh/chị] đã chuyển khoản chưa để em kiểm tra nha.',
+      'Dạ [anh/chị] ơi, không biết hôm nay mình đã sắp xếp được phần thanh toán gia hạn chưa ạ?',
+      'Dạ [anh/chị] ơi, em xin phép hỏi thăm phần gia hạn một chút ạ. Nếu mình đã chuyển rồi thì báo em để em kiểm tra và xác nhận nha.',
+      'Dạ [anh/chị] ơi, phí gia hạn website hôm trước em gửi mình đã thanh toán chưa ạ?',
+      'Dạ [anh/chị] ơi, em nhắc nhẹ mình phần gia hạn website nha, không biết [anh/chị] đã chuyển khoản được chưa ạ?',
+      'Dạ em hỏi thăm [anh/chị] chút nha, mình đã sắp xếp thanh toán phần gia hạn để bên em tiếp tục duy trì website chưa ạ?',
+      'Dạ [anh/chị] ơi, em hỏi thăm lại phần gia hạn website nha. Không biết mình đã thanh toán chưa để em kiểm tra và tiến hành gia hạn cho mình luôn ạ?'
+    ].join('\n'),
+  },
+  {
     id: 'track',
     label: '👋 Chăm sóc / Track khách',
     content: '{Chào|Xin chào} [Tên], bên em đang trong quá trình hỗ trợ và muốn hỏi thăm tình hình sử dụng dịch vụ của mình. {Anh/Chị} có cần hỗ trợ gì thêm không ạ?',
@@ -760,12 +1159,10 @@ const MESSAGE_TEMPLATES = [
   },
 ];
 
-// Mẫu tuỳ chỉnh do người dùng tự thêm — lưu trên trình duyệt (localStorage)
+// Mẫu tuỳ chỉnh do người dùng tự thêm — lưu trong IndexedDB của trình duyệt
 const CUSTOM_TPL_KEY = 'zs:customTemplates';
-function getCustomTemplates() {
-  try { return JSON.parse(localStorage.getItem(CUSTOM_TPL_KEY) || '[]'); } catch (e) { return []; }
-}
-function saveCustomTemplates(list) { localStorage.setItem(CUSTOM_TPL_KEY, JSON.stringify(list)); }
+function getCustomTemplates() { return ZsDb.getKV(CUSTOM_TPL_KEY, []); }
+function saveCustomTemplates(list) { ZsDb.setKV(CUSTOM_TPL_KEY, list); }
 function allTemplates() { return [...MESSAGE_TEMPLATES, ...getCustomTemplates()]; }
 
 function populateTemplateSelect(select, withPlaceholder) {
@@ -776,6 +1173,7 @@ function populateTemplateSelect(select, withPlaceholder) {
   if ([...select.options].some((o) => o.value === current)) select.value = current;
 }
 populateTemplateSelect($('#templatePicker'), true);
+populateTemplateSelect($('#bcTemplatePicker'), true);
 
 $('#templatePicker').onchange = (e) => {
   const tpl = allTemplates().find((t) => t.id === e.target.value);
@@ -786,7 +1184,9 @@ $('#templatePicker').onchange = (e) => {
     return;
   }
   box.value = tpl.content;
+  $('#singlePerLine').checked = !!tpl.perLine;
   e.target.value = '';
+  updateSinglePreview();
 };
 
 // ============================================================
@@ -807,11 +1207,12 @@ function renderTemplateManagerList() {
     return `
       <div class="tpl-row border border-line bg-panel2 rounded-xl px-3 py-2.5 flex items-start justify-between gap-2.5" data-id="${t.id}">
         <div class="min-w-0">
-          <div class="font-bold text-[13px] flex items-center gap-[7px]">
+          <div class="font-bold text-[13px] flex items-center gap-[7px] flex-wrap">
             ${escapeHtml(t.label)}
+            ${t.perLine ? `<span class="${TPL_TAG_CUSTOM}">Ngẫu nhiên theo dòng</span>` : ''}
             <span class="${isCustom ? TPL_TAG_CUSTOM : TPL_TAG_BUILTIN}">${isCustom ? 'Tuỳ chỉnh' : 'Có sẵn'}</span>
           </div>
-          <div class="text-[11.5px] text-muted mt-[3px] leading-relaxed">${escapeHtml(t.content)}</div>
+          <div class="text-[11.5px] text-muted mt-[3px] leading-relaxed whitespace-pre-line max-h-[120px] overflow-y-auto">${escapeHtml(t.content)}</div>
         </div>
         <div class="flex gap-1.5 shrink-0">
           ${isCustom
@@ -841,7 +1242,7 @@ function renderTemplateManagerList() {
   box.querySelectorAll('.tpl-copy').forEach((b) => {
     b.onclick = () => {
       const t = allTemplates().find((x) => x.id === b.closest('.tpl-row').dataset.id);
-      startEditTemplate(null, { label: t.label + ' (bản sao)', content: t.content });
+      startEditTemplate(null, { label: t.label + ' (bản sao)', content: t.content, perLine: t.perLine });
     };
   });
 }
@@ -851,12 +1252,14 @@ function startEditTemplate(existing, prefill) {
   $('#tplFormTitle').textContent = existing ? 'Sửa mẫu' : 'Thêm mẫu mới';
   $('#tplName').value = existing?.label || prefill?.label || '';
   $('#tplContent').value = existing?.content || prefill?.content || '';
+  $('#tplPerLine').checked = !!(existing?.perLine || prefill?.perLine);
   $('#tplCancelEdit').hidden = !existing;
   $('#tplName').focus();
 }
 
 function refreshAllTemplateSelects() {
   populateTemplateSelect($('#templatePicker'), true);
+  populateTemplateSelect($('#bcTemplatePicker'), true);
   populateTemplateSelect($('#cpTemplate'), false);
 }
 
@@ -873,14 +1276,15 @@ $('#tplCancelEdit').onclick = () => startEditTemplate(null);
 $('#tplSave').onclick = () => {
   const label = $('#tplName').value.trim();
   const content = $('#tplContent').value.trim();
+  const perLine = $('#tplPerLine').checked;
   if (!label || !content) return alert('Nhập đủ tên mẫu và nội dung.');
 
   const list = getCustomTemplates();
   if (editingTplId) {
     const i = list.findIndex((t) => t.id === editingTplId);
-    if (i !== -1) list[i] = { ...list[i], label, content };
+    if (i !== -1) list[i] = { ...list[i], label, content, perLine };
   } else {
-    list.push({ id: 'custom_' + Date.now().toString(36), label, content });
+    list.push({ id: 'custom_' + Date.now().toString(36), label, content, perLine });
   }
   const wasNew = !editingTplId;
   saveCustomTemplates(list);
@@ -894,28 +1298,25 @@ $('#tplSave').onclick = () => {
 };
 
 // ============================================================
-// GIA HẠN (domain/hosting...) — lưu cục bộ trên trình duyệt
+// GIA HẠN (domain/hosting...) — lưu trong IndexedDB của trình duyệt
 // Lưu ý: Zalo API hiện chưa trả về nhãn (label) đã gắn sẵn trong app Zalo,
-// nên phần "đồng bộ tag/gia hạn" này chạy hoàn toàn phía FE (localStorage),
-// chưa đồng bộ với server chung — cần backend hỗ trợ nếu muốn dùng thật.
+// nên tag/gia hạn chạy hoàn toàn phía FE, không đồng bộ lên server.
 // ============================================================
 const RENEW_KEY = 'zs:renew';
 
-function getAllRenewals() {
-  try { return JSON.parse(localStorage.getItem(RENEW_KEY) || '{}'); } catch (e) { return {}; }
-}
+function getAllRenewals() { return ZsDb.getKV(RENEW_KEY, {}); }
 function getRenewal(customerId) {
   return getAllRenewals()[customerId] || null;
 }
 function setRenewal(customerId, data) {
   const all = getAllRenewals();
   all[customerId] = data;
-  localStorage.setItem(RENEW_KEY, JSON.stringify(all));
+  ZsDb.setKV(RENEW_KEY, all);
 }
 function deleteRenewal(customerId) {
   const all = getAllRenewals();
   delete all[customerId];
-  localStorage.setItem(RENEW_KEY, JSON.stringify(all));
+  ZsDb.setKV(RENEW_KEY, all);
 }
 function daysLeftFrom(dateStr) {
   if (!dateStr) return null;
@@ -960,10 +1361,33 @@ $('#renewDelete').onclick = () => {
 };
 
 // Thay các biến gắn với dữ liệu gia hạn cục bộ (không đụng tới [Tên] — cái đó do server thay dựa trên field `name`)
+function pronounVars(customer) {
+  const g = customer.gender;
+  return {
+    '[anh/chị]': g === 'male' ? 'anh' : g === 'female' ? 'chị' : 'anh/chị',
+    '[Anh/Chị]': g === 'male' ? 'Anh' : g === 'female' ? 'Chị' : 'Anh/Chị',
+    '[Ông/Bà]': g === 'male' ? 'Ông' : g === 'female' ? 'Bà' : 'Ông/Bà',
+  };
+}
+
+// Mẫu "mỗi dòng là một biến thể": chọn ngẫu nhiên một dòng cho mỗi người nhận.
+function pickVariant(content, perLine) {
+  if (!perLine) return content;
+  const lines = content.split('\n').map((l) => l.trim()).filter(Boolean);
+  return lines.length ? lines[Math.floor(Math.random() * lines.length)] : content;
+}
+
+// Nội dung cuối cùng cho một khách: chọn biến thể + thay biến phía client
+// ([Tên] và Spintax do server xử lý khi gửi).
+function composeFor(content, perLine, customer) {
+  return applyClientVars(pickVariant(content, perLine), customer);
+}
+
 function applyClientVars(content, customer) {
   const r = getRenewal(customer.id);
   const dl = r ? daysLeftFrom(r.date) : null;
   const vars = {
+    ...pronounVars(customer),
     '[SĐT]': customer.threadId || '',
     '[SảnPhẩm]': r?.item || '(chưa thiết lập gia hạn)',
     '[NgàyHếtHạn]': r?.date ? new Date(r.date + 'T00:00:00').toLocaleDateString('vi-VN') : '(chưa thiết lập)',
@@ -975,7 +1399,7 @@ function applyClientVars(content, customer) {
 }
 
 // ============================================================
-// CHIẾN DỊCH TỰ ĐỘNG (campaign) — chạy phía trình duyệt (localStorage)
+// CHIẾN DỊCH TỰ ĐỘNG (campaign) — chạy phía trình duyệt, lưu trong IndexedDB
 // Giới hạn thật: chỉ hoạt động khi tab này đang mở + đã đăng nhập Zalo.
 // Muốn chạy nền thật sự (kể cả tắt trình duyệt) cần thêm scheduler ở backend.
 // ============================================================
@@ -983,10 +1407,8 @@ const CAMPAIGN_KEY = 'zs:campaigns';
 const campaignModal = $('#campaignModal');
 let editingCampaignId = null;
 
-function getCampaigns() {
-  try { return JSON.parse(localStorage.getItem(CAMPAIGN_KEY) || '[]'); } catch (e) { return []; }
-}
-function saveCampaigns(list) { localStorage.setItem(CAMPAIGN_KEY, JSON.stringify(list)); }
+function getCampaigns() { return ZsDb.getKV(CAMPAIGN_KEY, []); }
+function saveCampaigns(list) { ZsDb.setKV(CAMPAIGN_KEY, list); }
 function upsertCampaign(cp) {
   const list = getCampaigns();
   const i = list.findIndex((c) => c.id === cp.id);
@@ -1160,7 +1582,7 @@ async function runCampaignNow(id) {
 
   let ok = 0, fail = 0;
   for (const cust of targets) {
-    const content = applyClientVars(tpl.content, cust);
+    const content = composeFor(tpl.content, !!tpl.perLine, cust);
     try {
       const r = await api('/api/v1/zalosend/send', {
         method: 'POST',

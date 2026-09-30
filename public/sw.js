@@ -10,7 +10,7 @@
  *
  * Bump VERSION to invalidate all caches on deploy. */
 
-const VERSION = 'v4';
+const VERSION = 'v7';
 const CACHE_NAME = `toolhub-${VERSION}`;
 
 const PRECACHE_URLS = [
