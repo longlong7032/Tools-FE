@@ -17,6 +17,7 @@ function logLine(box, text, cls = 'info') {
   const line = el('div', `py-[3px] border-b border-[#12161c] last:border-b-0 ${LOG_LINE_COLOR[cls] || ''}`);
   const t = new Date().toLocaleTimeString('vi-VN');
   line.textContent = `[${t}] ${text}`;
+  box.hidden = false;
   box.appendChild(line);
   box.scrollTop = box.scrollHeight;
 }
@@ -87,6 +88,7 @@ $('#btnLogin').onclick = () => {
   $('#btnLogin').disabled = true;
   $('#btnCancel').hidden = false;
   $('#loginLog').innerHTML = '';
+  $('#loginLog').hidden = true;
   setQrBox(qrPlaceholder(`${SPINNER_HTML}Đang khởi tạo phiên đăng nhập...`));
   socket.emit('login:start');
 };
@@ -173,18 +175,17 @@ function renderCustomers() {
   const list = $('#customerList');
   list.innerHTML = '';
   customers.forEach((c) => {
-    const li = el('li', 'group flex items-center gap-2.5 px-2 py-2.5 rounded-[10px] hover:bg-panel2 transition');
+    const li = el('li', 'group flex items-center gap-2.5 px-2 py-2 rounded-[10px] hover:bg-panel2 transition');
     li.dataset.tag = c.tag || '';
+    li.dataset.search = `${c.name} ${c.threadId} ${c.tag || ''}`.toLowerCase();
     const initial = escapeHtml((c.name || '?').trim().charAt(0).toUpperCase() || '?');
     li.innerHTML = `
-      <input type="checkbox" class="pick w-auto accent-indigo-500" data-id="${c.id}" />
-      <div class="w-[30px] h-[30px] rounded-full shrink-0 bg-gradient-to-br from-indigo-500 to-purple-500 text-white flex items-center justify-center text-[12.5px] font-bold">${initial}</div>
-      <div class="ci-main flex-1 min-w-0">
+      <input type="checkbox" class="pick w-auto accent-indigo-500 shrink-0" data-id="${c.id}" />
+      <div class="w-[32px] h-[32px] rounded-full shrink-0 bg-gradient-to-br from-indigo-500 to-purple-500 text-white flex items-center justify-center text-[13px] font-bold">${c.isGroup ? '👥' : initial}</div>
+      <div class="ci-main flex-1 min-w-0" title="Bấm để chọn làm người nhận">
         <div class="font-semibold text-[13.5px] whitespace-nowrap overflow-hidden text-ellipsis">${escapeHtml(c.name)}</div>
-        <div class="text-[11.5px] text-muted mt-px whitespace-nowrap overflow-hidden text-ellipsis">${escapeHtml(c.threadId)}</div>
+        <div class="text-[11.5px] text-muted mt-px whitespace-nowrap overflow-hidden text-ellipsis">${escapeHtml(c.threadId)}${c.tag ? ` · <span class="text-amber-300/90">${escapeHtml(c.tag)}</span>` : ''}</div>
       </div>
-      ${c.isGroup ? '<span class="text-[10.5px] bg-indigo-500/[.14] border border-indigo-500/30 text-indigo-300 px-2 py-0.5 rounded-full font-semibold">Nhóm</span>' : ''}
-      ${c.tag ? `<span class="text-[10.5px] bg-amber-500/[.12] border border-amber-500/30 text-amber-300 px-2 py-0.5 rounded-full font-semibold">${escapeHtml(c.tag)}</span>` : ''}
       ${c.isGroup ? '' : genderBtnHtml(c)}
       ${renewBtnHtml(c)}
       <button class="row-action del h-6 w-0 shrink-0 overflow-hidden rounded-[7px] border-none bg-transparent text-muted2 opacity-0 transition group-hover:w-6 group-hover:opacity-100 hover:bg-rose-500/[.12] hover:text-rose-400" data-id="${c.id}" title="Xoá">
@@ -192,7 +193,10 @@ function renderCustomers() {
       </button>`;
     list.appendChild(li);
   });
-  $('#custCount').textContent = `${customers.length} khách`;
+  if (!customers.length) {
+    list.innerHTML = `<li class="px-4 py-8 text-center text-[12.5px] text-muted leading-relaxed">Chưa có khách hàng nào.<br />Bấm <b class="text-ink">⬇ Import</b> để lấy bạn bè / nhóm từ Zalo,<br />hoặc <b class="text-ink">+ Thêm</b> để nhập tay.</li>`;
+  }
+  $('#custCount').textContent = `${customers.length}`;
 
   // dropdown xuất hội thoại
   const expSel = $('#exportTarget');
@@ -247,7 +251,7 @@ function genderBtnHtml(c) {
   const cls = g === 'male' ? 'bg-sky-500/[.14] border-sky-500/30 text-sky-300'
     : g === 'female' ? 'bg-pink-500/[.14] border-pink-500/30 text-pink-300'
     : 'bg-panel3 border-line text-muted2';
-  return `<button type="button" class="gender-btn shrink-0 text-[10.5px] px-2 py-0.5 rounded-full font-semibold border transition ${cls}" data-id="${c.id}" title="Xưng hô khi gửi tin — bấm để đổi (Mình → Anh → Chị)">${GENDER_LABEL[g]}</button>`;
+  return `<button type="button" class="gender-btn shrink-0 text-[10.5px] px-1.5 py-0.5 rounded-md font-semibold border transition ${cls}" data-id="${c.id}" title="Xưng hô khi gửi tin — bấm để đổi (Mình → Anh → Chị)">${GENDER_LABEL[g]}</button>`;
 }
 
 function renewBtnHtml(c) {
@@ -276,7 +280,7 @@ function uniqueTagCounts() {
   return [...map.entries()]; // [[tag, count], ...]
 }
 
-const TAG_CHIP_BASE = 'tag-chip inline-flex items-center gap-1.5 cursor-pointer px-2.5 py-1 rounded-full text-[11.5px] font-semibold border transition';
+const TAG_CHIP_BASE = 'tag-chip inline-flex items-center gap-1.5 shrink-0 whitespace-nowrap cursor-pointer px-2.5 py-1 rounded-full text-[11.5px] font-semibold border transition';
 const TAG_CHIP_OFF = `${TAG_CHIP_BASE} bg-panel2 border-line text-muted hover:border-[#3a4353] hover:text-ink`;
 const TAG_CHIP_ON = `${TAG_CHIP_BASE} bg-indigo-500/[.14] border-indigo-500/35 text-indigo-300`;
 function tagChipHtml(tag, count, active) {
@@ -305,11 +309,24 @@ function renderTagFilters() {
 }
 
 function applyTagFilter() {
-  const rows = $('#customerList').querySelectorAll('li');
+  const q = $('#custSearch').value.trim().toLowerCase();
+  const rows = $('#customerList').querySelectorAll('li[data-tag]');
   rows.forEach((li) => {
-    li.hidden = !!(activeTagFilter && li.dataset.tag !== activeTagFilter);
+    const tagOk = !activeTagFilter || li.dataset.tag === activeTagFilter;
+    const searchOk = !q || (li.dataset.search || '').includes(q);
+    li.hidden = !(tagOk && searchOk);
   });
 }
+$('#custSearch').addEventListener('input', applyTagFilter);
+
+// Form thêm khách: ẩn mặc định cho gọn, mở bằng nút "+ Thêm"
+function toggleAddForm(show) {
+  const form = $('#customerForm');
+  form.hidden = show === undefined ? !form.hidden : !show;
+  if (!form.hidden) $('#cName').focus();
+}
+$('#btnToggleAdd').onclick = () => toggleAddForm();
+$('#btnCloseAdd').onclick = () => toggleAddForm(false);
 
 function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, (m) =>
@@ -332,6 +349,7 @@ $('#customerForm').onsubmit = async (e) => {
   $('#cName').value = $('#cThread').value = $('#cTag').value = '';
   $('#cGender').value = '';
   loadCustomers();
+  $('#cName').focus(); // giữ form mở để thêm liên tiếp nhiều khách
 };
 
 $('#selectAll').onchange = (e) => {
@@ -472,6 +490,10 @@ function updateSinglePreview() {
   const raw = $('#singleContent').value;
   $('#singleCount').textContent = fmtCount(raw.length);
   const cust = selectedSingleCustomer();
+  $('#singlePerLineWrap').hidden = !(raw.includes('\n') || $('#singlePerLine').checked);
+  $('#singleSendHint').textContent = !cust ? 'Chọn người nhận và nhập nội dung'
+    : !raw.trim() ? `Người nhận: ${cust.name} — nhập nội dung tin nhắn`
+    : `Sẽ gửi tới: ${cust.name}`;
   const box = $('#singlePreviewBox');
   if (!cust || !raw.trim()) { box.hidden = true; return; }
   box.hidden = false;
@@ -745,6 +767,7 @@ function estimateMs(n) {
 function updateBcPickedCount() {
   const n = selectedIds().length;
   $('#bcPickedCount').textContent = `(${n})`;
+  $('#pickedInfo').textContent = n ? `Đã chọn ${n}` : '';
 }
 
 function renderBcChooser() {
@@ -802,7 +825,12 @@ $('#selectAll').addEventListener('change', () => {
 function updateBcPreview() {
   const raw = $('#bcContent').value;
   $('#bcCount').textContent = fmtCount(raw.length);
-  const first = bcRecipients()[0];
+  $('#bcPerLineWrap').hidden = !(raw.includes('\n') || $('#bcPerLine').checked);
+  const recAll = bcRecipients();
+  const first = recAll[0];
+  $('#bcSendHint').textContent = recAll.length
+    ? `${recAll.length} người nhận${bcConfig ? ` · ~${fmtDuration(estimateMs(recAll.length)).replace('~', '')}` : ''}`
+    : 'Chưa chọn người nhận';
   const box = $('#bcPreviewBox');
   if (!first || !raw.trim()) { box.hidden = true; return; }
   box.hidden = false;
@@ -830,9 +858,12 @@ function startBroadcast(recipients, content, perLine) {
   bcState = { total: 0, ok: 0, fail: 0 };
   bcFailed = [];
   bcLog().innerHTML = '';
+  bcLog().hidden = true;
   $('#progressBar').style.width = '0%';
   $('#cOk').textContent = $('#cFail').textContent = $('#cLeft').textContent = '0';
   $('#btnRetryFailed').hidden = true;
+  $('#bcRunPanel').hidden = false;
+  $('#bcRunPanel').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
   // Server không giữ danh sách khách — gửi kèm người nhận lấy từ IndexedDB.
   socket.emit('broadcast:start', {
