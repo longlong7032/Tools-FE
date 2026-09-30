@@ -241,13 +241,13 @@ function renderCustomers() {
 }
 
 const GENDER_ORDER = ['', 'male', 'female'];
-const GENDER_LABEL = { '': 'Anh/Chị', male: 'Anh', female: 'Chị' };
+const GENDER_LABEL = { '': 'Mình', male: 'Anh', female: 'Chị' };
 function genderBtnHtml(c) {
   const g = c.gender || '';
   const cls = g === 'male' ? 'bg-sky-500/[.14] border-sky-500/30 text-sky-300'
     : g === 'female' ? 'bg-pink-500/[.14] border-pink-500/30 text-pink-300'
     : 'bg-panel3 border-line text-muted2';
-  return `<button type="button" class="gender-btn shrink-0 text-[10.5px] px-2 py-0.5 rounded-full font-semibold border transition ${cls}" data-id="${c.id}" title="Xưng hô khi gửi tin — bấm để đổi (Anh/Chị → Anh → Chị)">${GENDER_LABEL[g]}</button>`;
+  return `<button type="button" class="gender-btn shrink-0 text-[10.5px] px-2 py-0.5 rounded-full font-semibold border transition ${cls}" data-id="${c.id}" title="Xưng hô khi gửi tin — bấm để đổi (Mình → Anh → Chị)">${GENDER_LABEL[g]}</button>`;
 }
 
 function renewBtnHtml(c) {
@@ -1115,26 +1115,26 @@ const MESSAGE_TEMPLATES = [
     label: '💬 Hỏi thăm thanh toán gia hạn (20 biến thể)',
     perLine: true, // mỗi dòng là một biến thể, chọn ngẫu nhiên cho từng người nhận
     content: [
-      'Dạ [anh/chị] ơi, em hỏi thăm mình đã sắp xếp thanh toán phí gia hạn chưa ạ?',
-      'Dạ [anh/chị] ơi, phần chi phí gia hạn hôm trước mình đã chuyển khoản chưa ạ?',
-      'Dạ em hỏi thăm [anh/chị] chút ạ, không biết mình đã thanh toán phần gia hạn chưa ạ?',
-      'Dạ [anh/chị] ơi, em xin phép hỏi lại phần gia hạn website của mình, [anh/chị] đã sắp xếp thanh toán chưa ạ?',
-      'Dạ [anh/chị] ơi, phần gia hạn bên mình [anh/chị] đã xử lý giúp em chưa ạ?',
-      'Dạ em hỏi thăm chút nha [anh/chị], phí gia hạn mình đã chuyển khoản chưa ạ?',
-      'Dạ [anh/chị] ơi, không biết phần gia hạn website mình đã thanh toán được chưa ạ?',
-      'Dạ [anh/chị] ơi, em nhắn hỏi thăm lại phần gia hạn hôm trước, mình đã sắp xếp chuyển khoản chưa ạ?',
-      'Dạ [anh/chị] ơi, phần gia hạn hosting và tên miền mình đã thanh toán chưa ạ? Để em kiểm tra và xử lý gia hạn cho mình nha.',
-      'Dạ em hỏi thăm [anh/chị] xíu ạ, khoản gia hạn website mình đã chuyển chưa ạ?',
-      'Dạ [anh/chị] ơi, em xin phép nhắc nhẹ phần gia hạn website ạ, không biết mình đã sắp xếp thanh toán chưa?',
-      'Dạ [anh/chị] ơi, phần gia hạn của mình [anh/chị] đã sắp xếp thanh toán chưa ạ? Nếu mình chuyển rồi thì báo em kiểm tra nha.',
-      'Dạ [anh/chị] ơi, em hỏi lại chút về phí gia hạn ạ, mình đã thanh toán giúp em chưa ạ?',
-      'Dạ em nhắn hỏi thăm phần gia hạn website của mình ạ, [anh/chị] đã chuyển khoản chưa để em kiểm tra nha.',
-      'Dạ [anh/chị] ơi, không biết hôm nay mình đã sắp xếp được phần thanh toán gia hạn chưa ạ?',
-      'Dạ [anh/chị] ơi, em xin phép hỏi thăm phần gia hạn một chút ạ. Nếu mình đã chuyển rồi thì báo em để em kiểm tra và xác nhận nha.',
-      'Dạ [anh/chị] ơi, phí gia hạn website hôm trước em gửi mình đã thanh toán chưa ạ?',
-      'Dạ [anh/chị] ơi, em nhắc nhẹ mình phần gia hạn website nha, không biết [anh/chị] đã chuyển khoản được chưa ạ?',
-      'Dạ em hỏi thăm [anh/chị] chút nha, mình đã sắp xếp thanh toán phần gia hạn để bên em tiếp tục duy trì website chưa ạ?',
-      'Dạ [anh/chị] ơi, em hỏi thăm lại phần gia hạn website nha. Không biết mình đã thanh toán chưa để em kiểm tra và tiến hành gia hạn cho mình luôn ạ?'
+      'Dạ em xin phép hỏi phần gia hạn website mình đã thanh toán chưa ạ?',
+      'Dạ em nhắn hỏi thăm phần phí gia hạn hôm trước, không biết mình đã sắp xếp chuyển khoản chưa ạ?',
+      'Dạ em nhắc nhẹ phần gia hạn hosting và tên miền nha, mình đã thanh toán chưa để em kiểm tra và xử lý giúp mình ạ.',
+      'Dạ em hỏi thăm chút ạ, hôm nay mình đã sắp xếp được phần thanh toán gia hạn chưa ạ?',
+      'Dạ [anh/chị] ơi, em xin phép hỏi phần phí gia hạn website đã được thanh toán chưa ạ?',
+      'Dạ em xin phép hỏi thăm phần gia hạn một chút ạ. Nếu mình đã chuyển rồi thì báo em để em kiểm tra và xác nhận nha.',
+      'Dạ em nhắn hỏi thăm phần gia hạn website hôm trước, không biết mình đã chuyển khoản được chưa ạ?',
+      'Dạ [anh/chị] ơi, em hỏi lại chút về phí gia hạn ạ, phần này đã được sắp xếp thanh toán chưa ạ?',
+      'Dạ em xin phép nhắc nhẹ phần gia hạn website ạ, không biết mình đã sắp xếp thanh toán chưa ạ?',
+      'Dạ em hỏi thăm xíu ạ, khoản gia hạn website mình đã chuyển chưa ạ?',
+      'Dạ [anh/chị] ơi, em nhắn hỏi thăm phần gia hạn hôm trước, đã chuyển khoản xong chưa ạ? Nếu xong rồi thì báo em kiểm tra nha.',
+      'Dạ em xin phép hỏi lại phần gia hạn hosting, mình đã sắp xếp thanh toán được chưa ạ?',
+      'Dạ em nhắc nhẹ phần phí gia hạn nha, mình chuyển khoản được chưa ạ?',
+      'Dạ em hỏi thăm chút nha, mình đã sắp xếp thanh toán phần gia hạn để bên em tiếp tục duy trì website chưa ạ?',
+      'Dạ [anh/chị] ơi, phần gia hạn website đã xử lý thanh toán được chưa ạ? Để em kiểm tra và tiến hành gia hạn luôn ạ.',
+      'Dạ em xin phép hỏi thăm phần gia hạn tên miền, mình đã thanh toán chưa ạ?',
+      'Dạ em nhắn hỏi lại phần gia hạn hôm trước, không biết mình đã sắp xếp chuyển khoản chưa ạ?',
+      'Dạ [anh/chị] ơi, em hỏi thăm chút, phí gia hạn website hôm trước em gửi đã được thanh toán chưa ạ?',
+      'Dạ em xin phép nhắc phần gia hạn website nha, mình chuyển rồi thì báo em kiểm tra giúp em ạ.',
+      'Dạ em hỏi thăm lại phần gia hạn website nha, không biết mình đã thanh toán chưa để em kiểm tra và tiến hành gia hạn luôn ạ?'
     ].join('\n'),
   },
   {
@@ -1364,8 +1364,9 @@ $('#renewDelete').onclick = () => {
 function pronounVars(customer) {
   const g = customer.gender;
   return {
-    '[anh/chị]': g === 'male' ? 'anh' : g === 'female' ? 'chị' : 'anh/chị',
-    '[Anh/Chị]': g === 'male' ? 'Anh' : g === 'female' ? 'Chị' : 'Anh/Chị',
+    // Chưa rõ giới tính / nhóm: dùng "mình" cho tự nhiên và trung tính thay vì "anh/chị" gộp.
+    '[anh/chị]': g === 'male' ? 'anh' : g === 'female' ? 'chị' : 'mình',
+    '[Anh/Chị]': g === 'male' ? 'Anh' : g === 'female' ? 'Chị' : 'Mình',
     '[Ông/Bà]': g === 'male' ? 'Ông' : g === 'female' ? 'Bà' : 'Ông/Bà',
   };
 }
